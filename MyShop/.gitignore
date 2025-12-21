@@ -1,0 +1,74 @@
+# Build results
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Windows Store app package directories and files
+AppPackages/
+BundleArtifacts/
+Package.StoreAssociation.xml
+
+# Visual Studio cache/options directory
+.vs/
+
+# NuGet Packages
+*.nupkg
+*.snupkg
+.nuget/
+packages/
+
+# Rider
+.idea/
+*.sln.iml
+
+# Build DLL/EXE files
+*.dll
+*.exe
+*.pdb
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# macOS
+.DS_Store
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userprefs
+*.usertasks
+
+# Backup files
+*.bak
+*.swp
+*~
+
+# Generated files
+Generated/
+*.g.cs
+*.g.i.cs
+
+# Test Results
+[Tt]est[Rr]esult*/
+*.trx
+
+# Coverage
+*.coverage
+*.coveragexml
+
+# JetBrains Rider
+.idea/
+
+# Publish output
+publish/

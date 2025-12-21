@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window
+    x:Class="MyShop.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:MyShop"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Title="MyShop">
+
+    <Window.SystemBackdrop>
+        <MicaBackdrop />
+    </Window.SystemBackdrop>
+
+    <Grid Padding="24" RowSpacing="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Title -->
+        <TextBlock 
+            Grid.Row="0"
+            Text="WinUI 3 MVVM Demo" 
+            Style="{StaticResource TitleTextBlockStyle}"
+            HorizontalAlignment="Center"/>
+
+        <!-- Message Display - Bound to ViewModel's Message property -->
+        <Border 
+            Grid.Row="1"
+            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+            CornerRadius="8"
+            Padding="16">
+            <TextBlock 
+                Text="{x:Bind ViewModel.Message, Mode=OneWay}"
+                TextWrapping="Wrap"
+                HorizontalAlignment="Center"/>
+        </Border>
+
+        <!-- Load Data Button - Bound to ViewModel's LoadDataCommand -->
+        <Button 
+            Grid.Row="2"
+            Content="Load Data"
+            Command="{x:Bind ViewModel.LoadDataCommand}"
+            HorizontalAlignment="Center"
+            Style="{StaticResource AccentButtonStyle}"/>
+
+        <!-- Loading Indicator - Visible when IsLoading is true -->
+        <ProgressRing 
+            Grid.Row="3"
+            IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Top"/>
+    </Grid>
+</Window>
