@@ -4,10 +4,11 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:MyShop"
+    xmlns:models="using:MyShop.Models"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    Title="MyShop">
+    Title="MyShop - Connected to API">
 
     <Window.SystemBackdrop>
         <MicaBackdrop />
@@ -24,11 +25,11 @@
         <!-- Title -->
         <TextBlock 
             Grid.Row="0"
-            Text="WinUI 3 MVVM Demo" 
+            Text="MyShop - WinUI 3 + ASP.NET Core API" 
             Style="{StaticResource TitleTextBlockStyle}"
             HorizontalAlignment="Center"/>
 
-        <!-- Message Display - Bound to ViewModel's Message property -->
+        <!-- Message Display -->
         <Border 
             Grid.Row="1"
             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
@@ -40,19 +41,117 @@
                 HorizontalAlignment="Center"/>
         </Border>
 
-        <!-- Load Data Button - Bound to ViewModel's LoadDataCommand -->
-        <Button 
+        <!-- Buttons -->
+        <StackPanel 
             Grid.Row="2"
-            Content="Load Data"
-            Command="{x:Bind ViewModel.LoadDataCommand}"
+            Orientation="Horizontal"
             HorizontalAlignment="Center"
-            Style="{StaticResource AccentButtonStyle}"/>
+            Spacing="12">
+            
+            <Button 
+                Content="Load Data (Old)"
+                Command="{x:Bind ViewModel.LoadDataCommand}"/>
 
-        <!-- Loading Indicator - Visible when IsLoading is true -->
-        <ProgressRing 
-            Grid.Row="3"
-            IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Top"/>
+            <Button 
+                Content="🛒 Load Products from API"
+                Command="{x:Bind ViewModel.LoadProductsCommand}"
+                Style="{StaticResource AccentButtonStyle}"/>
+        </StackPanel>
+
+        <!-- Products List -->
+        <Grid Grid.Row="3">
+            <!-- Loading Indicator -->
+            <ProgressRing 
+                x:Name="LoadingRing"
+                IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Width="50"
+                Height="50"/>
+
+            <!-- Products GridView -->
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <GridView 
+                    x:Name="ProductsGrid"
+                    ItemsSource="{x:Bind ViewModel.Products, Mode=OneWay}"
+                    SelectionMode="None">
+                    <GridView.ItemTemplate>
+                        <DataTemplate x:DataType="models:Product">
+                            <Border 
+                                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                CornerRadius="8"
+                                Padding="16"
+                                Width="250"
+                                Height="300"
+                                Margin="8">
+                                <Grid RowSpacing="8">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="100"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+
+                                    <!-- Product Image Placeholder -->
+                                    <Border 
+                                        Grid.Row="0"
+                                        Background="{ThemeResource AccentFillColorDefaultBrush}"
+                                        CornerRadius="4">
+                                        <TextBlock 
+                                            Text="📦" 
+                                            FontSize="48"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"/>
+                                    </Border>
+
+                                    <!-- Product Name -->
+                                    <TextBlock 
+                                        Grid.Row="1"
+                                        Text="{x:Bind Name}"
+                                        FontSize="16"
+                                        FontWeight="SemiBold"
+                                        TextWrapping="Wrap"
+                                        MaxLines="2"/>
+
+                                    <!-- Category -->
+                                    <TextBlock 
+                                        Grid.Row="2"
+                                        Text="{x:Bind Category}"
+                                        Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                        FontSize="12"/>
+
+                                    <!-- Description -->
+                                    <TextBlock 
+                                        Grid.Row="3"
+                                        Text="{x:Bind Description}"
+                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                        TextWrapping="Wrap"
+                                        MaxLines="2"
+                                        FontSize="12"/>
+
+                                    <!-- Price -->
+                                    <TextBlock 
+                                        Grid.Row="4"
+                                        Text="{x:Bind FormattedPrice}"
+                                        FontSize="18"
+                                        FontWeight="Bold"
+                                        Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"/>
+
+                                    <!-- Stock Status -->
+                                    <TextBlock 
+                                        Grid.Row="5"
+                                        Text="{x:Bind StockStatus}"
+                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                        FontSize="12"
+                                        VerticalAlignment="Bottom"/>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </GridView.ItemTemplate>
+                </GridView>
+            </ScrollViewer>
+        </Grid>
     </Grid>
 </Window>

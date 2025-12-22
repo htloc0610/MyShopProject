@@ -49,10 +49,13 @@ public partial class App : Application
     {
         var services = new ServiceCollection();
 
+        // Register HttpClient for API calls
+        services.AddHttpClient<IDataService, DataService>();
+
         // Register Services
         // DataService is registered as Singleton - same instance shared across the app
         // This is suitable for services that maintain state or are expensive to create
-        services.AddSingleton<IDataService, DataService>();
+        // Note: AddHttpClient already registers DataService, so we don't need AddSingleton here
 
         // Register ViewModels
         // ViewModels are registered as Transient - new instance for each request
