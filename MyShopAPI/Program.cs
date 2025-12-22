@@ -1,4 +1,3 @@
-
 namespace MyShopAPI
 {
     public class Program
@@ -14,6 +13,17 @@ namespace MyShopAPI
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            // Add CORS policy to allow WPF client to connect
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll", policy =>
+                {
+                    policy.AllowAnyOrigin()
+                          .AllowAnyMethod()
+                          .AllowAnyHeader();
+                });
+            });
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -23,10 +33,22 @@ namespace MyShopAPI
                 app.UseSwaggerUI();
             }
 
+            // Use CORS - must be before UseAuthorization
+            app.UseCors("AllowAll");
+
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
 
+            // Add logging middleware to see all requests
+            app.Use(async (context, next) =>
+            {
+                var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+                logger.LogInformation("Incoming request: {Method} {Path}", 
+                    context.Request.Method, context.Request.Path);
+                await next();
+                logger.LogInformation("Response status: {StatusCode}", context.Response.StatusCode);
+            });
 
             app.MapControllers();
 
