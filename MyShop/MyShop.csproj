@@ -12,6 +12,9 @@
     <EnableMsixTooling>true</EnableMsixTooling>
     <Nullable>enable</Nullable>
   </PropertyGroup>
+  <ItemGroup>
+    <None Remove="Views\Dashboard.xaml" />
+  </ItemGroup>
 
   <ItemGroup>
     <Content Include="Assets\SplashScreen.scale-200.png" />
@@ -51,6 +54,12 @@
   <ItemGroup>
     <Folder Include="MyShopAPI\Controllers\" />
     <Folder Include="MyShopAPI\Models\" />
+    <Folder Include="Views\Dashboard\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\Dashboard.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
 
   <!--

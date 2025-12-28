@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using MyShop.ViewModels;
+using MyShop.Views;
 
 namespace MyShop;
 
@@ -23,6 +24,7 @@ public sealed partial class MainWindow : Window
 
         // Resolve MainViewModel from the DI container
         // This ensures IDataService is automatically injected into the ViewModel
+        RootFrame.Navigate(typeof(Dashboard));
         ViewModel = App.Current.Services.GetRequiredService<MainViewModel>();
     }
 }
