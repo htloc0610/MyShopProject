@@ -51,6 +51,7 @@ public partial class App : Application
 
         // Register HttpClient for API calls
         services.AddHttpClient<IDataService, DataService>();
+        services.AddHttpClient<DashboardService, DashboardService>();
 
         // Register Services
         // DataService is registered as Singleton - same instance shared across the app
@@ -61,6 +62,7 @@ public partial class App : Application
         // ViewModels are registered as Transient - new instance for each request
         // Each view gets its own ViewModel instance
         services.AddTransient<MainViewModel>();
+        services.AddTransient<DashboardViewModel>();
 
         return services.BuildServiceProvider();
     }
