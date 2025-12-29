@@ -28,6 +28,11 @@ public interface IProductService
     Task<Product?> GetProductByIdAsync(int id);
 
     /// <summary>
+    /// Creates a new product.
+    /// </summary>
+    Task<Product?> CreateProductAsync(Product product);
+
+    /// <summary>
     /// Updates an existing product.
     /// </summary>
     Task<Product?> UpdateProductAsync(int id, ProductUpdateDto productUpdate);

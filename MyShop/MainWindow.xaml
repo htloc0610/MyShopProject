@@ -44,8 +44,7 @@
             
             <NavigationViewItem Content="Thêm Sản Phẩm" 
                               Tag="AddProduct"
-                              Icon="Add"
-                              IsEnabled="False"/>
+                              Icon="Add"/>
             
             <NavigationViewItem Content="Danh Mục" 
                               Tag="Categories"

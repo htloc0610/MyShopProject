@@ -99,6 +99,29 @@ public class ProductService : IProductService
     }
 
     /// <summary>
+    /// Creates a new product.
+    /// </summary>
+    public async Task<Product?> CreateProductAsync(Product product)
+    {
+        try
+        {
+            var response = await _httpClient.PostAsJsonAsync(ProductsEndpoint, product);
+            
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<Product>();
+            }
+            
+            return null;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error creating product: {ex.Message}");
+            return null;
+        }
+    }
+
+    /// <summary>
     /// Updates an existing product.
     /// </summary>
     public async Task<Product?> UpdateProductAsync(int id, ProductUpdateDto productUpdate)

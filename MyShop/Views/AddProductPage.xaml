@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="MyShop.Views.AddProductPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header with Back Button -->
+        <Grid Grid.Row="0" 
+              Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+              BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+              BorderThickness="0,0,0,1"
+              Padding="20,12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Back Button -->
+            <Button Grid.Column="0" 
+                    Click="BackButton_Click"
+                    Style="{StaticResource SubtleButtonStyle}"
+                    VerticalAlignment="Center"
+                    Margin="0,0,12,0">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <FontIcon Glyph="&#xE72B;" FontSize="14"/>
+                    <TextBlock Text="Quay lại" FontSize="13"/>
+                </StackPanel>
+            </Button>
+
+            <!-- Title -->
+            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                <TextBlock Text="Thêm Sản Phẩm Mới" 
+                          FontSize="16"
+                          FontWeight="SemiBold"/>
+                <TextBlock Text="Điền thông tin sản phẩm mới" 
+                          FontSize="11"
+                          Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+            </StackPanel>
+
+            <!-- Action Buttons -->
+            <StackPanel Grid.Column="2"
+                       Orientation="Horizontal"
+                       Spacing="8"
+                       VerticalAlignment="Center">
+                
+                <!-- Clear Button -->
+                <Button x:Name="ClearButton"
+                       Click="ClearButton_Click"
+                       VerticalAlignment="Center"
+                       Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                       Padding="12,6">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <FontIcon Glyph="&#xE894;" FontSize="14"/>
+                        <TextBlock Text="Xóa trống" FontSize="13"/>
+                    </StackPanel>
+                </Button>
+
+                <!-- Save Button -->
+                <Button x:Name="SaveButton"
+                       Click="SaveButton_Click"
+                       VerticalAlignment="Center"
+                       Background="#107C10"
+                       Foreground="White"
+                       Padding="12,6">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <FontIcon Glyph="&#xE74E;" FontSize="14"/>
+                        <TextBlock Text="Lưu" FontSize="13"/>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <!-- Content Area -->
+        <ScrollViewer Grid.Row="1" Padding="20">
+            <Grid MaxWidth="1400">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="380"/>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Left Column: Image Upload -->
+                <Grid Grid.Column="0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0"
+                              Text="Hình ảnh sản phẩm" 
+                              FontSize="13"
+                              FontWeight="SemiBold"
+                              Margin="0,0,0,10"/>
+                    
+                    <Border Grid.Row="1"
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                            Height="400">
+                        <Grid>
+                            <!-- Placeholder when no image -->
+                            <StackPanel VerticalAlignment="Center"
+                                       HorizontalAlignment="Center"
+                                       Spacing="12"
+                                       Opacity="0.5">
+                                <FontIcon Glyph="&#xEB9F;" 
+                                         FontSize="64"
+                                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                <TextBlock Text="Chưa có hình ảnh" 
+                                          FontSize="14"
+                                          Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                            </StackPanel>
+
+                            <!-- Upload Button Overlay -->
+                            <Button VerticalAlignment="Bottom"
+                                   HorizontalAlignment="Center"
+                                   Margin="16"
+                                   Background="{ThemeResource AccentFillColorDefaultBrush}"
+                                   Foreground="White"
+                                   Padding="16,8"
+                                   Click="UploadImageButton_Click">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <FontIcon Glyph="&#xEB9F;" FontSize="16"/>
+                                    <TextBlock Text="Tải ảnh lên" FontSize="13"/>
+                                </StackPanel>
+                            </Button>
+                        </Grid>
+                    </Border>
+                </Grid>
+
+                <!-- Right Column: Product Information Form -->
+                <StackPanel Grid.Column="2" Spacing="16">
+                    
+                    <!-- Product Name -->
+                    <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Padding="16">
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Tên sản phẩm *" 
+                                      FontSize="11"
+                                      Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                            <TextBox x:Name="NameTextBox"
+                                    PlaceholderText="Nhập tên sản phẩm"
+                                    MaxLength="200"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Price -->
+                    <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Padding="16">
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Giá nhập (VNĐ) *" 
+                                      FontSize="11"
+                                      Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                            <NumberBox x:Name="PriceNumberBox"
+                                      PlaceholderText="Nhập giá sản phẩm"
+                                      SpinButtonPlacementMode="Inline"
+                                      Minimum="0"
+                                      LargeChange="100000"
+                                      SmallChange="10000"
+                                      Value="0"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Category & Stock -->
+                    <Grid ColumnSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Category -->
+                        <Border Grid.Column="0"
+                                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                BorderThickness="1"
+                                CornerRadius="8"
+                                Padding="12">
+                            <StackPanel Spacing="8">
+                                <TextBlock Text="Loại sản phẩm *" 
+                                          FontSize="11"
+                                          Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                <ComboBox x:Name="CategoryComboBox"
+                                         ItemsSource="{x:Bind ViewModel.Categories}"
+                                         SelectedValuePath="CategoryId"
+                                         DisplayMemberPath="Name"
+                                         HorizontalAlignment="Stretch"
+                                         PlaceholderText="Chọn loại sản phẩm"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Stock -->
+                        <Border Grid.Column="1"
+                                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                BorderThickness="1"
+                                CornerRadius="8"
+                                Padding="12">
+                            <StackPanel Spacing="8">
+                                <TextBlock Text="Số lượng *" 
+                                          FontSize="11"
+                                          Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                <NumberBox x:Name="StockNumberBox"
+                                          PlaceholderText="Nhập số lượng"
+                                          SpinButtonPlacementMode="Inline"
+                                          Minimum="0"
+                                          LargeChange="10"
+                                          SmallChange="1"
+                                          Value="0"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <!-- SKU -->
+                    <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Padding="16">
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="SKU (Mã sản phẩm) *" 
+                                      FontSize="11"
+                                      Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                            <TextBox x:Name="SkuTextBox"
+                                    PlaceholderText="Nhập mã SKU (vd: SP001)"
+                                    MaxLength="50"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Description -->
+                    <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Padding="16">
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Mô tả sản phẩm" 
+                                      FontSize="12"
+                                      FontWeight="SemiBold"/>
+                            <TextBox x:Name="DescriptionTextBox"
+                                    PlaceholderText="Nhập mô tả chi tiết về sản phẩm..."
+                                    AcceptsReturn="True"
+                                    TextWrapping="Wrap"
+                                    Height="150"
+                                    MaxLength="1000"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Required fields note -->
+                    <Border Background="{ThemeResource SystemFillColorAttentionBackgroundBrush}"
+                            BorderBrush="{ThemeResource SystemFillColorAttentionBrush}"
+                            BorderThickness="1"
+                            CornerRadius="4"
+                            Padding="12,8">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xE946;" 
+                                     FontSize="14"
+                                     Foreground="{ThemeResource SystemFillColorAttentionBrush}"/>
+                            <TextBlock Text="Các trường đánh dấu * là bắt buộc" 
+                                      FontSize="12"
+                                      Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </ScrollViewer>
+    </Grid>
+</Page>

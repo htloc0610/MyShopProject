@@ -327,6 +327,50 @@ public partial class ProductViewModel : ObservableObject
     #region Commands - Product Actions
 
     /// <summary>
+    /// Creates a new product.
+    /// </summary>
+    [RelayCommand]
+    private async Task CreateProductAsync(Product product)
+    {
+        if (product == null) return;
+
+        try
+        {
+            IsLoading = true;
+            HasError = false;
+            ErrorMessage = string.Empty;
+
+            var createdProduct = await _productService.CreateProductAsync(product);
+
+            if (createdProduct != null)
+            {
+                // Notify that products have changed
+                _productChangeNotifier.NotifyProductsChanged();
+                
+                // Reload to show the new product
+                CurrentPage = 1; // Go to first page to see the new product
+                await LoadProductsPagedAsync();
+            }
+            else
+            {
+                HasError = true;
+                ErrorMessage = "Không thể tạo sản phẩm. Vui lòng thử lại.";
+            }
+        }
+        catch (System.Exception ex)
+        {
+            HasError = true;
+            ErrorMessage = $"Lỗi khi tạo sản phẩm: {ex.Message}";
+            System.Diagnostics.Debug.WriteLine($"Error in CreateProductAsync: {ex}");
+            throw; // Re-throw to let the UI handle it
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    /// <summary>
     /// Updates an existing product.
     /// </summary>
     [RelayCommand]
