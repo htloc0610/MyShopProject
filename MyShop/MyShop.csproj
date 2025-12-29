@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
@@ -16,6 +16,16 @@
     <Utf8Output>true</Utf8Output>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="MyShopAPI\**" />
+    <Compile Remove="MyShop\**" />
+    <EmbeddedResource Remove="MyShopAPI\**" />
+    <EmbeddedResource Remove="MyShop\**" />
+    <None Remove="MyShopAPI\**" />
+    <None Remove="MyShop\**" />
+    <Page Remove="MyShopAPI\**" />
+    <Page Remove="MyShop\**" />
+  </ItemGroup>
   <ItemGroup>
     <None Remove="Views\Dashboard.xaml" />
   </ItemGroup>
@@ -58,18 +68,22 @@
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.4" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="MyShopAPI\Controllers\" />
-    <Folder Include="MyShopAPI\Models\" />
-    <Folder Include="MyShop\Views\" />
+    <Folder Include="Converters\" />
     <Folder Include="Views\Dashboard\" />
   </ItemGroup>
   <ItemGroup>
+    <None Update="Views\ProductDetailPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </None>
     <None Update="Views\ProductListPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </None>
   </ItemGroup>
   <ItemGroup>
     <Page Update="Views\Dashboard.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="Views\ProductDetailPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
@@ -90,4 +104,10 @@
     <PublishTrimmed Condition="'$(Configuration)' == 'Debug'">False</PublishTrimmed>
     <PublishTrimmed Condition="'$(Configuration)' != 'Debug'">True</PublishTrimmed>
   </PropertyGroup>
+  <ItemGroup>
+    <PRIResource Remove="MyShopAPI\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <PRIResource Remove="MyShop\**" />
+  </ItemGroup>
 </Project>

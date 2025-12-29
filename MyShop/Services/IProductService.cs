@@ -26,4 +26,14 @@ public interface IProductService
     /// Gets a single product by ID.
     /// </summary>
     Task<Product?> GetProductByIdAsync(int id);
+
+    /// <summary>
+    /// Updates an existing product.
+    /// </summary>
+    Task<Product?> UpdateProductAsync(int id, ProductUpdateDto productUpdate);
+
+    /// <summary>
+    /// Deletes a product by ID.
+    /// </summary>
+    Task<bool> DeleteProductAsync(int id);
 }

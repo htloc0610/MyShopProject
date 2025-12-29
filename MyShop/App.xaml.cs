@@ -50,10 +50,14 @@ public partial class App : Application
         services.AddHttpClient<ICategoryService, CategoryService>();
         services.AddHttpClient<DashboardService>();
 
+        // Register ProductChangeNotifier as Singleton
+        services.AddSingleton<ProductChangeNotifier>();
+
         // Register ViewModels as Transient
         // Each view gets its own ViewModel instance
         services.AddTransient<DashboardViewModel>();
         services.AddTransient<ProductViewModel>();
+        services.AddTransient<MainWindowViewModel>();
 
         return services.BuildServiceProvider();
     }

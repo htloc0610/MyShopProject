@@ -33,7 +33,7 @@
                               Tag="ProductList"
                               Icon="Shop">
                 <NavigationViewItem.InfoBadge>
-                    <InfoBadge Value="66" 
+                    <InfoBadge Value="{x:Bind ViewModel.TotalProducts, Mode=OneWay}" 
                               Style="{StaticResource AttentionValueInfoBadgeStyle}"/>
                 </NavigationViewItem.InfoBadge>
             </NavigationViewItem>

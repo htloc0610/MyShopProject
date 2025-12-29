@@ -216,6 +216,7 @@
             <!-- DataGrid -->
             <controls:DataGrid x:Name="ProductDataGrid"
                               ItemsSource="{x:Bind ViewModel.Products, Mode=OneWay}"
+                              SelectedItem="{x:Bind ViewModel.SelectedProduct, Mode=TwoWay}"
                               AutoGenerateColumns="False"
                               IsReadOnly="True"
                               GridLinesVisibility="Horizontal"
@@ -224,6 +225,7 @@
                               CanUserResizeColumns="True"
                               CanUserSortColumns="False"
                               SelectionMode="Single"
+                              DoubleTapped="ProductDataGrid_DoubleTapped"
                               Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolToVisibilityInverseConverter}}">
                 
                 <controls:DataGrid.Columns>
@@ -271,7 +273,38 @@
                     <!-- Description Column -->
                     <controls:DataGridTextColumn Header="Mô Tả"
                                                 Binding="{Binding Description}"
-                                                Width="3*"/>
+                                                Width="2*"/>
+
+                    <!-- Actions Column -->
+                    <controls:DataGridTemplateColumn Header="Thao Tác"
+                                                    Width="200">
+                        <controls:DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate x:DataType="models:Product">
+                                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                    <Button Click="ViewDetailButton_Click"
+                                           Tag="{x:Bind}"
+                                           Style="{StaticResource AccentButtonStyle}"
+                                           Height="32">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <FontIcon Glyph="&#xE8A3;" FontSize="14"/>
+                                            <TextBlock Text="Chi tiết"/>
+                                        </StackPanel>
+                                    </Button>
+                                    
+                                    <Button Click="DeleteButton_Click"
+                                           Tag="{x:Bind}"
+                                           Height="32"
+                                           Background="#C42B1C"
+                                           Foreground="White">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <FontIcon Glyph="&#xE74D;" FontSize="14"/>
+                                            <TextBlock Text="Xóa"/>
+                                        </StackPanel>
+                                    </Button>
+                                </StackPanel>
+                            </DataTemplate>
+                        </controls:DataGridTemplateColumn.CellTemplate>
+                    </controls:DataGridTemplateColumn>
                 </controls:DataGrid.Columns>
             </controls:DataGrid>
         </Grid>

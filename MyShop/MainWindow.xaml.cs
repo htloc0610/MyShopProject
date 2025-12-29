@@ -1,6 +1,8 @@
 using System;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using MyShop.ViewModels;
 using MyShop.Views;
 
 namespace MyShop;
@@ -11,9 +13,13 @@ namespace MyShop;
 /// </summary>
 public sealed partial class MainWindow : Window
 {
+    public MainWindowViewModel ViewModel { get; }
+
     public MainWindow()
     {
         InitializeComponent();
+
+        ViewModel = App.Current.Services.GetRequiredService<MainWindowViewModel>();
 
         // Set window size
         this.AppWindow.Resize(new Windows.Graphics.SizeInt32(1400, 900));
@@ -21,6 +27,9 @@ public sealed partial class MainWindow : Window
         // Navigate to Dashboard on startup
         NavView.SelectedItem = NavView.MenuItems[0];
         ContentFrame.Navigate(typeof(Dashboard));
+
+        // Load product count after initialization
+        _ = ViewModel.LoadProductCountAsync();
     }
 
     /// <summary>

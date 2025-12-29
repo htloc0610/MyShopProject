@@ -81,6 +81,46 @@ public class ProductService : IProductService
         }
     }
 
+    /// <summary>
+    /// Deletes a product by ID.
+    /// </summary>
+    public async Task<bool> DeleteProductAsync(int id)
+    {
+        try
+        {
+            var response = await _httpClient.DeleteAsync($"{ProductsEndpoint}/{id}");
+            return response.IsSuccessStatusCode;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error deleting product {id}: {ex.Message}");
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Updates an existing product.
+    /// </summary>
+    public async Task<Product?> UpdateProductAsync(int id, ProductUpdateDto productUpdate)
+    {
+        try
+        {
+            var response = await _httpClient.PutAsJsonAsync($"{ProductsEndpoint}/{id}", productUpdate);
+            
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<Product>();
+            }
+            
+            return null;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error updating product {id}: {ex.Message}");
+            return null;
+        }
+    }
+
     #region Private Helper Methods
 
     /// <summary>

@@ -18,6 +18,7 @@ public partial class ProductViewModel : ObservableObject
 
     private readonly IProductService _productService;
     private readonly ICategoryService _categoryService;
+    private readonly ProductChangeNotifier _productChangeNotifier;
 
     #endregion
 
@@ -25,6 +26,9 @@ public partial class ProductViewModel : ObservableObject
 
     [ObservableProperty]
     private ObservableCollection<Product> _products = new();
+
+    [ObservableProperty]
+    private Product? _selectedProduct;
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(GoToPreviousPageCommand))]
@@ -100,10 +104,11 @@ public partial class ProductViewModel : ObservableObject
 
     #region Constructor
 
-    public ProductViewModel(IProductService productService, ICategoryService categoryService)
+    public ProductViewModel(IProductService productService, ICategoryService categoryService, ProductChangeNotifier productChangeNotifier)
     {
         _productService = productService;
         _categoryService = categoryService;
+        _productChangeNotifier = productChangeNotifier;
     }
 
     #endregion
@@ -315,6 +320,118 @@ public partial class ProductViewModel : ObservableObject
     private bool CanGoToPreviousPage()
     {
         return TotalPages > 0 && CurrentPage > 1 && !IsLoading;
+    }
+
+    #endregion
+
+    #region Commands - Product Actions
+
+    /// <summary>
+    /// Updates an existing product.
+    /// </summary>
+    [RelayCommand]
+    private async Task UpdateProductAsync(Product product)
+    {
+        if (product == null) return;
+
+        try
+        {
+            IsLoading = true;
+
+            // Create update DTO
+            var updateDto = new ProductUpdateDto
+            {
+                ProductId = product.Id,
+                Sku = product.Sku,
+                Name = product.Name,
+                ImportPrice = product.Price,
+                Count = product.Stock,
+                Description = product.Description,
+                CategoryId = product.CategoryId
+            };
+
+            var updatedProduct = await _productService.UpdateProductAsync(product.Id, updateDto);
+
+            if (updatedProduct != null)
+            {
+                // Update the product in the collection
+                var index = Products.IndexOf(product);
+                if (index >= 0)
+                {
+                    Products[index] = updatedProduct;
+                }
+                
+                // Reload to get fresh data with correct category name
+                await LoadProductsPagedAsync();
+                
+                // Notify that products have changed (in case count changed)
+                _productChangeNotifier.NotifyProductsChanged();
+            }
+            else
+            {
+                HasError = true;
+                ErrorMessage = "Không thể cập nhật sản phẩm. Vui lòng thử lại.";
+            }
+        }
+        catch (System.Exception ex)
+        {
+            HasError = true;
+            ErrorMessage = $"Lỗi khi cập nhật sản phẩm: {ex.Message}";
+            System.Diagnostics.Debug.WriteLine($"Error in UpdateProductAsync: {ex}");
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    /// <summary>
+    /// Deletes the selected product after confirmation.
+    /// </summary>
+    [RelayCommand]
+    private async Task DeleteProductAsync(Product product)
+    {
+        if (product == null) return;
+
+        try
+        {
+            IsLoading = true;
+            
+            var success = await _productService.DeleteProductAsync(product.Id);
+            
+            if (success)
+            {
+                // Remove from collection to update UI immediately
+                Products.Remove(product);
+                ProductCount--;
+                OnPropertyChanged(nameof(PaginationInfo));
+                
+                // Notify that products have changed
+                _productChangeNotifier.NotifyProductsChanged();
+                
+                // If current page is empty and not the first page, go back one page
+                if (Products.Count == 0 && CurrentPage > 1)
+                {
+                    CurrentPage--;
+                    await LoadProductsPagedAsync();
+                }
+            }
+            else
+            {
+                HasError = true;
+                ErrorMessage = "Không thể xóa sản phẩm. Vui lòng thử lại.";
+            }
+        }
+        catch (System.Exception ex)
+        {
+            HasError = true;
+            ErrorMessage = $"Lỗi khi xóa sản phẩm: {ex.Message}";
+            System.Diagnostics.Debug.WriteLine($"Error in DeleteProductAsync: {ex}");
+        }
+        finally
+        {
+            IsLoading = false;
+        }
     }
 
     #endregion

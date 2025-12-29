@@ -119,24 +119,50 @@ namespace MyShopAPI.Controllers
         /// Update product.
         /// </summary>
         [HttpPut("{id:int}")]
-        public async Task<ActionResult<ProductResponseDto>> Update(int id, Product updated)
+        public async Task<ActionResult<ProductResponseDto>> Update(int id, [FromBody] ProductUpdateDto updateDto)
         {
+            _logger.LogInformation("Updating product {ProductId}", id);
+            _logger.LogInformation("Received data: {@UpdateDto}", updateDto);
+
+            // Validate that IDs match
+            if (id != updateDto.ProductId)
+            {
+                _logger.LogWarning("Product ID mismatch. URL id: {UrlId}, DTO id: {DtoId}", id, updateDto.ProductId);
+                return BadRequest(new { message = "Product ID mismatch" });
+            }
+
             var product = await _context.Products
                 .Include(p => p.Category)
                 .FirstOrDefaultAsync(p => p.ProductId == id);
 
             if (product == null)
+            {
+                _logger.LogWarning("Product {ProductId} not found", id);
                 return NotFound(new { message = $"Product {id} not found" });
+            }
 
-            product.Sku = updated.Sku;
-            product.Name = updated.Name;
-            product.ImportPrice = updated.ImportPrice;
-            product.Count = updated.Count;
-            product.Description = updated.Description;
-            product.CategoryId = updated.CategoryId;
+            // Validate category exists
+            var categoryExists = await _context.Categories
+                .AnyAsync(c => c.CategoryId == updateDto.CategoryId);
+
+            if (!categoryExists)
+            {
+                _logger.LogWarning("Invalid category id: {CategoryId}", updateDto.CategoryId);
+                return BadRequest(new { message = "Invalid category id" });
+            }
+
+            // Update product properties
+            product.Sku = updateDto.Sku;
+            product.Name = updateDto.Name;
+            product.ImportPrice = (int)Math.Round(updateDto.ImportPrice); // Convert decimal to int
+            product.Count = updateDto.Count;
+            product.Description = updateDto.Description;
+            product.CategoryId = updateDto.CategoryId;
 
             await _context.SaveChangesAsync();
+            _logger.LogInformation("Product {ProductId} updated successfully", id);
 
+            // Reload category for response
             await _context.Entry(product)
                 .Reference(p => p.Category)
                 .LoadAsync();
