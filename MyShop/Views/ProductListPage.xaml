@@ -1,4 +1,4 @@
-<Page
+﻿<Page
     x:Class="MyShop.Views.ProductListPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -13,7 +13,9 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <!-- Header -->
@@ -24,40 +26,80 @@
             </Grid.ColumnDefinitions>
 
             <StackPanel Grid.Column="0">
-                <TextBlock Text="Danh S�ch S?n Ph?m" 
+                <TextBlock Text="Danh Sách Sản Phẩm" 
                           Style="{StaticResource TitleTextBlockStyle}"
                           FontWeight="Bold"/>
                 <TextBlock Style="{StaticResource BodyTextBlockStyle}"
                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                           Margin="0,4,0,0">
-                    <Run Text="T?ng s?:"/>
+                    <Run Text="Tổng số:"/>
                     <Run Text="{x:Bind ViewModel.ProductCount, Mode=OneWay}"/>
-                    <Run Text="s?n ph?m"/>
+                    <Run Text="sản phẩm"/>
                 </TextBlock>
             </StackPanel>
 
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
                 <Button Command="{x:Bind ViewModel.RefreshCommand}"
-                       ToolTipService.ToolTip="L�m m?i danh s�ch">
+                       ToolTipService.ToolTip="Làm mới danh sách">
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <FontIcon Glyph="&#xE72C;" FontSize="16"/>
-                        <TextBlock Text="L�m m?i"/>
+                        <TextBlock Text="Làm mới"/>
                     </StackPanel>
                 </Button>
             </StackPanel>
         </Grid>
 
+        <!-- Sorting Controls -->
+        <Grid Grid.Row="1" Margin="0,0,0,16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="12">
+                <TextBlock Text="Sắp xếp theo:" 
+                          VerticalAlignment="Center"
+                          Style="{StaticResource BodyTextBlockStyle}"/>
+                
+                <Button Content="Mã SP" 
+                       Command="{x:Bind ViewModel.ChangeSortCommand}"
+                       CommandParameter="id"
+                       Style="{StaticResource AccentButtonStyle}"
+                       Height="32"/>
+                
+                <Button Content="Tên" 
+                       Command="{x:Bind ViewModel.ChangeSortCommand}"
+                       CommandParameter="name"
+                       Height="32"/>
+                
+                <Button Content="Giá" 
+                       Command="{x:Bind ViewModel.ChangeSortCommand}"
+                       CommandParameter="price"
+                       Height="32"/>
+                
+                <Button Content="Tồn kho" 
+                       Command="{x:Bind ViewModel.ChangeSortCommand}"
+                       CommandParameter="stock"
+                       Height="32"/>
+                
+                <FontIcon Glyph="{x:Bind ViewModel.IsDescending, Mode=OneWay, Converter={StaticResource SortDirectionToGlyphConverter}}"
+                         FontSize="16"
+                         VerticalAlignment="Center"
+                         Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"/>
+            </StackPanel>
+        </Grid>
+
         <!-- Error InfoBar -->
-        <InfoBar Grid.Row="1"
+        <InfoBar Grid.Row="2"
                  IsOpen="{x:Bind ViewModel.HasError, Mode=OneWay}"
                  Severity="Error"
-                 Title="L?i"
+                 Title="Lỗi"
                  Message="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}"
                  IsClosable="True"
                  Margin="0,0,0,16"/>
 
         <!-- DataGrid -->
-        <Grid Grid.Row="2">
+        <Grid Grid.Row="3">
             <!-- Progress Ring -->
             <ProgressRing IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}"
                          Width="60"
@@ -74,28 +116,28 @@
                               HeadersVisibility="Column"
                               AlternatingRowBackground="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
                               CanUserResizeColumns="True"
-                              CanUserSortColumns="True"
+                              CanUserSortColumns="False"
                               SelectionMode="Single"
                               Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolToVisibilityInverseConverter}}">
                 
                 <controls:DataGrid.Columns>
                     <!-- ID Column -->
-                    <controls:DataGridTextColumn Header="M� SP"
+                    <controls:DataGridTextColumn Header="Mã SP"
                                                 Binding="{Binding Id}"
                                                 Width="80"/>
 
                     <!-- Product Name Column -->
-                    <controls:DataGridTextColumn Header="T�n S?n Ph?m"
+                    <controls:DataGridTextColumn Header="Tên Sản Phẩm"
                                                 Binding="{Binding Name}"
                                                 Width="2*"/>
 
                     <!-- Category Column -->
-                    <controls:DataGridTextColumn Header="Lo?i"
+                    <controls:DataGridTextColumn Header="Loại"
                                                 Binding="{Binding Category}"
                                                 Width="150"/>
 
                     <!-- Price Column -->
-                    <controls:DataGridTemplateColumn Header="Gi� (VN?)"
+                    <controls:DataGridTemplateColumn Header="Giá (VNĐ)"
                                                     Width="150">
                         <controls:DataGridTemplateColumn.CellTemplate>
                             <DataTemplate x:DataType="models:Product">
@@ -108,7 +150,7 @@
                     </controls:DataGridTemplateColumn>
 
                     <!-- Stock Column -->
-                    <controls:DataGridTemplateColumn Header="T?n Kho"
+                    <controls:DataGridTemplateColumn Header="Tồn Kho"
                                                     Width="120">
                         <controls:DataGridTemplateColumn.CellTemplate>
                             <DataTemplate x:DataType="models:Product">
@@ -121,11 +163,68 @@
                     </controls:DataGridTemplateColumn>
 
                     <!-- Description Column -->
-                    <controls:DataGridTextColumn Header="M� T?"
+                    <controls:DataGridTextColumn Header="Mô Tả"
                                                 Binding="{Binding Description}"
                                                 Width="3*"/>
                 </controls:DataGrid.Columns>
             </controls:DataGrid>
         </Grid>
+
+        <!-- Pagination Controls -->
+        <Border Grid.Row="4" 
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                BorderThickness="1"
+                CornerRadius="8"
+                Padding="16"
+                Margin="0,16,0,0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Page Size Selector -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="12">
+                    <TextBlock Text="Số lượng/trang:" 
+                              VerticalAlignment="Center"
+                              Style="{StaticResource BodyTextBlockStyle}"/>
+                    <ComboBox ItemsSource="{x:Bind ViewModel.PageSizeOptions}"
+                             SelectedItem="{x:Bind ViewModel.SelectedPageSize, Mode=TwoWay}"
+                             Width="80"
+                             VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <!-- Page Info -->
+                <TextBlock Grid.Column="1"
+                          Text="{x:Bind ViewModel.PaginationInfo, Mode=OneWay}"
+                          VerticalAlignment="Center"
+                          HorizontalAlignment="Center"
+                          Style="{StaticResource BodyStrongTextBlockStyle}"/>
+
+                <!-- Navigation Buttons -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" Margin="0,0,16,0">
+                    <Button Command="{x:Bind ViewModel.GoToPreviousPageCommand}"
+                           ToolTipService.ToolTip="Trang trước"
+                           Width="100">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xE76B;" FontSize="14"/>
+                            <TextBlock Text="Trước"/>
+                        </StackPanel>
+                    </Button>
+                    
+                    <Button Command="{x:Bind ViewModel.GoToNextPageCommand}"
+                           ToolTipService.ToolTip="Trang sau"
+                           Width="100">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="Sau"/>
+                            <FontIcon Glyph="&#xE76C;" FontSize="14"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
     </Grid>
 </Page>

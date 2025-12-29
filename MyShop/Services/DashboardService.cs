@@ -1,13 +1,15 @@
 ﻿using MyShop.Models.Dashboard;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 
 namespace MyShop.Services;
 
+/// <summary>
+/// Service for managing dashboard data from API.
+/// </summary>
 public class DashboardService
 {
     private readonly HttpClient _httpClient;
@@ -21,26 +23,30 @@ public class DashboardService
 
     public async Task<DashboardSummary?> GetSummaryAsync()
     {
-        var rs = await _httpClient.GetFromJsonAsync<DashboardSummary>("api/dashboard/summary");
-        return rs;
+        return await _httpClient.GetFromJsonAsync<DashboardSummary>("api/dashboard/summary");
     }
 
     public async Task<List<LowStockProduct>> GetLowStockProductsAsync()
-        => await _httpClient.GetFromJsonAsync<List<LowStockProduct>>(
-               "api/dashboard/low-stock") ?? new();
+    {
+        return await _httpClient.GetFromJsonAsync<List<LowStockProduct>>("api/dashboard/low-stock")
+            ?? new List<LowStockProduct>();
+    }
 
     public async Task<List<TopSellingProduct>> GetTopSellingProductsAsync()
-        => await _httpClient.GetFromJsonAsync<List<TopSellingProduct>>(
-               "api/dashboard/top-selling") ?? new();
+    {
+        return await _httpClient.GetFromJsonAsync<List<TopSellingProduct>>("api/dashboard/top-selling")
+            ?? new List<TopSellingProduct>();
+    }
 
     public async Task<List<RecentOrder>> GetRecentOrdersAsync()
-        => await _httpClient.GetFromJsonAsync<List<RecentOrder>>(
-               "api/dashboard/recent-orders") ?? new();
+    {
+        return await _httpClient.GetFromJsonAsync<List<RecentOrder>>("api/dashboard/recent-orders")
+            ?? new List<RecentOrder>();
+    }
 
     public async Task<List<RevenueByDay>> GetMonthlyRevenueAsync()
     {
-        var rs = await _httpClient.GetFromJsonAsync<List<RevenueByDay>>(
-               "api/dashboard/revenue-month") ?? new();
-        return rs;
+        return await _httpClient.GetFromJsonAsync<List<RevenueByDay>>("api/dashboard/revenue-month")
+            ?? new List<RevenueByDay>();
     }
 }

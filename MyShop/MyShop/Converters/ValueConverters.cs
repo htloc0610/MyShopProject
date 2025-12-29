@@ -95,4 +95,25 @@ namespace MyShop.Converters
             throw new NotImplementedException();
         }
     }
+
+    /// <summary>
+    /// Converts sort direction boolean to glyph (arrow icon).
+    /// false (ascending) = UpArrow, true (descending) = DownArrow
+    /// </summary>
+    public class SortDirectionToGlyphConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, string language)
+        {
+            if (value is bool isDescending)
+            {
+                return isDescending ? "\uE74B" : "\uE74A"; // Down arrow : Up arrow
+            }
+            return "\uE74A"; // Default: Up arrow
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, string language)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }

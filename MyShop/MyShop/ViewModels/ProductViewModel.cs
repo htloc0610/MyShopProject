@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+ï»¿using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -8,44 +8,58 @@ using MyShop.Services;
 namespace MyShop.ViewModels;
 
 /// <summary>
-/// ViewModel for managing product list display.
-/// Uses MVVM Toolkit for property change notifications and commands.
+/// ViewModel for managing product list display with paging and sorting.
 /// </summary>
 public partial class ProductViewModel : ObservableObject
 {
     private readonly IProductService _productService;
 
-    /// <summary>
-    /// Collection of products to display in the UI.
-    /// ObservableCollection automatically notifies UI of changes.
-    /// </summary>
     [ObservableProperty]
     private ObservableCollection<Product> _products = new();
 
-    /// <summary>
-    /// Indicates whether data is currently being loaded.
-    /// Bound to ProgressRing visibility.
-    /// </summary>
     [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(GoToPreviousPageCommand))]
+    [NotifyCanExecuteChangedFor(nameof(GoToNextPageCommand))]
     private bool _isLoading;
 
-    /// <summary>
-    /// Error message to display to user if loading fails.
-    /// </summary>
     [ObservableProperty]
     private string _errorMessage = string.Empty;
 
-    /// <summary>
-    /// Indicates whether an error occurred.
-    /// </summary>
     [ObservableProperty]
     private bool _hasError;
 
-    /// <summary>
-    /// Total number of products loaded.
-    /// </summary>
     [ObservableProperty]
     private int _productCount;
+
+    #region Paging Properties
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(GoToPreviousPageCommand))]
+    [NotifyCanExecuteChangedFor(nameof(GoToNextPageCommand))]
+    private int _currentPage = 1;
+
+    [ObservableProperty]
+    private int _pageSize = 10;
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(GoToPreviousPageCommand))]
+    [NotifyCanExecuteChangedFor(nameof(GoToNextPageCommand))]
+    private int _totalPages;
+
+    [ObservableProperty]
+    private string _sortColumn = "id";
+
+    [ObservableProperty]
+    private bool _isDescending = false;
+
+    [ObservableProperty]
+    private int _selectedPageSize = 10;
+
+    public ObservableCollection<int> PageSizeOptions { get; } = new() { 10, 20, 50 };
+
+    public string PaginationInfo => $"Trang {CurrentPage} trÃªn {TotalPages}";
+
+    #endregion
 
     public ProductViewModel(IProductService productService)
     {
@@ -53,11 +67,10 @@ public partial class ProductViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Loads all products from the API.
-    /// Command can be invoked from XAML button or automatically on page load.
+    /// Loads products with paging and sorting.
     /// </summary>
     [RelayCommand]
-    private async Task LoadProductsAsync()
+    private async Task LoadProductsPagedAsync()
     {
         try
         {
@@ -65,33 +78,33 @@ public partial class ProductViewModel : ObservableObject
             HasError = false;
             ErrorMessage = string.Empty;
 
-            // Call API to get products
-            var products = await _productService.GetProductsAsync();
+            var result = await _productService.GetProductsPagedAsync(
+                CurrentPage,
+                PageSize,
+                SortColumn,
+                IsDescending);
 
-            // Clear existing products
             Products.Clear();
-
-            // Add products to observable collection
-            // This approach avoids "CollectionView does not support changes" error
-            foreach (var product in products)
+            foreach (var product in result.Items)
             {
                 Products.Add(product);
             }
 
-            ProductCount = Products.Count;
+            ProductCount = result.TotalCount;
+            TotalPages = result.TotalPages;
+            OnPropertyChanged(nameof(PaginationInfo));
 
-            // Show error if no products found
             if (ProductCount == 0)
             {
                 HasError = true;
-                ErrorMessage = "Không tìm th?y s?n ph?m nào. Vui lòng ki?m tra k?t n?i API.";
+                ErrorMessage = "KhÃ´ng tÃ¬m tháº¥y sáº£n pháº©m nÃ o.";
             }
         }
         catch (System.Exception ex)
         {
             HasError = true;
-            ErrorMessage = $"L?i khi t?i s?n ph?m: {ex.Message}";
-            System.Diagnostics.Debug.WriteLine($"Error in LoadProductsAsync: {ex}");
+            ErrorMessage = $"Lá»—i khi táº£i sáº£n pháº©m: {ex.Message}";
+            System.Diagnostics.Debug.WriteLine($"Error in LoadProductsPagedAsync: {ex}");
         }
         finally
         {
@@ -99,52 +112,63 @@ public partial class ProductViewModel : ObservableObject
         }
     }
 
-    /// <summary>
-    /// Loads products for a specific category.
-    /// </summary>
-    [RelayCommand]
-    private async Task LoadProductsByCategoryAsync(int categoryId)
+    [RelayCommand(CanExecute = nameof(CanGoToNextPage))]
+    private async Task GoToNextPageAsync()
     {
-        try
-        {
-            IsLoading = true;
-            HasError = false;
-            ErrorMessage = string.Empty;
-
-            var products = await _productService.GetProductsByCategoryAsync(categoryId);
-
-            Products.Clear();
-            foreach (var product in products)
-            {
-                Products.Add(product);
-            }
-
-            ProductCount = Products.Count;
-
-            if (ProductCount == 0)
-            {
-                HasError = true;
-                ErrorMessage = $"Không tìm th?y s?n ph?m nào trong danh m?c này.";
-            }
-        }
-        catch (System.Exception ex)
-        {
-            HasError = true;
-            ErrorMessage = $"L?i khi t?i s?n ph?m: {ex.Message}";
-            System.Diagnostics.Debug.WriteLine($"Error in LoadProductsByCategoryAsync: {ex}");
-        }
-        finally
-        {
-            IsLoading = false;
-        }
+        CurrentPage++;
+        await LoadProductsPagedAsync();
     }
 
-    /// <summary>
-    /// Refreshes the product list.
-    /// </summary>
+    private bool CanGoToNextPage()
+    {
+        return TotalPages > 0 && CurrentPage < TotalPages && !IsLoading;
+    }
+
+    [RelayCommand(CanExecute = nameof(CanGoToPreviousPage))]
+    private async Task GoToPreviousPageAsync()
+    {
+        CurrentPage--;
+        await LoadProductsPagedAsync();
+    }
+
+    private bool CanGoToPreviousPage()
+    {
+        return TotalPages > 0 && CurrentPage > 1 && !IsLoading;
+    }
+
+    [RelayCommand]
+    private async Task ChangePageSizeAsync(int newPageSize)
+    {
+        PageSize = newPageSize;
+        CurrentPage = 1;
+        await LoadProductsPagedAsync();
+    }
+
+    [RelayCommand]
+    private async Task ChangeSortAsync(string columnName)
+    {
+        if (SortColumn.Equals(columnName, System.StringComparison.OrdinalIgnoreCase))
+        {
+            IsDescending = !IsDescending;
+        }
+        else
+        {
+            SortColumn = columnName;
+            IsDescending = false;
+        }
+
+        CurrentPage = 1;
+        await LoadProductsPagedAsync();
+    }
+
     [RelayCommand]
     private async Task RefreshAsync()
     {
-        await LoadProductsAsync();
+        await LoadProductsPagedAsync();
+    }
+
+    partial void OnSelectedPageSizeChanged(int value)
+    {
+        _ = ChangePageSizeAsync(value);
     }
 }

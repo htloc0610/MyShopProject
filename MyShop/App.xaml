@@ -12,6 +12,9 @@
                 <!-- Other merged dictionaries here -->
             </ResourceDictionary.MergedDictionaries>
             
+            <!-- Default Font Family for Vietnamese support -->
+            <FontFamily x:Key="DefaultFontFamily">Segoe UI, Arial, sans-serif</FontFamily>
+            
             <!-- Value Converters -->
             <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
             <converters:BoolToVisibilityInverseConverter x:Key="BoolToVisibilityInverseConverter"/>
@@ -19,6 +22,7 @@
             <converters:StringToBoolConverter x:Key="StringToBoolConverter"/>
             <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
             <converters:PriceConverter x:Key="PriceConverter"/>
+            <converters:SortDirectionToGlyphConverter x:Key="SortDirectionToGlyphConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

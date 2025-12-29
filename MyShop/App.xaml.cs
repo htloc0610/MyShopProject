@@ -8,7 +8,7 @@ namespace MyShop;
 
 /// <summary>
 /// Provides application-specific behavior to supplement the default Application class.
-/// This class is responsible for configuring Dependency Injection and managing the app lifecycle.
+/// Configures Dependency Injection for MVVM architecture with ProductService and DashboardService.
 /// </summary>
 public partial class App : Application
 {
@@ -16,7 +16,6 @@ public partial class App : Application
 
     /// <summary>
     /// Gets the current App instance for accessing services globally.
-    /// This pattern allows any component to access the DI container.
     /// </summary>
     public static new App Current => (App)Application.Current;
 
@@ -38,28 +37,20 @@ public partial class App : Application
     /// <summary>
     /// Configures and builds the service provider with all application services.
     /// 
-    /// DI Lifecycle Overview:
-    /// - Singleton: One instance for the entire application lifetime.
-    ///   Use for: Stateless services, caching, configuration.
-    /// - Transient: New instance each time it's requested.
-    ///   Use for: Lightweight, stateless services, ViewModels.
-    /// - Scoped: One instance per scope (not commonly used in desktop apps).
+    /// Architecture:
+    /// - Services: Singleton HttpClient-based services for API communication
+    /// - ViewModels: Transient instances, one per view
     /// </summary>
     private static IServiceProvider ConfigureServices()
     {
         var services = new ServiceCollection();
 
-        // Register HttpClient for API calls
-        services.AddHttpClient<IDataService, DataService>();
-        services.AddHttpClient<DashboardService, DashboardService>();
-        
-        // Register ProductService with HttpClient
+        // Register Services with HttpClient
         services.AddHttpClient<IProductService, ProductService>();
+        services.AddHttpClient<DashboardService>();
 
-        // Register ViewModels
-        // ViewModels are registered as Transient - new instance for each request
+        // Register ViewModels as Transient
         // Each view gets its own ViewModel instance
-        services.AddTransient<MainViewModel>();
         services.AddTransient<DashboardViewModel>();
         services.AddTransient<ProductViewModel>();
 
@@ -69,7 +60,6 @@ public partial class App : Application
     /// <summary>
     /// Invoked when the application is launched.
     /// </summary>
-    /// <param name="args">Details about the launch request and process.</param>
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
         _window = new MainWindow();

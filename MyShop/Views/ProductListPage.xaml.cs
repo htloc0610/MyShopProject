@@ -6,7 +6,7 @@ using MyShop.ViewModels;
 namespace MyShop.Views;
 
 /// <summary>
-/// Page for displaying product list in DataGrid.
+/// Page for displaying product list in DataGrid with paging and sorting.
 /// Uses ProductViewModel for data management.
 /// </summary>
 public sealed partial class ProductListPage : Page
@@ -27,16 +27,16 @@ public sealed partial class ProductListPage : Page
 
     /// <summary>
     /// Called when page is navigated to.
-    /// Automatically loads products.
+    /// Automatically loads products with paging.
     /// </summary>
     protected override async void OnNavigatedTo(NavigationEventArgs e)
     {
         base.OnNavigatedTo(e);
 
-        // Load products when page loads
+        // Load products when page loads (using paged endpoint)
         if (ViewModel.Products.Count == 0)
         {
-            await ViewModel.LoadProductsCommand.ExecuteAsync(null);
+            await ViewModel.LoadProductsPagedCommand.ExecuteAsync(null);
         }
     }
 }

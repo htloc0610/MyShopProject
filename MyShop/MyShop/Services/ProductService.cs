@@ -25,7 +25,6 @@ public class ProductService : IProductService
 
     /// <summary>
     /// Gets all products from the API.
-    /// GET /api/products
     /// </summary>
     public async Task<List<Product>> GetProductsAsync()
     {
@@ -33,11 +32,6 @@ public class ProductService : IProductService
         {
             var products = await _httpClient.GetFromJsonAsync<List<Product>>(ProductsEndpoint);
             return products ?? new List<Product>();
-        }
-        catch (HttpRequestException ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"HTTP Error getting products: {ex.Message}");
-            return new List<Product>();
         }
         catch (Exception ex)
         {
@@ -47,20 +41,63 @@ public class ProductService : IProductService
     }
 
     /// <summary>
+    /// Gets products with paging and sorting support.
+    /// </summary>
+    public async Task<PagedResult<Product>> GetProductsPagedAsync(
+        int page,
+        int pageSize,
+        string? sortBy = null,
+        bool isDescending = false)
+    {
+        try
+        {
+            // Build query string
+            var queryParams = new List<string>
+            {
+                $"page={page}",
+                $"pageSize={pageSize}",
+                $"isDescending={isDescending.ToString().ToLower()}"
+            };
+
+            if (!string.IsNullOrWhiteSpace(sortBy))
+            {
+                queryParams.Add($"sortBy={sortBy}");
+            }
+
+            var queryString = string.Join("&", queryParams);
+            var url = $"{ProductsEndpoint}?{queryString}";
+
+            var result = await _httpClient.GetFromJsonAsync<PagedResult<Product>>(url);
+            
+            return result ?? new PagedResult<Product>
+            {
+                Items = new List<Product>(),
+                TotalCount = 0,
+                CurrentPage = page,
+                PageSize = pageSize
+            };
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error getting paged products: {ex.Message}");
+            return new PagedResult<Product>
+            {
+                Items = new List<Product>(),
+                TotalCount = 0,
+                CurrentPage = page,
+                PageSize = pageSize
+            };
+        }
+    }
+
+    /// <summary>
     /// Gets a single product by ID.
-    /// GET /api/products/{id}
     /// </summary>
     public async Task<Product?> GetProductByIdAsync(int id)
     {
         try
         {
-            var product = await _httpClient.GetFromJsonAsync<Product>($"{ProductsEndpoint}/{id}");
-            return product;
-        }
-        catch (HttpRequestException ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"HTTP Error getting product {id}: {ex.Message}");
-            return null;
+            return await _httpClient.GetFromJsonAsync<Product>($"{ProductsEndpoint}/{id}");
         }
         catch (Exception ex)
         {
@@ -71,7 +108,6 @@ public class ProductService : IProductService
 
     /// <summary>
     /// Gets products by category ID.
-    /// GET /api/products/category/{categoryId}
     /// </summary>
     public async Task<List<Product>> GetProductsByCategoryAsync(int categoryId)
     {
@@ -79,11 +115,6 @@ public class ProductService : IProductService
         {
             var products = await _httpClient.GetFromJsonAsync<List<Product>>($"{ProductsEndpoint}/category/{categoryId}");
             return products ?? new List<Product>();
-        }
-        catch (HttpRequestException ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"HTTP Error getting products for category {categoryId}: {ex.Message}");
-            return new List<Product>();
         }
         catch (Exception ex)
         {

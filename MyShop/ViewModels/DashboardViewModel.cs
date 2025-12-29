@@ -4,12 +4,14 @@ using MyShop.Models.Dashboard;
 using MyShop.Services;
 using System;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace MyShop.ViewModels;
 
+/// <summary>
+/// ViewModel for managing dashboard data display.
+/// </summary>
 public partial class DashboardViewModel : ObservableObject
 {
     private readonly DashboardService _dashboardService;
@@ -20,7 +22,6 @@ public partial class DashboardViewModel : ObservableObject
     [ObservableProperty]
     private string errorMessage = string.Empty;
 
-    // ===== SUMMARY =====
     [ObservableProperty]
     private int totalProducts;
 
@@ -30,7 +31,6 @@ public partial class DashboardViewModel : ObservableObject
     [ObservableProperty]
     private string todayRevenue = string.Empty;
 
-    // ===== COLLECTIONS =====
     [ObservableProperty]
     private ObservableCollection<LowStockProduct> lowStockProducts = new();
 
@@ -43,13 +43,11 @@ public partial class DashboardViewModel : ObservableObject
     [ObservableProperty]
     private ObservableCollection<RevenueByDay> monthlyRevenue = new();
 
-
     public DashboardViewModel(DashboardService dashboardService)
     {
         _dashboardService = dashboardService;
     }
 
-    // GIỐNG LoadProductsAsync
     [RelayCommand]
     private async Task LoadDashboardAsync()
     {
@@ -58,7 +56,7 @@ public partial class DashboardViewModel : ObservableObject
 
         try
         {
-            // SUMMARY
+            // Load summary
             var summary = await _dashboardService.GetSummaryAsync();
             if (summary != null)
             {
@@ -67,25 +65,25 @@ public partial class DashboardViewModel : ObservableObject
                 TodayRevenue = summary.TodayRevenueFormatted;
             }
 
-            // LOW STOCK
+            // Load low stock products
             LowStockProducts.Clear();
             var lowStock = await _dashboardService.GetLowStockProductsAsync();
             foreach (var item in lowStock)
                 LowStockProducts.Add(item);
 
-            // TOP SELLING
+            // Load top selling products
             TopSellingProducts.Clear();
             var topSelling = await _dashboardService.GetTopSellingProductsAsync();
             foreach (var item in topSelling)
                 TopSellingProducts.Add(item);
 
-            // RECENT ORDERS
+            // Load recent orders
             RecentOrders.Clear();
             var orders = await _dashboardService.GetRecentOrdersAsync();
             foreach (var order in orders)
                 RecentOrders.Add(order);
 
-            // MONTHLY REVENUE
+            // Load monthly revenue with bar height calculation
             MonthlyRevenue.Clear();
             var revenueData = await _dashboardService.GetMonthlyRevenueAsync();
             if (revenueData.Count > 0)
@@ -95,14 +93,10 @@ public partial class DashboardViewModel : ObservableObject
 
                 foreach (var item in revenueData)
                 {   
-                    item.BarHeight = maxRevenue == 0
-                        ? 0
-                        : (double)(item.Revenue / maxRevenue) * maxBarHeight;
-
+                    item.BarHeight = maxRevenue == 0 ? 0 : (double)(item.Revenue / maxRevenue) * maxBarHeight;
                     MonthlyRevenue.Add(item);
                 }
             }
-
         }
         catch (Exception ex)
         {

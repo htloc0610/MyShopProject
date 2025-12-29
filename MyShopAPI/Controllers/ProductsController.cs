@@ -4,6 +4,7 @@ using MyShopAPI.Data;
 using MyShopAPI.DTOs;
 using MyShopAPI.Mappers;
 using MyShopAPI.Models;
+using System.Linq.Expressions;
 
 namespace MyShopAPI.Controllers
 {
@@ -26,13 +27,96 @@ namespace MyShopAPI.Controllers
         /// Get all products (API output giống version cũ)
         /// </summary>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ProductResponseDto>>> GetAll()
+        public async Task<IActionResult> GetAll(
+            [FromQuery] int? page = null,
+            [FromQuery] int? pageSize = null,
+            [FromQuery] string? sortBy = null,
+            [FromQuery] bool isDescending = false)
         {
+            // If paging parameters are provided, use paged endpoint
+            if (page.HasValue && pageSize.HasValue)
+            {
+                return await GetPagedProducts(page.Value, pageSize.Value, sortBy, isDescending);
+            }
+
+            // Otherwise return all products (backward compatibility)
             var products = await _context.Products
                 .Include(p => p.Category)
                 .ToListAsync();
 
             return Ok(products.Select(ProductMapper.ToDto));
+        }
+
+        /// <summary>
+        /// Get products with server-side paging and sorting
+        /// </summary>
+        private async Task<IActionResult> GetPagedProducts(
+            int page,
+            int pageSize,
+            string? sortBy,
+            bool isDescending)
+        {
+            // Validate parameters
+            if (page < 1) page = 1;
+            if (pageSize < 1) pageSize = 10;
+            if (pageSize > 100) pageSize = 100; // Max 100 items per page
+
+            // Build query
+            var query = _context.Products.Include(p => p.Category).AsQueryable();
+
+            // Apply sorting
+            query = ApplySorting(query, sortBy, isDescending);
+
+            // Get total count before pagination
+            var totalCount = await query.CountAsync();
+
+            // Apply pagination
+            var products = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            // Build result
+            var result = new PagedResult<ProductResponseDto>
+            {
+                Items = products.Select(ProductMapper.ToDto).ToList(),
+                TotalCount = totalCount,
+                CurrentPage = page,
+                PageSize = pageSize
+            };
+
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Apply sorting to products query
+        /// </summary>
+        private IQueryable<Product> ApplySorting(
+            IQueryable<Product> query,
+            string? sortBy,
+            bool isDescending)
+        {
+            if (string.IsNullOrWhiteSpace(sortBy))
+            {
+                // Default sorting by ProductId
+                return query.OrderBy(p => p.ProductId);
+            }
+
+            // Map sort column name to property
+            Expression<Func<Product, object>> sortExpression = sortBy.ToLower() switch
+            {
+                "id" => p => p.ProductId,
+                "name" => p => p.Name,
+                "price" => p => p.ImportPrice,
+                "stock" => p => p.Count,
+                "category" => p => p.Category!.Name,
+                "sku" => p => p.Sku,
+                _ => p => p.ProductId // Default
+            };
+
+            return isDescending
+                ? query.OrderByDescending(sortExpression)
+                : query.OrderBy(sortExpression);
         }
 
         /// <summary>
