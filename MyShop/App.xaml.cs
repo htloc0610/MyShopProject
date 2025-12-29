@@ -47,6 +47,7 @@ public partial class App : Application
 
         // Register Services with HttpClient
         services.AddHttpClient<IProductService, ProductService>();
+        services.AddHttpClient<ICategoryService, CategoryService>();
         services.AddHttpClient<DashboardService>();
 
         // Register ViewModels as Transient

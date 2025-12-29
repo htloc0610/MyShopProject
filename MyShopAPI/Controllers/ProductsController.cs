@@ -24,37 +24,19 @@ namespace MyShopAPI.Controllers
         }
 
         /// <summary>
-        /// Get all products (API output giống version cũ)
+        /// Get products with paging, sorting, and filtering.
+        /// Server-side processing for optimal performance.
         /// </summary>
         [HttpGet]
-        public async Task<IActionResult> GetAll(
-            [FromQuery] int? page = null,
-            [FromQuery] int? pageSize = null,
+        public async Task<ActionResult<PagedResult<ProductResponseDto>>> GetAll(
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10,
             [FromQuery] string? sortBy = null,
-            [FromQuery] bool isDescending = false)
-        {
-            // If paging parameters are provided, use paged endpoint
-            if (page.HasValue && pageSize.HasValue)
-            {
-                return await GetPagedProducts(page.Value, pageSize.Value, sortBy, isDescending);
-            }
-
-            // Otherwise return all products (backward compatibility)
-            var products = await _context.Products
-                .Include(p => p.Category)
-                .ToListAsync();
-
-            return Ok(products.Select(ProductMapper.ToDto));
-        }
-
-        /// <summary>
-        /// Get products with server-side paging and sorting
-        /// </summary>
-        private async Task<IActionResult> GetPagedProducts(
-            int page,
-            int pageSize,
-            string? sortBy,
-            bool isDescending)
+            [FromQuery] bool isDescending = false,
+            [FromQuery] string? keyword = null,
+            [FromQuery] int? categoryId = null,
+            [FromQuery] decimal? minPrice = null,
+            [FromQuery] decimal? maxPrice = null)
         {
             // Validate parameters
             if (page < 1) page = 1;
@@ -63,6 +45,9 @@ namespace MyShopAPI.Controllers
 
             // Build query
             var query = _context.Products.Include(p => p.Category).AsQueryable();
+
+            // Apply filters
+            query = ApplyFilters(query, keyword, categoryId, minPrice, maxPrice);
 
             // Apply sorting
             query = ApplySorting(query, sortBy, isDescending);
@@ -89,7 +74,133 @@ namespace MyShopAPI.Controllers
         }
 
         /// <summary>
-        /// Apply sorting to products query
+        /// Get product by id.
+        /// </summary>
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult<ProductResponseDto>> GetById(int id)
+        {
+            var product = await _context.Products
+                .Include(p => p.Category)
+                .FirstOrDefaultAsync(p => p.ProductId == id);
+
+            if (product == null)
+                return NotFound(new { message = $"Product {id} not found" });
+
+            return Ok(ProductMapper.ToDto(product));
+        }
+
+        /// <summary>
+        /// Create new product.
+        /// </summary>
+        [HttpPost]
+        public async Task<ActionResult<ProductResponseDto>> Create(Product product)
+        {
+            var categoryExists = await _context.Categories
+                .AnyAsync(c => c.CategoryId == product.CategoryId);
+
+            if (!categoryExists)
+                return BadRequest(new { message = "Invalid category id" });
+
+            _context.Products.Add(product);
+            await _context.SaveChangesAsync();
+
+            await _context.Entry(product)
+                .Reference(p => p.Category)
+                .LoadAsync();
+
+            return CreatedAtAction(
+                nameof(GetById),
+                new { id = product.ProductId },
+                ProductMapper.ToDto(product)
+            );
+        }
+
+        /// <summary>
+        /// Update product.
+        /// </summary>
+        [HttpPut("{id:int}")]
+        public async Task<ActionResult<ProductResponseDto>> Update(int id, Product updated)
+        {
+            var product = await _context.Products
+                .Include(p => p.Category)
+                .FirstOrDefaultAsync(p => p.ProductId == id);
+
+            if (product == null)
+                return NotFound(new { message = $"Product {id} not found" });
+
+            product.Sku = updated.Sku;
+            product.Name = updated.Name;
+            product.ImportPrice = updated.ImportPrice;
+            product.Count = updated.Count;
+            product.Description = updated.Description;
+            product.CategoryId = updated.CategoryId;
+
+            await _context.SaveChangesAsync();
+
+            await _context.Entry(product)
+                .Reference(p => p.Category)
+                .LoadAsync();
+
+            return Ok(ProductMapper.ToDto(product));
+        }
+
+        /// <summary>
+        /// Delete product.
+        /// </summary>
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var product = await _context.Products.FindAsync(id);
+            if (product == null)
+                return NotFound(new { message = $"Product {id} not found" });
+
+            _context.Products.Remove(product);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        #region Private Helper Methods
+
+        /// <summary>
+        /// Apply filters to products query.
+        /// </summary>
+        private IQueryable<Product> ApplyFilters(
+            IQueryable<Product> query,
+            string? keyword,
+            int? categoryId,
+            decimal? minPrice,
+            decimal? maxPrice)
+        {
+            // Filter by keyword (search in product name)
+            if (!string.IsNullOrWhiteSpace(keyword))
+            {
+                var normalizedKeyword = keyword.ToLower().Trim();
+                query = query.Where(p => p.Name.ToLower().Contains(normalizedKeyword));
+            }
+
+            // Filter by category
+            if (categoryId.HasValue && categoryId.Value > 0)
+            {
+                query = query.Where(p => p.CategoryId == categoryId.Value);
+            }
+
+            // Filter by price range
+            if (minPrice.HasValue && minPrice.Value >= 0)
+            {
+                query = query.Where(p => p.ImportPrice >= minPrice.Value);
+            }
+
+            if (maxPrice.HasValue && maxPrice.Value >= 0)
+            {
+                query = query.Where(p => p.ImportPrice <= maxPrice.Value);
+            }
+
+            return query;
+        }
+
+        /// <summary>
+        /// Apply sorting to products query.
         /// </summary>
         private IQueryable<Product> ApplySorting(
             IQueryable<Product> query,
@@ -119,105 +230,6 @@ namespace MyShopAPI.Controllers
                 : query.OrderBy(sortExpression);
         }
 
-        /// <summary>
-        /// Get product by id
-        /// </summary>
-        [HttpGet("{id:int}")]
-        public async Task<ActionResult<ProductResponseDto>> GetById(int id)
-        {
-            var product = await _context.Products
-                .Include(p => p.Category)
-                .FirstOrDefaultAsync(p => p.ProductId == id);
-
-            if (product == null)
-                return NotFound(new { message = $"Product {id} not found" });
-
-            return Ok(ProductMapper.ToDto(product));
-        }
-
-        /// <summary>
-        /// Get products by category id
-        /// </summary>
-        [HttpGet("category/{categoryId:int}")]
-        public async Task<ActionResult<IEnumerable<ProductResponseDto>>> GetByCategory(int categoryId)
-        {
-            var products = await _context.Products
-                .Where(p => p.CategoryId == categoryId)
-                .Include(p => p.Category)
-                .ToListAsync();
-
-            return Ok(products.Select(ProductMapper.ToDto));
-        }
-
-        /// <summary>
-        /// Create new product (vẫn dùng Entity để ghi DB)
-        /// </summary>
-        [HttpPost]
-        public async Task<ActionResult<ProductResponseDto>> Create(Product product)
-        {
-            var categoryExists = await _context.Categories
-                .AnyAsync(c => c.CategoryId == product.CategoryId);
-
-            if (!categoryExists)
-                return BadRequest(new { message = "Invalid category id" });
-
-            _context.Products.Add(product);
-            await _context.SaveChangesAsync();
-
-            await _context.Entry(product)
-                .Reference(p => p.Category)
-                .LoadAsync();
-
-            return CreatedAtAction(
-                nameof(GetById),
-                new { id = product.ProductId },
-                ProductMapper.ToDto(product)
-            );
-        }
-
-        /// <summary>
-        /// Update product
-        /// </summary>
-        [HttpPut("{id:int}")]
-        public async Task<ActionResult<ProductResponseDto>> Update(int id, Product updated)
-        {
-            var product = await _context.Products
-                .Include(p => p.Category)
-                .FirstOrDefaultAsync(p => p.ProductId == id);
-
-            if (product == null)
-                return NotFound(new { message = $"Product {id} not found" });
-
-            product.Sku = updated.Sku;
-            product.Name = updated.Name;
-            product.ImportPrice = updated.ImportPrice;
-            product.Count = updated.Count;
-            product.Description = updated.Description;
-            product.CategoryId = updated.CategoryId;
-
-            await _context.SaveChangesAsync();
-
-            await _context.Entry(product)
-                .Reference(p => p.Category)
-                .LoadAsync();
-
-            return Ok(ProductMapper.ToDto(product));
-        }
-
-        /// <summary>
-        /// Delete product
-        /// </summary>
-        [HttpDelete("{id:int}")]
-        public async Task<IActionResult> Delete(int id)
-        {
-            var product = await _context.Products.FindAsync(id);
-            if (product == null)
-                return NotFound(new { message = $"Product {id} not found" });
-
-            _context.Products.Remove(product);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
+        #endregion
     }
 }

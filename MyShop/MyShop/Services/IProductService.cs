@@ -10,22 +10,20 @@ namespace MyShop.Services;
 public interface IProductService
 {
     /// <summary>
-    /// Gets all products from the API.
+    /// Gets products with paging, sorting, and filtering support.
     /// </summary>
-    Task<List<Product>> GetProductsAsync();
-
-    /// <summary>
-    /// Gets products with paging and sorting support.
-    /// </summary>
-    Task<PagedResult<Product>> GetProductsPagedAsync(int page, int pageSize, string? sortBy = null, bool isDescending = false);
+    Task<PagedResult<Product>> GetProductsPagedAsync(
+        int page, 
+        int pageSize, 
+        string? sortBy = null, 
+        bool isDescending = false,
+        string? keyword = null,
+        int? categoryId = null,
+        double? minPrice = null,
+        double? maxPrice = null);
 
     /// <summary>
     /// Gets a single product by ID.
     /// </summary>
     Task<Product?> GetProductByIdAsync(int id);
-
-    /// <summary>
-    /// Gets products by category ID.
-    /// </summary>
-    Task<List<Product>> GetProductsByCategoryAsync(int categoryId);
 }

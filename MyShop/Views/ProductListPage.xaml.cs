@@ -33,10 +33,10 @@ public sealed partial class ProductListPage : Page
     {
         base.OnNavigatedTo(e);
 
-        // Load products when page loads (using paged endpoint)
+        // Initialize ViewModel (load categories and products)
         if (ViewModel.Products.Count == 0)
         {
-            await ViewModel.LoadProductsPagedCommand.ExecuteAsync(null);
+            await ViewModel.InitializeAsync();
         }
     }
 }

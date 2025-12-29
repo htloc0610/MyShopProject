@@ -14,6 +14,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
@@ -49,8 +50,113 @@
             </StackPanel>
         </Grid>
 
+        <!-- Filter Bar -->
+        <Border Grid.Row="1" 
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                BorderThickness="1"
+                CornerRadius="8"
+                Padding="16"
+                Margin="0,0,0,16">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- First Row: Search and Category -->
+                <Grid Grid.Row="0" Margin="0,0,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition Width="12"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Search Box -->
+                    <TextBox Grid.Column="0"
+                            PlaceholderText="Tìm kiếm theo tên sản phẩm..."
+                            Text="{x:Bind ViewModel.SearchKeyword, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            VerticalAlignment="Center">
+                        <TextBox.Header>
+                            <TextBlock Text="Tìm kiếm" FontWeight="SemiBold"/>
+                        </TextBox.Header>
+                    </TextBox>
+
+                    <!-- Category Filter -->
+                    <ComboBox Grid.Column="2"
+                             ItemsSource="{x:Bind ViewModel.Categories, Mode=OneWay}"
+                             SelectedItem="{x:Bind ViewModel.SelectedCategory, Mode=TwoWay}"
+                             DisplayMemberPath="Name"
+                             HorizontalAlignment="Stretch"
+                             VerticalAlignment="Center">
+                        <ComboBox.Header>
+                            <TextBlock Text="Loại sản phẩm" FontWeight="SemiBold"/>
+                        </ComboBox.Header>
+                    </ComboBox>
+                </Grid>
+
+                <!-- Second Row: Price Range and Buttons -->
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="12"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="12"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Min Price -->
+                    <NumberBox Grid.Column="0"
+                              Value="{x:Bind ViewModel.MinPrice, Mode=TwoWay}"
+                              PlaceholderText="0"
+                              SpinButtonPlacementMode="Compact"
+                              Minimum="0"
+                              VerticalAlignment="Center">
+                        <NumberBox.Header>
+                            <TextBlock Text="Giá tối thiểu (VNĐ)" FontWeight="SemiBold"/>
+                        </NumberBox.Header>
+                    </NumberBox>
+
+                    <!-- Max Price -->
+                    <NumberBox Grid.Column="2"
+                              Value="{x:Bind ViewModel.MaxPrice, Mode=TwoWay}"
+                              PlaceholderText="0"
+                              SpinButtonPlacementMode="Compact"
+                              Minimum="0"
+                              VerticalAlignment="Center">
+                        <NumberBox.Header>
+                            <TextBlock Text="Giá tối đa (VNĐ)" FontWeight="SemiBold"/>
+                        </NumberBox.Header>
+                    </NumberBox>
+
+                    <!-- Filter Buttons -->
+                    <StackPanel Grid.Column="4" 
+                               Orientation="Horizontal" 
+                               Spacing="8"
+                               VerticalAlignment="Bottom">
+                        <Button Command="{x:Bind ViewModel.ApplyFiltersCommand}"
+                               Style="{StaticResource AccentButtonStyle}"
+                               Width="100">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon Glyph="&#xE71C;" FontSize="16"/>
+                                <TextBlock Text="Lọc"/>
+                            </StackPanel>
+                        </Button>
+                        
+                        <Button Command="{x:Bind ViewModel.ClearFiltersCommand}"
+                               Width="120">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon Glyph="&#xE894;" FontSize="16"/>
+                                <TextBlock Text="Xóa lọc"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </Border>
+
         <!-- Sorting Controls -->
-        <Grid Grid.Row="1" Margin="0,0,0,16">
+        <Grid Grid.Row="2" Margin="0,0,0,16">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
@@ -90,7 +196,7 @@
         </Grid>
 
         <!-- Error InfoBar -->
-        <InfoBar Grid.Row="2"
+        <InfoBar Grid.Row="3"
                  IsOpen="{x:Bind ViewModel.HasError, Mode=OneWay}"
                  Severity="Error"
                  Title="Lỗi"
@@ -99,7 +205,7 @@
                  Margin="0,0,0,16"/>
 
         <!-- DataGrid -->
-        <Grid Grid.Row="3">
+        <Grid Grid.Row="4">
             <!-- Progress Ring -->
             <ProgressRing IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}"
                          Width="60"
@@ -171,7 +277,7 @@
         </Grid>
 
         <!-- Pagination Controls -->
-        <Border Grid.Row="4" 
+        <Border Grid.Row="5" 
                 Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                 BorderThickness="1"
