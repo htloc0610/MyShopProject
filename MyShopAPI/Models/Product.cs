@@ -1,17 +1,25 @@
 namespace MyShopAPI.Models
 {
-    /// <summary>
-    /// Represents a product in the shop.
-    /// </summary>
     public class Product
     {
-        public int Id { get; set; }
+        public int ProductId { get; set; }
+
+        public string Sku { get; set; } = string.Empty;
+
         public string Name { get; set; } = string.Empty;
+
+        public int ImportPrice { get; set; }
+
+        public int Count { get; set; }
+
         public string Description { get; set; } = string.Empty;
-        public decimal Price { get; set; }
-        public int Stock { get; set; }
-        public string Category { get; set; } = string.Empty;
-        public string ImageUrl { get; set; } = string.Empty;
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+
+        // Foreign key
+        public int CategoryId { get; set; }
+
+        // Navigation
+        public Category Category { get; set; } = null!;
+
+        public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
     }
 }

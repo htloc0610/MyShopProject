@@ -1,178 +1,138 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using MyShopAPI.Data;
+using MyShopAPI.DTOs;
+using MyShopAPI.Mappers;
 using MyShopAPI.Models;
 
 namespace MyShopAPI.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/products")]
     public class ProductsController : ControllerBase
     {
+        private readonly AppDbContext _context;
         private readonly ILogger<ProductsController> _logger;
 
-        // Sample in-memory data (in real app, this would be from database)
-        private static readonly List<Product> _products = new()
+        public ProductsController(
+            AppDbContext context,
+            ILogger<ProductsController> logger)
         {
-            new Product
-            {
-                Id = 1,
-                Name = "Laptop Dell XPS 13",
-                Description = "High-performance ultrabook with 13-inch display",
-                Price = 1299.99M,
-                Stock = 15,
-                Category = "Electronics",
-                ImageUrl = "https://via.placeholder.com/200"
-            },
-            new Product
-            {
-                Id = 2,
-                Name = "iPhone 15 Pro",
-                Description = "Latest Apple smartphone with advanced features",
-                Price = 999.99M,
-                Stock = 25,
-                Category = "Electronics",
-                ImageUrl = "https://via.placeholder.com/200"
-            },
-            new Product
-            {
-                Id = 3,
-                Name = "Sony WH-1000XM5",
-                Description = "Premium noise-cancelling headphones",
-                Price = 399.99M,
-                Stock = 30,
-                Category = "Audio",
-                ImageUrl = "https://via.placeholder.com/200"
-            },
-            new Product
-            {
-                Id = 4,
-                Name = "Samsung Galaxy Watch 6",
-                Description = "Advanced smartwatch with health tracking",
-                Price = 349.99M,
-                Stock = 20,
-                Category = "Wearables",
-                ImageUrl = "https://via.placeholder.com/200"
-            },
-            new Product
-            {
-                Id = 5,
-                Name = "iPad Air",
-                Description = "Powerful tablet for work and entertainment",
-                Price = 599.99M,
-                Stock = 18,
-                Category = "Electronics",
-                ImageUrl = "https://via.placeholder.com/200"
-            }
-        };
-
-        public ProductsController(ILogger<ProductsController> logger)
-        {
+            _context = context;
             _logger = logger;
         }
 
         /// <summary>
-        /// Get all products
+        /// Get all products (API output giống version cũ)
         /// </summary>
         [HttpGet]
-        public ActionResult<IEnumerable<Product>> GetAll()
+        public async Task<ActionResult<IEnumerable<ProductResponseDto>>> GetAll()
         {
-            _logger.LogInformation("Getting all products");
-            return Ok(_products);
+            var products = await _context.Products
+                .Include(p => p.Category)
+                .ToListAsync();
+
+            return Ok(products.Select(ProductMapper.ToDto));
         }
 
         /// <summary>
-        /// Get product by ID
+        /// Get product by id
         /// </summary>
-        [HttpGet("{id}")]
-        public ActionResult<Product> GetById(int id)
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult<ProductResponseDto>> GetById(int id)
         {
-            var product = _products.FirstOrDefault(p => p.Id == id);
+            var product = await _context.Products
+                .Include(p => p.Category)
+                .FirstOrDefaultAsync(p => p.ProductId == id);
+
             if (product == null)
-            {
-                _logger.LogWarning("Product with ID {Id} not found", id);
-                return NotFound(new { message = $"Product with ID {id} not found" });
-            }
+                return NotFound(new { message = $"Product {id} not found" });
 
-            _logger.LogInformation("Retrieved product {Id}", id);
-            return Ok(product);
+            return Ok(ProductMapper.ToDto(product));
         }
 
         /// <summary>
-        /// Get products by category
+        /// Get products by category id
         /// </summary>
-        [HttpGet("category/{category}")]
-        public ActionResult<IEnumerable<Product>> GetByCategory(string category)
+        [HttpGet("category/{categoryId:int}")]
+        public async Task<ActionResult<IEnumerable<ProductResponseDto>>> GetByCategory(int categoryId)
         {
-            var products = _products.Where(p => 
-                p.Category.Equals(category, StringComparison.OrdinalIgnoreCase)).ToList();
-            
-            _logger.LogInformation("Found {Count} products in category {Category}", 
-                products.Count, category);
-            
-            return Ok(products);
+            var products = await _context.Products
+                .Where(p => p.CategoryId == categoryId)
+                .Include(p => p.Category)
+                .ToListAsync();
+
+            return Ok(products.Select(ProductMapper.ToDto));
         }
 
         /// <summary>
-        /// Create a new product
+        /// Create new product (vẫn dùng Entity để ghi DB)
         /// </summary>
         [HttpPost]
-        public ActionResult<Product> Create([FromBody] Product product)
+        public async Task<ActionResult<ProductResponseDto>> Create(Product product)
         {
-            if (product == null)
-            {
-                return BadRequest(new { message = "Product data is required" });
-            }
+            var categoryExists = await _context.Categories
+                .AnyAsync(c => c.CategoryId == product.CategoryId);
 
-            // Auto-increment ID
-            product.Id = _products.Max(p => p.Id) + 1;
-            product.CreatedAt = DateTime.Now;
-            
-            _products.Add(product);
-            
-            _logger.LogInformation("Created new product with ID {Id}", product.Id);
-            
-            return CreatedAtAction(nameof(GetById), new { id = product.Id }, product);
+            if (!categoryExists)
+                return BadRequest(new { message = "Invalid category id" });
+
+            _context.Products.Add(product);
+            await _context.SaveChangesAsync();
+
+            await _context.Entry(product)
+                .Reference(p => p.Category)
+                .LoadAsync();
+
+            return CreatedAtAction(
+                nameof(GetById),
+                new { id = product.ProductId },
+                ProductMapper.ToDto(product)
+            );
         }
 
         /// <summary>
-        /// Update an existing product
+        /// Update product
         /// </summary>
-        [HttpPut("{id}")]
-        public ActionResult<Product> Update(int id, [FromBody] Product updatedProduct)
+        [HttpPut("{id:int}")]
+        public async Task<ActionResult<ProductResponseDto>> Update(int id, Product updated)
         {
-            var product = _products.FirstOrDefault(p => p.Id == id);
+            var product = await _context.Products
+                .Include(p => p.Category)
+                .FirstOrDefaultAsync(p => p.ProductId == id);
+
             if (product == null)
-            {
-                return NotFound(new { message = $"Product with ID {id} not found" });
-            }
+                return NotFound(new { message = $"Product {id} not found" });
 
-            product.Name = updatedProduct.Name;
-            product.Description = updatedProduct.Description;
-            product.Price = updatedProduct.Price;
-            product.Stock = updatedProduct.Stock;
-            product.Category = updatedProduct.Category;
-            product.ImageUrl = updatedProduct.ImageUrl;
+            product.Sku = updated.Sku;
+            product.Name = updated.Name;
+            product.ImportPrice = updated.ImportPrice;
+            product.Count = updated.Count;
+            product.Description = updated.Description;
+            product.CategoryId = updated.CategoryId;
 
-            _logger.LogInformation("Updated product {Id}", id);
-            
-            return Ok(product);
+            await _context.SaveChangesAsync();
+
+            await _context.Entry(product)
+                .Reference(p => p.Category)
+                .LoadAsync();
+
+            return Ok(ProductMapper.ToDto(product));
         }
 
         /// <summary>
-        /// Delete a product
+        /// Delete product
         /// </summary>
-        [HttpDelete("{id}")]
-        public ActionResult Delete(int id)
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> Delete(int id)
         {
-            var product = _products.FirstOrDefault(p => p.Id == id);
+            var product = await _context.Products.FindAsync(id);
             if (product == null)
-            {
-                return NotFound(new { message = $"Product with ID {id} not found" });
-            }
+                return NotFound(new { message = $"Product {id} not found" });
 
-            _products.Remove(product);
-            
-            _logger.LogInformation("Deleted product {Id}", id);
-            
+            _context.Products.Remove(product);
+            await _context.SaveChangesAsync();
+
             return NoContent();
         }
     }
