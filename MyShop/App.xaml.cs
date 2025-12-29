@@ -53,11 +53,6 @@ public partial class App : Application
         services.AddHttpClient<IDataService, DataService>();
         services.AddHttpClient<DashboardService, DashboardService>();
 
-        // Register Services
-        // DataService is registered as Singleton - same instance shared across the app
-        // This is suitable for services that maintain state or are expensive to create
-        // Note: AddHttpClient already registers DataService, so we don't need AddSingleton here
-
         // Register ViewModels
         // ViewModels are registered as Transient - new instance for each request
         // Each view gets its own ViewModel instance
