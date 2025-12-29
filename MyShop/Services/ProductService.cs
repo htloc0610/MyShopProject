@@ -144,6 +144,45 @@ public class ProductService : IProductService
         }
     }
 
+    /// <summary>
+    /// Imports multiple products from Excel.
+    /// </summary>
+    public async Task<(bool Success, int ImportedCount, List<string> Errors)> ImportProductsAsync(List<ProductImportDto> products)
+    {
+        var errors = new List<string>();
+        var importedCount = 0;
+
+        try
+        {
+            var response = await _httpClient.PostAsJsonAsync($"{ProductsEndpoint}/bulk-import", products);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<BulkImportResult>();
+                
+                if (result != null)
+                {
+                    importedCount = result.ImportedCount;
+                    errors = result.Errors ?? new List<string>();
+                    return (true, importedCount, errors);
+                }
+            }
+            else
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                errors.Add($"L?i t? server: {errorContent}");
+            }
+
+            return (false, importedCount, errors);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error importing products: {ex.Message}");
+            errors.Add($"L?i k?t n?i: {ex.Message}");
+            return (false, 0, errors);
+        }
+    }
+
     #region Private Helper Methods
 
     /// <summary>

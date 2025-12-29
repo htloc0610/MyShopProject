@@ -20,6 +20,11 @@ public partial class App : Application
     public static new App Current => (App)Application.Current;
 
     /// <summary>
+    /// Gets the main window for accessing its HWND.
+    /// </summary>
+    public static Window? MainWindow { get; private set; }
+
+    /// <summary>
     /// Gets the service provider for resolving dependencies.
     /// </summary>
     public IServiceProvider Services { get; }
@@ -68,6 +73,7 @@ public partial class App : Application
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
         _window = new MainWindow();
+        MainWindow = _window;
         _window.Activate();
     }
 }

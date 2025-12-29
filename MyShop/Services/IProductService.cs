@@ -41,4 +41,9 @@ public interface IProductService
     /// Deletes a product by ID.
     /// </summary>
     Task<bool> DeleteProductAsync(int id);
+
+    /// <summary>
+    /// Imports multiple products from Excel.
+    /// </summary>
+    Task<(bool Success, int ImportedCount, List<string> Errors)> ImportProductsAsync(List<ProductImportDto> products);
 }

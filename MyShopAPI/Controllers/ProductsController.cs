@@ -186,6 +186,158 @@ namespace MyShopAPI.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// Bulk import products from Excel.
+        /// Validates ALL data first. If ANY error exists, rejects the entire batch.
+        /// </summary>
+        [HttpPost("bulk-import")]
+        public async Task<ActionResult<BulkImportResult>> BulkImport([FromBody] List<ProductImportDto> products)
+        {
+            var result = new BulkImportResult();
+            var validationErrors = new List<string>();
+
+            try
+            {
+                _logger.LogInformation("Starting bulk import validation for {Count} products", products.Count);
+
+                if (products == null || products.Count == 0)
+                {
+                    result.Errors.Add("⛔ Không có dữ liệu để import");
+                    return BadRequest(result);
+                }
+
+                // PHASE 1: VALIDATE ALL PRODUCTS FIRST
+                // We will NOT insert any product if even one has an error
+                var validProducts = new List<Product>();
+                var skuSet = new HashSet<string>(); // Track SKUs in this batch
+
+                for (int i = 0; i < products.Count; i++)
+                {
+                    var dto = products[i];
+                    var rowNumber = i + 2; // Excel row number (row 1 is header, data starts at row 2)
+                    
+                    try
+                    {
+                        // Validate required fields
+                        if (string.IsNullOrWhiteSpace(dto.Name))
+                        {
+                            validationErrors.Add($"❌ Sản phẩm {i + 1} (Dòng {rowNumber}): Tên không được để trống");
+                            continue;
+                        }
+
+                        if (string.IsNullOrWhiteSpace(dto.Sku))
+                        {
+                            validationErrors.Add($"❌ Sản phẩm {i + 1} (Dòng {rowNumber}): SKU không được để trống");
+                            continue;
+                        }
+
+                        // Check duplicate SKU in the current batch
+                        if (skuSet.Contains(dto.Sku))
+                        {
+                            validationErrors.Add($"❌ Sản phẩm {i + 1} (Dòng {rowNumber}, '{dto.Name}'): SKU '{dto.Sku}' bị trùng trong file");
+                            continue;
+                        }
+
+                        // Check if SKU already exists in database
+                        var skuExists = await _context.Products.AnyAsync(p => p.Sku == dto.Sku);
+                        if (skuExists)
+                        {
+                            validationErrors.Add($"❌ Sản phẩm {i + 1} (Dòng {rowNumber}, '{dto.Name}'): SKU '{dto.Sku}' đã tồn tại trong hệ thống");
+                            continue;
+                        }
+
+                        // Validate category exists
+                        var categoryExists = await _context.Categories
+                            .AnyAsync(c => c.CategoryId == dto.CategoryId);
+
+                        if (!categoryExists)
+                        {
+                            validationErrors.Add($"❌ Sản phẩm {i + 1} (Dòng {rowNumber}, '{dto.Name}'): CategoryId {dto.CategoryId} không hợp lệ");
+                            continue;
+                        }
+
+                        // Validate price
+                        if (dto.Price <= 0)
+                        {
+                            validationErrors.Add($"❌ Sản phẩm {i + 1} (Dòng {rowNumber}, '{dto.Name}'): Giá ({dto.Price}) phải lớn hơn 0");
+                            continue;
+                        }
+
+                        // Validate stock
+                        if (dto.Stock < 0)
+                        {
+                            validationErrors.Add($"❌ Sản phẩm {i + 1} (Dòng {rowNumber}, '{dto.Name}'): Số lượng ({dto.Stock}) không được âm");
+                            continue;
+                        }
+
+                        // Add to SKU tracking set
+                        skuSet.Add(dto.Sku);
+
+                        // Create product entity (but don't insert yet)
+                        var product = new Product
+                        {
+                            Sku = dto.Sku,
+                            Name = dto.Name,
+                            ImportPrice = (int)Math.Round(dto.Price),
+                            Count = dto.Stock,
+                            Description = dto.Description ?? string.Empty,
+                            CategoryId = dto.CategoryId
+                        };
+
+                        validProducts.Add(product);
+                    }
+                    catch (Exception ex)
+                    {
+                        validationErrors.Add($"❌ Sản phẩm {i + 1} (Dòng {rowNumber}, '{dto.Name}'): Lỗi xử lý - {ex.Message}");
+                        _logger.LogError(ex, "Error processing product {Index}", i + 1);
+                    }
+                }
+
+                // PHASE 2: CHECK IF ALL PRODUCTS ARE VALID
+                if (validationErrors.Any())
+                {
+                    // Reject the entire batch
+                    result.Errors.Add("⛔ BATCH BỊ TỪ CHỐI - Dữ liệu chứa lỗi");
+                    result.Errors.Add($"📊 Tổng số sản phẩm: {products.Count}");
+                    result.Errors.Add($"❌ Số lỗi phát hiện: {validationErrors.Count}");
+                    result.Errors.Add($"✅ Số sản phẩm hợp lệ: {validProducts.Count}");
+                    result.Errors.Add("");
+                    result.Errors.Add("📝 CHI TIẾT LỖI:");
+                    result.Errors.AddRange(validationErrors);
+                    result.Errors.Add("");
+                    result.Errors.Add("💡 Vui lòng sửa TẤT CẢ các lỗi và thử lại. Không có sản phẩm nào được import.");
+
+                    _logger.LogWarning("Bulk import rejected: {ErrorCount} validation errors found", validationErrors.Count);
+                    
+                    return BadRequest(result);
+                }
+
+                // PHASE 3: ALL VALID - INSERT ALL PRODUCTS
+                if (validProducts.Any())
+                {
+                    await _context.Products.AddRangeAsync(validProducts);
+                    await _context.SaveChangesAsync();
+                    result.ImportedCount = validProducts.Count;
+                    
+                    _logger.LogInformation("Successfully imported {Count} products", validProducts.Count);
+                    
+                    return Ok(result);
+                }
+                else
+                {
+                    result.Errors.Add("⛔ Không có sản phẩm hợp lệ để import");
+                    return BadRequest(result);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during bulk import");
+                result.Errors.Add($"⛔ LỖI HỆ THỐNG: {ex.Message}");
+                result.Errors.Add("💡 Vui lòng liên hệ quản trị viên nếu lỗi tiếp tục xảy ra.");
+                return StatusCode(500, result);
+            }
+        }
+
         #region Private Helper Methods
 
         /// <summary>
