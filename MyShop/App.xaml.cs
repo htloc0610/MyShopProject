@@ -52,12 +52,16 @@ public partial class App : Application
         // Register HttpClient for API calls
         services.AddHttpClient<IDataService, DataService>();
         services.AddHttpClient<DashboardService, DashboardService>();
+        
+        // Register ProductService with HttpClient
+        services.AddHttpClient<IProductService, ProductService>();
 
         // Register ViewModels
         // ViewModels are registered as Transient - new instance for each request
         // Each view gets its own ViewModel instance
         services.AddTransient<MainViewModel>();
         services.AddTransient<DashboardViewModel>();
+        services.AddTransient<ProductViewModel>();
 
         return services.BuildServiceProvider();
     }

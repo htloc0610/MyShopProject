@@ -40,6 +40,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageReference Include="CommunityToolkit.WinUI.UI.Controls.DataGrid" Version="7.1.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.4">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -55,7 +56,13 @@
   <ItemGroup>
     <Folder Include="MyShopAPI\Controllers\" />
     <Folder Include="MyShopAPI\Models\" />
+    <Folder Include="MyShop\Views\" />
     <Folder Include="Views\Dashboard\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="Views\ProductListPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Page Update="Views\Dashboard.xaml">

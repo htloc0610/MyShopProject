@@ -3,8 +3,8 @@ using System;
 namespace MyShop.Models
 {
     /// <summary>
-    /// Represents a product in the shop (Client-side model).
-    /// Matches the API Product model for serialization.
+    /// Represents a product in the shop (Client-side DTO).
+    /// Matches the API ProductResponseDto for JSON deserialization.
     /// </summary>
     public class Product
     {
@@ -15,16 +15,20 @@ namespace MyShop.Models
         public int Stock { get; set; }
         public string Category { get; set; } = string.Empty;
         public string ImageUrl { get; set; } = string.Empty;
-        public DateTime CreatedAt { get; set; }
 
         /// <summary>
-        /// Formatted price for display
+        /// Formatted price for display in VND
         /// </summary>
-        public string FormattedPrice => $"${Price:N2}";
+        public string FormattedPrice => $"{Price:N0} VN?";
 
         /// <summary>
         /// Stock status for display
         /// </summary>
-        public string StockStatus => Stock > 0 ? $"{Stock} in stock" : "Out of stock";
+        public string StockStatus => Stock > 0 ? $"{Stock} s?n ph?m" : "H?t hàng";
+
+        /// <summary>
+        /// Stock color indicator
+        /// </summary>
+        public string StockColor => Stock > 10 ? "Green" : Stock > 0 ? "Orange" : "Red";
     }
 }

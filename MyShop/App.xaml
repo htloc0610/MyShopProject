@@ -14,9 +14,11 @@
             
             <!-- Value Converters -->
             <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+            <converters:BoolToVisibilityInverseConverter x:Key="BoolToVisibilityInverseConverter"/>
             <converters:BoolToInverseVisibilityConverter x:Key="BoolToInverseVisibilityConverter"/>
             <converters:StringToBoolConverter x:Key="StringToBoolConverter"/>
             <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
+            <converters:PriceConverter x:Key="PriceConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>
