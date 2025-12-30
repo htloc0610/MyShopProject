@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace MyShop.Models
+namespace MyShop.Models.Shared
 {
     /// <summary>
     /// Represents a paged result from the API (Client-side)

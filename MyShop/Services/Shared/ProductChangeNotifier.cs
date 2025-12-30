@@ -1,6 +1,6 @@
 using System;
 
-namespace MyShop.Services;
+namespace MyShop.Services.Shared;
 
 /// <summary>
 /// Service for notifying when product data changes.

@@ -1,8 +1,9 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using MyShop.Models;
+using MyShop.Models.Categories;
+using MyShop.Models.Shared;
 
-namespace MyShop.Services;
+namespace MyShop.Services.Categories;
 
 /// <summary>
 /// Interface for category-related API operations.

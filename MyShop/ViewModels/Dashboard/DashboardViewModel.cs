@@ -1,13 +1,13 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MyShop.Models.Dashboard;
-using MyShop.Services;
+using MyShop.Services.Dashboard;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace MyShop.ViewModels;
+namespace MyShop.ViewModels.Dashboard;
 
 /// <summary>
 /// ViewModel for managing dashboard data display.

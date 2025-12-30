@@ -5,7 +5,7 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 
-namespace MyShop.Services;
+namespace MyShop.Services.Dashboard;
 
 /// <summary>
 /// Service for managing dashboard data from API.

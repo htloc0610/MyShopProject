@@ -3,10 +3,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
-using MyShop.Models;
-using MyShop.ViewModels;
+using MyShop.Models.Categories;
+using MyShop.ViewModels.Categories;
 
-namespace MyShop.Views;
+namespace MyShop.Views.Categories;
 
 /// <summary>
 /// Page for managing categories with full CRUD operations.

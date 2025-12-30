@@ -1,4 +1,4 @@
-namespace MyShop.Models
+﻿namespace MyShop.Models.Categories
 {
     /// <summary>
     /// Represents a product category (Client-side DTO).
@@ -13,6 +13,6 @@ namespace MyShop.Models
         /// <summary>
         /// Display text for ComboBox
         /// </summary>
-        public string DisplayText => $"{Name} ({ProductCount} s?n ph?m)";
+        public string DisplayText => $"{Name} ({ProductCount} sản phẩm)";
     }
 }

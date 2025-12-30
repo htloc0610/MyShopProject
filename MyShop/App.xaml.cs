@@ -1,8 +1,14 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
-using MyShop.Services;
+using MyShop.Services.Products;
+using MyShop.Services.Categories;
+using MyShop.Services.Dashboard;
+using MyShop.Services.Shared;
 using MyShop.ViewModels;
+using MyShop.ViewModels.Products;
+using MyShop.ViewModels.Categories;
+using MyShop.ViewModels.Dashboard;
 
 namespace MyShop;
 

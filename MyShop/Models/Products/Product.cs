@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace MyShop.Models
+namespace MyShop.Models.Products
 {
     /// <summary>
     /// Represents a product in the shop (Client-side DTO).

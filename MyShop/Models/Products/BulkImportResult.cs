@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace MyShop.Models;
+namespace MyShop.Models.Products;
 
 /// <summary>
 /// Result from bulk import operation.

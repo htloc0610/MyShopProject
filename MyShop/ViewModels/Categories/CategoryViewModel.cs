@@ -5,10 +5,10 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using MyShop.Models;
-using MyShop.Services;
+using MyShop.Models.Categories;
+using MyShop.Services.Categories;
 
-namespace MyShop.ViewModels;
+namespace MyShop.ViewModels.Categories;
 
 /// <summary>
 /// ViewModel for managing categories.
@@ -113,7 +113,7 @@ public partial class CategoryViewModel : ObservableObject
             }
             
             HasError = true;
-            ErrorMessage = "Không th? t?o danh m?c. Tên có th? ?ã t?n t?i.";
+            ErrorMessage = "Khï¿½ng th? t?o danh m?c. Tï¿½n cï¿½ th? ?ï¿½ t?n t?i.";
             return false;
         }
         catch (Exception ex)
@@ -154,7 +154,7 @@ public partial class CategoryViewModel : ObservableObject
             }
             
             HasError = true;
-            ErrorMessage = "Không th? c?p nh?t danh m?c. Tên có th? ?ã t?n t?i.";
+            ErrorMessage = "Khï¿½ng th? c?p nh?t danh m?c. Tï¿½n cï¿½ th? ?ï¿½ t?n t?i.";
             return false;
         }
         catch (Exception ex)
@@ -196,13 +196,13 @@ public partial class CategoryViewModel : ObservableObject
             }
             
             HasError = true;
-            ErrorMessage = errorMessage ?? "Không th? xóa danh m?c";
+            ErrorMessage = errorMessage ?? "Khï¿½ng th? xï¿½a danh m?c";
             return (false, errorMessage);
         }
         catch (Exception ex)
         {
             HasError = true;
-            ErrorMessage = $"L?i khi xóa danh m?c: {ex.Message}";
+            ErrorMessage = $"L?i khi xï¿½a danh m?c: {ex.Message}";
             System.Diagnostics.Debug.WriteLine($"Error deleting category: {ex}");
             return (false, ex.Message);
         }

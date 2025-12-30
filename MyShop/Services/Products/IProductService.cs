@@ -1,8 +1,9 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using MyShop.Models;
+using MyShop.Models.Products;
+using MyShop.Models.Shared;
 
-namespace MyShop.Services;
+namespace MyShop.Services.Products;
 
 /// <summary>
 /// Interface for product-related API operations.

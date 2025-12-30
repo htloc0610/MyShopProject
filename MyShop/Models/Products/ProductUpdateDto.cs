@@ -1,4 +1,4 @@
-namespace MyShop.Models;
+namespace MyShop.Models.Products;
 
 /// <summary>
 /// Data Transfer Object for updating a product.

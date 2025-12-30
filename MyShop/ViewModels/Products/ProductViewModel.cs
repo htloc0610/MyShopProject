@@ -3,10 +3,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using MyShop.Models;
-using MyShop.Services;
+using MyShop.Models.Products;
+using MyShop.Models.Categories;
+using MyShop.Models.Shared;
+using MyShop.Services.Products;
+using MyShop.Services.Categories;
+using MyShop.Services.Shared;
 
-namespace MyShop.ViewModels;
+namespace MyShop.ViewModels.Products;
 
 /// <summary>
 /// ViewModel for managing product list with paging, sorting, and filtering.

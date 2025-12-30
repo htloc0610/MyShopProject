@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
-using MyShop.Models;
+using MyShop.Models.Products;
+using MyShop.Models.Shared;
 
-namespace MyShop.Services;
+namespace MyShop.Services.Products;
 
 /// <summary>
 /// Service for managing product data from API.

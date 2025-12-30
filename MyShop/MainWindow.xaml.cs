@@ -3,7 +3,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using MyShop.ViewModels;
-using MyShop.Views;
+using MyShop.Views.Products;
+using MyShop.Views.Categories;
+using MyShop.Views.Dashboard;
 
 namespace MyShop;
 

@@ -6,13 +6,16 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 using MyShop.Helpers;
-using MyShop.Models;
-using MyShop.Services;
-using MyShop.ViewModels;
+using MyShop.Models.Products;
+using MyShop.Models.Categories;
+using MyShop.Services.Products;
+using MyShop.Services.Categories;
+using MyShop.Services.Shared;
+using MyShop.ViewModels.Products;
 using Windows.Storage;
 using Windows.Storage.Pickers;
 
-namespace MyShop.Views;
+namespace MyShop.Views.Products;
 
 /// <summary>
 /// Page for adding a new product.

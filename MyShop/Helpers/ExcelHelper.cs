@@ -1,5 +1,6 @@
 using ClosedXML.Excel;
-using MyShop.Models;
+using MyShop.Models.Products;
+using MyShop.Models.Categories;
 using System;
 using System.Collections.Generic;
 using System.IO;

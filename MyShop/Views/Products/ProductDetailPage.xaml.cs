@@ -6,10 +6,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
-using MyShop.Models;
-using MyShop.ViewModels;
+using MyShop.Models.Products;
+using MyShop.ViewModels.Products;
+using MyShop.Services.Products;
 
-namespace MyShop.Views;
+namespace MyShop.Views.Products;
 
 /// <summary>
 /// Page for displaying detailed product information.
@@ -142,7 +143,7 @@ public sealed partial class ProductDetailPage : Page, INotifyPropertyChanged
 
         try
         {
-            var productService = App.Current.Services.GetRequiredService<Services.IProductService>();
+            var productService = App.Current.Services.GetRequiredService<IProductService>();
             var updatedProduct = await productService.GetProductByIdAsync(Product.Id);
             
             if (updatedProduct != null)

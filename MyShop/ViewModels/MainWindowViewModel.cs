@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
-using MyShop.Services;
+using MyShop.Services.Dashboard;
+using MyShop.Services.Shared;
 using System.Threading.Tasks;
 
 namespace MyShop.ViewModels;

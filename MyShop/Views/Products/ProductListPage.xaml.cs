@@ -4,10 +4,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Navigation;
-using MyShop.Models;
-using MyShop.ViewModels;
+using MyShop.Models.Products;
+using MyShop.ViewModels.Products;
 
-namespace MyShop.Views;
+namespace MyShop.Views.Products;
 
 /// <summary>
 /// Page for displaying product list in DataGrid with paging and sorting.

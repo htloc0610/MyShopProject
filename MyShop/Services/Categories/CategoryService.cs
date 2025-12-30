@@ -4,9 +4,10 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading.Tasks;
-using MyShop.Models;
+using MyShop.Models.Categories;
+using MyShop.Models.Shared;
 
-namespace MyShop.Services;
+namespace MyShop.Services.Categories;
 
 /// <summary>
 /// Service for managing category data from API.
