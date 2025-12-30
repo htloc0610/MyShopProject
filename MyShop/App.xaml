@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <Application
     x:Class="MyShop.App"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -12,11 +11,31 @@
                 <!-- Other merged dictionaries here -->
             </ResourceDictionary.MergedDictionaries>
             
+            <!-- Default Font Family for Vietnamese support -->
+            <FontFamily x:Key="DefaultFontFamily">Segoe UI, Arial, sans-serif</FontFamily>
+            
             <!-- Value Converters -->
             <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+            <converters:BoolToVisibilityInverseConverter x:Key="BoolToVisibilityInverseConverter"/>
             <converters:BoolToInverseVisibilityConverter x:Key="BoolToInverseVisibilityConverter"/>
             <converters:StringToBoolConverter x:Key="StringToBoolConverter"/>
             <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
+            <converters:PriceConverter x:Key="PriceConverter"/>
+            <converters:SortDirectionToGlyphConverter x:Key="SortDirectionToGlyphConverter"/>
+            <converters:IndexToDisplayNumberConverter x:Key="IndexToDisplayNumberConverter"/>
+            <converters:DecimalToDoubleConverter x:Key="DecimalToDoubleConverter"/>
+            <converters:IntToDoubleConverter x:Key="IntToDoubleConverter"/>
+            <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
+            <converters:NullToVisibilityInverseConverter x:Key="NullToVisibilityInverseConverter"/>
+
+            <!-- Custom Button Styles -->
+            <Style x:Key="DangerButtonStyle" TargetType="Button">
+                <Setter Property="Background" Value="#C42B1C"/>
+                <Setter Property="Foreground" Value="White"/>
+                <Setter Property="BorderBrush" Value="#A12010"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="CornerRadius" Value="4"/>
+            </Style>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

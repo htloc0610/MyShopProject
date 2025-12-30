@@ -1,14 +1,20 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
-using MyShop.Services;
+using MyShop.Services.Products;
+using MyShop.Services.Categories;
+using MyShop.Services.Dashboard;
+using MyShop.Services.Shared;
 using MyShop.ViewModels;
+using MyShop.ViewModels.Products;
+using MyShop.ViewModels.Categories;
+using MyShop.ViewModels.Dashboard;
 
 namespace MyShop;
 
 /// <summary>
 /// Provides application-specific behavior to supplement the default Application class.
-/// This class is responsible for configuring Dependency Injection and managing the app lifecycle.
+/// Configures Dependency Injection for MVVM architecture with ProductService and DashboardService.
 /// </summary>
 public partial class App : Application
 {
@@ -16,9 +22,13 @@ public partial class App : Application
 
     /// <summary>
     /// Gets the current App instance for accessing services globally.
-    /// This pattern allows any component to access the DI container.
     /// </summary>
     public static new App Current => (App)Application.Current;
+
+    /// <summary>
+    /// Gets the main window for accessing its HWND.
+    /// </summary>
+    public static Window? MainWindow { get; private set; }
 
     /// <summary>
     /// Gets the service provider for resolving dependencies.
@@ -38,31 +48,28 @@ public partial class App : Application
     /// <summary>
     /// Configures and builds the service provider with all application services.
     /// 
-    /// DI Lifecycle Overview:
-    /// - Singleton: One instance for the entire application lifetime.
-    ///   Use for: Stateless services, caching, configuration.
-    /// - Transient: New instance each time it's requested.
-    ///   Use for: Lightweight, stateless services, ViewModels.
-    /// - Scoped: One instance per scope (not commonly used in desktop apps).
+    /// Architecture:
+    /// - Services: Singleton HttpClient-based services for API communication
+    /// - ViewModels: Transient instances, one per view
     /// </summary>
     private static IServiceProvider ConfigureServices()
     {
         var services = new ServiceCollection();
 
-        // Register HttpClient for API calls
-        services.AddHttpClient<IDataService, DataService>();
-        services.AddHttpClient<DashboardService, DashboardService>();
+        // Register Services with HttpClient
+        services.AddHttpClient<IProductService, ProductService>();
+        services.AddHttpClient<ICategoryService, CategoryService>();
+        services.AddHttpClient<DashboardService>();
 
-        // Register Services
-        // DataService is registered as Singleton - same instance shared across the app
-        // This is suitable for services that maintain state or are expensive to create
-        // Note: AddHttpClient already registers DataService, so we don't need AddSingleton here
+        // Register ProductChangeNotifier as Singleton
+        services.AddSingleton<ProductChangeNotifier>();
 
-        // Register ViewModels
-        // ViewModels are registered as Transient - new instance for each request
+        // Register ViewModels as Transient
         // Each view gets its own ViewModel instance
-        services.AddTransient<MainViewModel>();
         services.AddTransient<DashboardViewModel>();
+        services.AddTransient<ProductViewModel>();
+        services.AddTransient<CategoryViewModel>();
+        services.AddTransient<MainWindowViewModel>();
 
         return services.BuildServiceProvider();
     }
@@ -70,10 +77,10 @@ public partial class App : Application
     /// <summary>
     /// Invoked when the application is launched.
     /// </summary>
-    /// <param name="args">Details about the launch request and process.</param>
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
         _window = new MainWindow();
+        MainWindow = _window;
         _window.Activate();
     }
 }

@@ -1,30 +1,66 @@
+using System;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 using MyShop.ViewModels;
-using MyShop.Views;
+using MyShop.Views.Products;
+using MyShop.Views.Categories;
+using MyShop.Views.Dashboard;
 
 namespace MyShop;
 
 /// <summary>
-/// Main application window.
-/// Retrieves its ViewModel from the DI container for proper dependency injection.
+/// Main application window with NavigationView.
+/// Provides navigation between different pages (Dashboard, ProductList, etc.)
 /// </summary>
 public sealed partial class MainWindow : Window
 {
-    /// <summary>
-    /// Gets the ViewModel for this window.
-    /// The ViewModel is resolved from the DI container, ensuring all its
-    /// dependencies (like IDataService) are properly injected.
-    /// </summary>
-    public MainViewModel ViewModel { get; }
+    public MainWindowViewModel ViewModel { get; }
 
     public MainWindow()
     {
         InitializeComponent();
 
-        // Resolve MainViewModel from the DI container
-        // This ensures IDataService is automatically injected into the ViewModel
-        RootFrame.Navigate(typeof(Dashboard));
-        ViewModel = App.Current.Services.GetRequiredService<MainViewModel>();
+        ViewModel = App.Current.Services.GetRequiredService<MainWindowViewModel>();
+
+        // Set window size
+        this.AppWindow.Resize(new Windows.Graphics.SizeInt32(1400, 900));
+
+        // Navigate to Dashboard on startup
+        NavView.SelectedItem = NavView.MenuItems[0];
+        ContentFrame.Navigate(typeof(Dashboard));
+
+        // Load product count after initialization
+        _ = ViewModel.LoadProductCountAsync();
+    }
+
+    /// <summary>
+    /// Handles navigation when user selects a menu item.
+    /// </summary>
+    private void NavView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
+    {
+        if (args.IsSettingsSelected)
+        {
+            return;
+        }
+
+        var selectedItem = args.SelectedItemContainer as NavigationViewItem;
+        if (selectedItem == null) return;
+
+        string tag = selectedItem.Tag?.ToString() ?? string.Empty;
+
+        Type? pageType = tag switch
+        {
+            "Dashboard" => typeof(Dashboard),
+            "ProductList" => typeof(ProductListPage),
+            "AddProduct" => typeof(AddProductPage),
+            "Categories" => typeof(CategoryListPage),
+            _ => null
+        };
+
+        if (pageType != null && ContentFrame.CurrentSourcePageType != pageType)
+        {
+            ContentFrame.Navigate(pageType);
+        }
     }
 }

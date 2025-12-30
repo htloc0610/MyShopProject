@@ -1,11 +1,12 @@
 using Microsoft.EntityFrameworkCore;
 using MyShopAPI.Data;
+using MyShopAPI.Services;
 
 namespace MyShopAPI
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +16,10 @@ namespace MyShopAPI
                     builder.Configuration.GetConnectionString("DefaultConnection")
                 )
             );
+            
+            // Register DatabaseSeeder
+            builder.Services.AddScoped<DatabaseSeeder>();
+            
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
@@ -32,6 +37,13 @@ namespace MyShopAPI
             });
 
             var app = builder.Build();
+
+            // Seed database on startup (only in Development mode)
+            // Will only seed if database is empty (no products exist)
+            if (app.Environment.IsDevelopment())
+            {
+                await SeedDatabaseAsync(app);
+            }
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
@@ -60,6 +72,23 @@ namespace MyShopAPI
             app.MapControllers();
 
             app.Run();
+        }
+
+        private static async Task SeedDatabaseAsync(WebApplication app)
+        {
+            using var scope = app.Services.CreateScope();
+            var services = scope.ServiceProvider;
+
+            try
+            {
+                var seeder = services.GetRequiredService<DatabaseSeeder>();
+                await seeder.SeedAsync();
+            }
+            catch (Exception ex)
+            {
+                var logger = services.GetRequiredService<ILogger<Program>>();
+                logger.LogError(ex, "An error occurred while seeding the database.");
+            }
         }
     }
 }

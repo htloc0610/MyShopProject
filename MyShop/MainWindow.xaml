@@ -8,13 +8,69 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    Title="MyShop - Connected to API">
+    Title="MyShop - Product">
 
     <Window.SystemBackdrop>
         <MicaBackdrop />
     </Window.SystemBackdrop>
     
-    <Frame x:Name="RootFrame"/>
+    <NavigationView x:Name="NavView"
+                    IsBackButtonVisible="Collapsed"
+                    IsSettingsVisible="False"
+                    PaneDisplayMode="Left"
+                    SelectionChanged="NavView_SelectionChanged">
+        
+        <NavigationView.MenuItems>
+            <NavigationViewItem Content="Dashboard" 
+                              Tag="Dashboard"
+                              Icon="Home">
+                <NavigationViewItem.InfoBadge>
+                    <InfoBadge Style="{StaticResource AttentionIconInfoBadgeStyle}"/>
+                </NavigationViewItem.InfoBadge>
+            </NavigationViewItem>
+            
+            <NavigationViewItem Content="Danh Sách Sản Phẩm" 
+                              Tag="ProductList"
+                              Icon="Shop">
+                <NavigationViewItem.InfoBadge>
+                    <InfoBadge Value="{x:Bind ViewModel.TotalProducts, Mode=OneWay}" 
+                              Style="{StaticResource AttentionValueInfoBadgeStyle}"/>
+                </NavigationViewItem.InfoBadge>
+            </NavigationViewItem>
+            
+            <NavigationViewItemSeparator/>
+            
+            <NavigationViewItemHeader Content="Quản Lý"/>
+            
+            <NavigationViewItem Content="Thêm Sản Phẩm" 
+                              Tag="AddProduct"
+                              Icon="Add"/>
+            
+            <NavigationViewItem Content="Danh Mục" 
+                              Tag="Categories"
+                              Icon="Library"/>
+        </NavigationView.MenuItems>
 
-    
+        <NavigationView.PaneFooter>
+            <StackPanel Orientation="Vertical" Spacing="8" Padding="16">
+                <TextBlock Text="API Status" 
+                          Style="{StaticResource CaptionTextBlockStyle}"
+                          Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <FontIcon Glyph="&#xE774;" 
+                             FontSize="12"
+                             Foreground="LimeGreen"/>
+                    <TextBlock Text="Connected" 
+                              Style="{StaticResource BodyTextBlockStyle}"
+                              Foreground="LimeGreen"/>
+                </StackPanel>
+                <TextBlock Text="http://localhost:5002" 
+                          Style="{StaticResource CaptionTextBlockStyle}"
+                          Foreground="{ThemeResource TextFillColorTertiaryBrush}"/>
+            </StackPanel>
+        </NavigationView.PaneFooter>
+
+        <Frame x:Name="ContentFrame" Padding="0"/>
+        
+    </NavigationView>
 </Window>

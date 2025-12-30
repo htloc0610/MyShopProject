@@ -10,11 +10,13 @@ namespace MyShopAPI.Mappers
             return new ProductResponseDto
             {
                 Id = product.ProductId,
+                Sku = product.Sku,
                 Name = product.Name,
                 Description = product.Description,
                 Price = product.ImportPrice,
                 Stock = product.Count,
                 Category = product.Category.Name,
+                CategoryId = product.CategoryId,
                 ImageUrl = string.Empty
             };
         }
