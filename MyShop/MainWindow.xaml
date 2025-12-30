@@ -48,8 +48,7 @@
             
             <NavigationViewItem Content="Danh Mục" 
                               Tag="Categories"
-                              Icon="Library"
-                              IsEnabled="False"/>
+                              Icon="Library"/>
         </NavigationView.MenuItems>
 
         <NavigationView.PaneFooter>

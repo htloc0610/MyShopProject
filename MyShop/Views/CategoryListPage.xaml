@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="MyShop.Views.CategoryListPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:controls="using:CommunityToolkit.WinUI.UI.Controls"
+    xmlns:models="using:MyShop.Models"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Grid Padding="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Grid Grid.Row="0" Margin="0,0,0,20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0">
+                <TextBlock Text="Quản Lý Danh Mục" 
+                          Style="{StaticResource TitleTextBlockStyle}"
+                          FontWeight="Bold"/>
+                <TextBlock Style="{StaticResource BodyTextBlockStyle}"
+                          Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                          Margin="0,4,0,0">
+                    <Run Text="Tổng số:"/>
+                    <Run Text="{x:Bind ViewModel.CategoryCount, Mode=OneWay}"/>
+                    <Run Text="danh mục"/>
+                </TextBlock>
+            </StackPanel>
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
+                <Button Command="{x:Bind ViewModel.RefreshCommand}"
+                       ToolTipService.ToolTip="Làm mới">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon Glyph="&#xE72C;" FontSize="16"/>
+                        <TextBlock Text="Làm mới"/>
+                    </StackPanel>
+                </Button>
+
+                <Button Click="AddCategoryButton_Click"
+                       Style="{StaticResource AccentButtonStyle}"
+                       ToolTipService.ToolTip="Thêm danh mục mới">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon Glyph="&#xE710;" FontSize="16"/>
+                        <TextBlock Text="Thêm Danh Mục"/>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <!-- Content -->
+        <Grid Grid.Row="1">
+            <!-- Progress Ring -->
+            <ProgressRing IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}"
+                         Width="60"
+                         Height="60"
+                         HorizontalAlignment="Center"
+                         VerticalAlignment="Center"/>
+
+            <!-- Error InfoBar -->
+            <InfoBar IsOpen="{x:Bind ViewModel.HasError, Mode=OneWay}"
+                     Severity="Error"
+                     Title="Lỗi"
+                     Message="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}"
+                     IsClosable="True"
+                     VerticalAlignment="Top"
+                     Margin="0,0,0,16"/>
+
+            <!-- DataGrid -->
+            <controls:DataGrid x:Name="CategoryDataGrid"
+                              ItemsSource="{x:Bind ViewModel.Categories, Mode=OneWay}"
+                              SelectedItem="{x:Bind ViewModel.SelectedCategory, Mode=TwoWay}"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True"
+                              GridLinesVisibility="Horizontal"
+                              HeadersVisibility="Column"
+                              AlternatingRowBackground="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                              CanUserResizeColumns="True"
+                              SelectionMode="Single"
+                              Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolToInverseVisibilityConverter}}">
+                
+                <controls:DataGrid.Columns>
+                    <!-- ID Column -->
+                    <controls:DataGridTextColumn Header="ID"
+                                                Binding="{Binding CategoryId}"
+                                                Width="80"/>
+
+                    <!-- Name Column -->
+                    <controls:DataGridTextColumn Header="Tên Danh Mục"
+                                                Binding="{Binding Name}"
+                                                Width="2*"/>
+
+                    <!-- Description Column -->
+                    <controls:DataGridTextColumn Header="Mô Tả"
+                                                Binding="{Binding Description}"
+                                                Width="3*"/>
+
+                    <!-- Product Count Column -->
+                    <controls:DataGridTemplateColumn Header="Số Sản Phẩm"
+                                                    Width="150">
+                        <controls:DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate x:DataType="models:Category">
+                                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                    <FontIcon Glyph="&#xE7C5;" 
+                                             FontSize="14"
+                                             Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"/>
+                                    <TextBlock Text="{x:Bind ProductCount}"
+                                              FontWeight="SemiBold"
+                                              Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </controls:DataGridTemplateColumn.CellTemplate>
+                    </controls:DataGridTemplateColumn>
+
+                    <!-- Actions Column -->
+                    <controls:DataGridTemplateColumn Header="Thao Tác"
+                                                    Width="250">
+                        <controls:DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate x:DataType="models:Category">
+                                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                    <Button Click="EditButton_Click"
+                                           Tag="{x:Bind}"
+                                           Style="{StaticResource AccentButtonStyle}"
+                                           Height="32">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <FontIcon Glyph="&#xE70F;" FontSize="14"/>
+                                            <TextBlock Text="Sửa"/>
+                                        </StackPanel>
+                                    </Button>
+                                    
+                                    <Button Click="DeleteButton_Click"
+                                           Tag="{x:Bind}"
+                                           Height="32"
+                                           Background="#C42B1C"
+                                           Foreground="White">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <FontIcon Glyph="&#xE74D;" FontSize="14"/>
+                                            <TextBlock Text="Xóa"/>
+                                        </StackPanel>
+                                    </Button>
+                                </StackPanel>
+                            </DataTemplate>
+                        </controls:DataGridTemplateColumn.CellTemplate>
+                    </controls:DataGridTemplateColumn>
+                </controls:DataGrid.Columns>
+            </controls:DataGrid>
+        </Grid>
+    </Grid>
+</Page>

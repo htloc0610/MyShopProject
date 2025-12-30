@@ -62,6 +62,7 @@ public partial class App : Application
         // Each view gets its own ViewModel instance
         services.AddTransient<DashboardViewModel>();
         services.AddTransient<ProductViewModel>();
+        services.AddTransient<CategoryViewModel>();
         services.AddTransient<MainWindowViewModel>();
 
         return services.BuildServiceProvider();

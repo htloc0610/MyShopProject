@@ -215,9 +215,9 @@ public sealed partial class AddProductPage : Page
                     // All validation passed, show confirmation
                     var confirmDialog = new ContentDialog
                     {
-                        Title = "✅ File hợp lệ - Xác nhận Import",
+                        Title = "File hợp lệ - Xác nhận Import",
                         Content = $"File đã được kiểm tra và hợp lệ!\n\n" +
-                                 $"📊 Tổng số sản phẩm: {products.Count}\n\n" +
+                                 $"Tổng số sản phẩm: {products.Count}\n\n" +
                                  $"Bạn có muốn import {products.Count} sản phẩm vào hệ thống?",
                         PrimaryButtonText = "Import",
                         CloseButtonText = "Hủy",
@@ -239,11 +239,11 @@ public sealed partial class AddProductPage : Page
 
                         if (success && importedCount > 0)
                         {
-                            var message = $"✅ Đã import thành công {importedCount} sản phẩm!";
+                            var message = $"Đã import thành công {importedCount} sản phẩm!";
                             
                             if (importErrors.Any())
                             {
-                                message += $"\n\n⚠️ Có {importErrors.Count} cảnh báo từ server:\n" + 
+                                message += $"\n\nCó {importErrors.Count} cảnh báo từ server:\n" + 
                                           string.Join("\n", importErrors.Take(5));
                                 if (importErrors.Count > 5)
                                 {
@@ -258,7 +258,7 @@ public sealed partial class AddProductPage : Page
                         }
                         else
                         {
-                            var errorMessage = "❌ Import thất bại!\n\n";
+                            var errorMessage = "Import thất bại!\n\n";
                             errorMessage += string.Join("\n", importErrors.Take(10));
                             if (importErrors.Count > 10)
                             {

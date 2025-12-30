@@ -52,7 +52,7 @@ public sealed partial class MainWindow : Window
             "Dashboard" => typeof(Dashboard),
             "ProductList" => typeof(ProductListPage),
             "AddProduct" => typeof(AddProductPage),
-            "Categories" => null, // Not implemented yet
+            "Categories" => typeof(CategoryListPage),
             _ => null
         };
 

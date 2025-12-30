@@ -73,6 +73,9 @@
     <Folder Include="Views\Dashboard\" />
   </ItemGroup>
   <ItemGroup>
+    <None Update="Views\CategoryListPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </None>
     <None Update="Views\ProductDetailPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </None>
@@ -81,6 +84,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Page Update="Views\CategoryListPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Update="Views\Dashboard.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
