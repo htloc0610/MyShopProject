@@ -27,6 +27,8 @@ namespace MyShopAPI.Data
             _userContextService = userContextService;
         }
 
+        public string? CurrentUserId => _userContextService?.GetUserId();
+
         public DbSet<Product> Products => Set<Product>();
         public DbSet<Category> Categories => Set<Category>();
         public DbSet<Order> Orders => Set<Order>();
@@ -91,21 +93,21 @@ namespace MyShopAPI.Data
             // These filters automatically filter queries by UserId
             // ====================================================
 
-            // Get current user ID (will be null during migrations or when not authenticated)
-            var currentUserId = _userContextService?.GetUserId();
+            // GLOBAL QUERY FILTERS for Multi-Tenant Data Isolation
+            // These filters automatically filter queries by UserId
+            // ====================================================
 
-            if (!string.IsNullOrEmpty(currentUserId))
-            {
-                // Apply global query filters - each query will automatically filter by UserId
-                modelBuilder.Entity<Category>()
-                    .HasQueryFilter(c => c.UserId == currentUserId);
+            // We use the property CurrentUserId so EF Core creates a parameterized query
+            // and evaluates the value for EACH request (not just once at startup)
+            
+            modelBuilder.Entity<Category>()
+                .HasQueryFilter(c => c.UserId == CurrentUserId);
 
-                modelBuilder.Entity<Product>()
-                    .HasQueryFilter(p => p.UserId == currentUserId);
+            modelBuilder.Entity<Product>()
+                .HasQueryFilter(p => p.UserId == CurrentUserId);
 
-                modelBuilder.Entity<Order>()
-                    .HasQueryFilter(o => o.UserId == currentUserId);
-            }
+            modelBuilder.Entity<Order>()
+                .HasQueryFilter(o => o.UserId == CurrentUserId);
         }
     }
 }

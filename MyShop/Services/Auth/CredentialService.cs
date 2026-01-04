@@ -1,126 +1,61 @@
-using Windows.Security.Credentials;
+using System.Diagnostics;
 
 namespace MyShop.Services.Auth
 {
     /// <summary>
-    /// Implementation of ICredentialService using Windows PasswordVault.
-    /// Provides secure storage for JWT tokens in Windows Credential Manager.
+    /// Implementation of ICredentialService using in-memory storage.
+    /// For production, use Windows PasswordVault (but needs proper capability setup).
     /// </summary>
     public class CredentialService : ICredentialService
     {
-        private const string ResourceName = "MyShopApp";
-        private const string AccessTokenKey = "AccessToken";
-        private const string RefreshTokenKey = "RefreshToken";
-
-        private readonly PasswordVault _vault;
+        // In-memory storage (simple approach for now)
+        private string? _accessToken;
+        private string? _refreshToken;
 
         public CredentialService()
         {
-            _vault = new PasswordVault();
+            Debug.WriteLine("=== CredentialService: Created (in-memory storage) ===");
         }
 
         /// <inheritdoc />
         public void SaveAccessToken(string token)
         {
-            try
-            {
-                // Remove existing token first
-                RemoveCredential(AccessTokenKey);
-            }
-            catch { /* Ignore if not found */ }
-
-            var credential = new PasswordCredential(ResourceName, AccessTokenKey, token);
-            _vault.Add(credential);
+            _accessToken = token;
+            Debug.WriteLine($"=== CredentialService: AccessToken saved (length: {token?.Length}) ===");
         }
 
         /// <inheritdoc />
         public string? GetAccessToken()
         {
-            try
-            {
-                var credential = _vault.Retrieve(ResourceName, AccessTokenKey);
-                credential.RetrievePassword();
-                return credential.Password;
-            }
-            catch
-            {
-                return null;
-            }
+            Debug.WriteLine($"=== CredentialService: GetAccessToken called, has token: {_accessToken != null} ===");
+            return _accessToken;
         }
 
         /// <inheritdoc />
         public void SaveRefreshToken(string token)
         {
-            try
-            {
-                // Remove existing token first
-                RemoveCredential(RefreshTokenKey);
-            }
-            catch { /* Ignore if not found */ }
-
-            var credential = new PasswordCredential(ResourceName, RefreshTokenKey, token);
-            _vault.Add(credential);
+            _refreshToken = token;
+            Debug.WriteLine($"=== CredentialService: RefreshToken saved ===");
         }
 
         /// <inheritdoc />
         public string? GetRefreshToken()
         {
-            try
-            {
-                var credential = _vault.Retrieve(ResourceName, RefreshTokenKey);
-                credential.RetrievePassword();
-                return credential.Password;
-            }
-            catch
-            {
-                return null;
-            }
+            return _refreshToken;
         }
 
         /// <inheritdoc />
         public void ClearCredentials()
         {
-            try
-            {
-                RemoveCredential(AccessTokenKey);
-            }
-            catch { /* Ignore if not found */ }
-
-            try
-            {
-                RemoveCredential(RefreshTokenKey);
-            }
-            catch { /* Ignore if not found */ }
+            _accessToken = null;
+            _refreshToken = null;
+            Debug.WriteLine("=== CredentialService: Credentials cleared ===");
         }
 
         /// <inheritdoc />
         public bool HasStoredCredentials()
         {
-            try
-            {
-                var credentials = _vault.FindAllByResource(ResourceName);
-                return credentials.Count > 0;
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// Remove a specific credential from the vault.
-        /// </summary>
-        private void RemoveCredential(string userName)
-        {
-            try
-            {
-                var credential = _vault.Retrieve(ResourceName, userName);
-                _vault.Remove(credential);
-            }
-            catch
-            {
-                // Ignore if credential doesn't exist
-            }
+            return !string.IsNullOrEmpty(_accessToken);
         }
     }
 }

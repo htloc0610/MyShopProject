@@ -65,6 +65,37 @@ namespace MyShopAPI
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
                     ClockSkew = TimeSpan.Zero // No tolerance for token expiry
                 };
+                options.Events = new JwtBearerEvents
+                {
+                    OnAuthenticationFailed = context =>
+                    {
+                        var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+                        logger.LogError("Authentication failed: {Message}", context.Exception.Message);
+                        return Task.CompletedTask;
+                    },
+                    OnTokenValidated = context =>
+                    {
+                        var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+                        var claims = context.Principal?.Claims.Select(c => $"{c.Type}={c.Value}").ToList();
+                        logger.LogInformation("Token validated. User: {User}. Claims: {Claims}", 
+                            context.Principal?.Identity?.Name, string.Join(", ", claims ?? new List<string>()));
+                        return Task.CompletedTask;
+                    },
+                    OnMessageReceived = context =>
+                    {
+                        var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+                        var authHeader = context.Request.Headers["Authorization"].ToString();
+                        if (!string.IsNullOrEmpty(authHeader))
+                        {
+                            logger.LogInformation("Creating ticket with Auth header: {HeaderLength} chars", authHeader.Length);
+                        }
+                        else 
+                        {
+                            logger.LogWarning("No Authorization header received");
+                        }
+                        return Task.CompletedTask;
+                    }
+                };
             });
 
             // ====================================================
@@ -170,8 +201,8 @@ namespace MyShopAPI
 
             // Use CORS - must be before UseAuthorization
             app.UseCors("AllowAll");
-
-            app.UseHttpsRedirection();
+            
+            // app.UseHttpsRedirection(); // Disable for local dev to avoid Auth header stripping
 
             // IMPORTANT: UseAuthentication must come BEFORE UseAuthorization
             app.UseAuthentication();

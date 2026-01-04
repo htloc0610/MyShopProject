@@ -3,6 +3,7 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Diagnostics;
 using MyShop.Models.Auth;
 
 namespace MyShop.Services.Auth
@@ -32,6 +33,7 @@ namespace MyShop.Services.Auth
 
             // Configure base address for auth API
             _httpClient.BaseAddress = new Uri("http://localhost:5002/");
+            Debug.WriteLine("=== AuthService Initialized ===");
         }
 
         /// <inheritdoc />
@@ -48,12 +50,15 @@ namespace MyShop.Services.Auth
                 };
 
                 var response = await _httpClient.PostAsJsonAsync("api/auth/register", request);
+                Debug.WriteLine($"=== Register Request: {request.Email}, Shop: {request.ShopName} ===");
+                Debug.WriteLine($"=== Register Response: {response.StatusCode} ===");
 
                 if (response.IsSuccessStatusCode)
                 {
                     var tokenResponse = await response.Content.ReadFromJsonAsync<TokenResponse>(JsonOptions);
                     if (tokenResponse != null)
                     {
+                        Debug.WriteLine("=== Register Success: Token received ===");
                         _sessionService.SetSession(
                             tokenResponse.User.Id,
                             tokenResponse.User.Email,
@@ -71,6 +76,8 @@ namespace MyShop.Services.Auth
                 }
 
                 var errorContent = await response.Content.ReadAsStringAsync();
+                Debug.WriteLine($"=== Register Error Content: {errorContent} ===");
+                
                 return new AuthResult
                 {
                     Success = false,
@@ -79,6 +86,7 @@ namespace MyShop.Services.Auth
             }
             catch (Exception ex)
             {
+                Debug.WriteLine($"=== Register Exception: {ex.Message} ===");
                 return new AuthResult
                 {
                     Success = false,

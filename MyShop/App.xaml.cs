@@ -12,6 +12,7 @@ using MyShop.ViewModels.Products;
 using MyShop.ViewModels.Categories;
 using MyShop.ViewModels.Dashboard;
 using MyShop.ViewModels.Auth;
+using System.Diagnostics;
 
 namespace MyShop;
 
@@ -158,10 +159,19 @@ internal class AuthenticatedHttpMessageHandler : HttpClientHandler
         System.Threading.CancellationToken cancellationToken)
     {
         var accessToken = _sessionService.AccessToken;
+        Debug.WriteLine($"=== API Request: {request.RequestUri} ===");
+        Debug.WriteLine($"=== Token Available: {!string.IsNullOrEmpty(accessToken)} ===");
+        
         if (!string.IsNullOrEmpty(accessToken))
         {
             request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+            Debug.WriteLine("=== Token attached to header ===");
         }
+        else
+        {
+            Debug.WriteLine("=== NO TOKEN attached ===");
+        }
+
         return await base.SendAsync(request, cancellationToken);
     }
 }
