@@ -1,20 +1,23 @@
 ﻿using System;
+using System.Net.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using MyShop.Services.Products;
 using MyShop.Services.Categories;
 using MyShop.Services.Dashboard;
 using MyShop.Services.Shared;
+using MyShop.Services.Auth;
 using MyShop.ViewModels;
 using MyShop.ViewModels.Products;
 using MyShop.ViewModels.Categories;
 using MyShop.ViewModels.Dashboard;
+using MyShop.ViewModels.Auth;
 
 namespace MyShop;
 
 /// <summary>
 /// Provides application-specific behavior to supplement the default Application class.
-/// Configures Dependency Injection for MVVM architecture with ProductService and DashboardService.
+/// Configures Dependency Injection for MVVM architecture with authentication services.
 /// </summary>
 public partial class App : Application
 {
@@ -47,31 +50,84 @@ public partial class App : Application
 
     /// <summary>
     /// Configures and builds the service provider with all application services.
-    /// 
-    /// Architecture:
-    /// - Services: Singleton HttpClient-based services for API communication
-    /// - ViewModels: Transient instances, one per view
     /// </summary>
     private static IServiceProvider ConfigureServices()
     {
         var services = new ServiceCollection();
 
-        // Register Services with HttpClient
-        services.AddHttpClient<IProductService, ProductService>();
-        services.AddHttpClient<ICategoryService, CategoryService>();
-        services.AddHttpClient<DashboardService>();
+        // ====================================================
+        // Base HttpClient (shared)
+        // ====================================================
+        var baseAddress = new Uri("http://localhost:5002/");
 
-        // Register ProductChangeNotifier as Singleton
+        // ====================================================
+        // Authentication Services (register first as dependencies)
+        // ====================================================
+        services.AddSingleton<ICredentialService, CredentialService>();
+        services.AddSingleton<ISessionService, SessionService>();
+        
+        // Auth service - doesn't need auth handler (it's for login/register)
+        services.AddSingleton<IAuthService>(sp =>
+        {
+            var httpClient = new HttpClient { BaseAddress = baseAddress };
+            return new AuthService(
+                httpClient,
+                sp.GetRequiredService<ISessionService>(),
+                sp.GetRequiredService<ICredentialService>());
+        });
+
+        // ====================================================
+        // Authenticated Services (need bearer token)
+        // ====================================================
+        services.AddSingleton<IProductService>(sp =>
+        {
+            var sessionService = sp.GetRequiredService<ISessionService>();
+            var httpClient = CreateAuthenticatedHttpClient(baseAddress, sessionService);
+            return new ProductService(httpClient);
+        });
+
+        services.AddSingleton<ICategoryService>(sp =>
+        {
+            var sessionService = sp.GetRequiredService<ISessionService>();
+            var httpClient = CreateAuthenticatedHttpClient(baseAddress, sessionService);
+            return new CategoryService(httpClient);
+        });
+
+        services.AddSingleton<DashboardService>(sp =>
+        {
+            var sessionService = sp.GetRequiredService<ISessionService>();
+            var httpClient = CreateAuthenticatedHttpClient(baseAddress, sessionService);
+            return new DashboardService(httpClient);
+        });
+
+        // ====================================================
+        // Other Services
+        // ====================================================
         services.AddSingleton<ProductChangeNotifier>();
 
-        // Register ViewModels as Transient
-        // Each view gets its own ViewModel instance
+        // ====================================================
+        // ViewModels
+        // ====================================================
+        services.AddTransient<LoginViewModel>();
         services.AddTransient<DashboardViewModel>();
         services.AddTransient<ProductViewModel>();
         services.AddTransient<CategoryViewModel>();
         services.AddTransient<MainWindowViewModel>();
 
         return services.BuildServiceProvider();
+    }
+
+    /// <summary>
+    /// Creates an HttpClient that automatically adds Bearer token to requests.
+    /// </summary>
+    private static HttpClient CreateAuthenticatedHttpClient(Uri baseAddress, ISessionService sessionService)
+    {
+        var handler = new AuthenticatedHttpMessageHandler(sessionService);
+        var httpClient = new HttpClient(handler)
+        {
+            BaseAddress = baseAddress
+        };
+        return httpClient;
     }
 
     /// <summary>
@@ -82,5 +138,41 @@ public partial class App : Application
         _window = new MainWindow();
         MainWindow = _window;
         _window.Activate();
+    }
+}
+
+/// <summary>
+/// HTTP message handler that adds Bearer token to requests.
+/// </summary>
+internal class AuthenticatedHttpMessageHandler : HttpClientHandler
+{
+    private readonly ISessionService _sessionService;
+
+    public AuthenticatedHttpMessageHandler(ISessionService sessionService)
+    {
+        _sessionService = sessionService;
+    }
+
+    protected override async System.Threading.Tasks.Task<HttpResponseMessage> SendAsync(
+        HttpRequestMessage request, 
+        System.Threading.CancellationToken cancellationToken)
+    {
+        var accessToken = _sessionService.AccessToken;
+        if (!string.IsNullOrEmpty(accessToken))
+        {
+            request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+        }
+        return await base.SendAsync(request, cancellationToken);
+    }
+}
+
+/// <summary>
+/// Extension method for getting required services with null check.
+/// </summary>
+public static class ServiceProviderExtensions
+{
+    public static T GetRequiredService<T>(this IServiceProvider provider) where T : notnull
+    {
+        return provider.GetService<T>() ?? throw new InvalidOperationException($"Service {typeof(T)} not registered");
     }
 }

@@ -27,6 +27,12 @@
             <converters:IntToDoubleConverter x:Key="IntToDoubleConverter"/>
             <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
             <converters:NullToVisibilityInverseConverter x:Key="NullToVisibilityInverseConverter"/>
+            <converters:InverseBoolConverter x:Key="InverseBoolConverter"/>
+            
+            <!-- Role-Based Converters -->
+            <converters:RoleToVisibilityConverter x:Key="RoleToVisibilityConverter"/>
+            <converters:OwnerOnlyVisibilityConverter x:Key="OwnerOnlyVisibilityConverter"/>
+            <converters:OwnerOnlyEnabledConverter x:Key="OwnerOnlyEnabledConverter"/>
 
             <!-- Custom Button Styles -->
             <Style x:Key="DangerButtonStyle" TargetType="Button">

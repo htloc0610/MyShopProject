@@ -45,6 +45,22 @@ namespace MyShop.Converters
     }
 
     /// <summary>
+    /// Inverts a boolean value (true -> false, false -> true).
+    /// </summary>
+    public class InverseBoolConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, string language)
+        {
+            return value is bool boolValue && !boolValue;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, string language)
+        {
+            return value is bool boolValue && !boolValue;
+        }
+    }
+
+    /// <summary>
     /// Converts string to boolean (empty/null = false, otherwise = true).
     /// </summary>
     public class StringToBoolConverter : IValueConverter

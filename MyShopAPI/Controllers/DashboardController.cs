@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MyShopAPI.Data;
 using MyShopAPI.DTOs;
@@ -8,6 +9,7 @@ namespace MyShopAPI.Controllers
 {
     [ApiController]
     [Route("api/dashboard")]
+    [Authorize] // Require authentication for all dashboard operations
     public class DashboardController : ControllerBase
     {
         private readonly AppDbContext _context;

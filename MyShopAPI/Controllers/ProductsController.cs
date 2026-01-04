@@ -1,26 +1,32 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MyShopAPI.Data;
 using MyShopAPI.DTOs;
 using MyShopAPI.Mappers;
 using MyShopAPI.Models;
+using MyShopAPI.Services;
 using System.Linq.Expressions;
 
 namespace MyShopAPI.Controllers
 {
     [ApiController]
     [Route("api/products")]
+    [Authorize] // Require authentication for all product operations
     public class ProductsController : ControllerBase
     {
         private readonly AppDbContext _context;
         private readonly ILogger<ProductsController> _logger;
+        private readonly IUserContextService _userContextService;
 
         public ProductsController(
             AppDbContext context,
-            ILogger<ProductsController> logger)
+            ILogger<ProductsController> logger,
+            IUserContextService userContextService)
         {
             _context = context;
             _logger = logger;
+            _userContextService = userContextService;
         }
 
         /// <summary>
@@ -101,6 +107,13 @@ namespace MyShopAPI.Controllers
             if (!categoryExists)
                 return BadRequest(new { message = "Invalid category id" });
 
+            // Set UserId for data ownership
+            var userId = _userContextService.GetUserId();
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized(new { message = "User not authenticated" });
+            
+            product.UserId = userId;
+
             _context.Products.Add(product);
             await _context.SaveChangesAsync();
 
@@ -172,8 +185,10 @@ namespace MyShopAPI.Controllers
 
         /// <summary>
         /// Delete product.
+        /// Owner only - Staff cannot delete products.
         /// </summary>
         [HttpDelete("{id:int}")]
+        [Authorize(Policy = "OwnerOnly")]
         public async Task<IActionResult> Delete(int id)
         {
             var product = await _context.Products.FindAsync(id);
@@ -273,6 +288,14 @@ namespace MyShopAPI.Controllers
                         // Add to SKU tracking set
                         skuSet.Add(dto.Sku);
 
+                        // Get current user ID for data ownership
+                        var userId = _userContextService.GetUserId();
+                        if (string.IsNullOrEmpty(userId))
+                        {
+                            validationErrors.Add($"❌ User not authenticated");
+                            continue;
+                        }
+
                         // Create product entity (but don't insert yet)
                         var product = new Product
                         {
@@ -281,7 +304,8 @@ namespace MyShopAPI.Controllers
                             ImportPrice = (int)Math.Round(dto.Price),
                             Count = dto.Stock,
                             Description = dto.Description ?? string.Empty,
-                            CategoryId = dto.CategoryId
+                            CategoryId = dto.CategoryId,
+                            UserId = userId
                         };
 
                         validProducts.Add(product);
