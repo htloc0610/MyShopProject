@@ -1,174 +1,106 @@
 using System;
-using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MyShop.Services.Auth;
-using System.ComponentModel.DataAnnotations;
+using MyShop.Models.Auth;
+using System.Threading.Tasks;
 
-namespace MyShop.ViewModels.Auth
+namespace MyShop.ViewModels.Auth;
+
+public partial class LoginViewModel : ObservableObject
 {
-    /// <summary>
-    /// ViewModel for the login page.
-    /// Handles user authentication with email/password validation.
-    /// </summary>
-    public partial class LoginViewModel : ObservableObject
+    private readonly IAuthService _authService;
+    private readonly ICredentialService _credentialService;
+    private readonly ISessionService _sessionService;
+
+    [ObservableProperty]
+    private string _email = string.Empty;
+
+    [ObservableProperty]
+    private string _password = string.Empty;
+
+    [ObservableProperty]
+    private string _shopName = string.Empty;
+
+    [ObservableProperty]
+    private bool _isLoginMode = true;
+
+    [ObservableProperty]
+    private string _errorMessage = string.Empty;
+
+    [ObservableProperty]
+    private bool _isLoading;
+
+    [ObservableProperty]
+    private bool _rememberMe;
+
+    public event EventHandler? LoginSuccessful;
+
+    public LoginViewModel(IAuthService authService, ICredentialService credentialService, ISessionService sessionService)
     {
-        private readonly IAuthService _authService;
-        private readonly ISessionService _sessionService;
+        _authService = authService;
+        _credentialService = credentialService;
+        _sessionService = sessionService;
+    }
 
-        public LoginViewModel(IAuthService authService, ISessionService sessionService)
+    [RelayCommand]
+    private void ToggleMode()
+    {
+        IsLoginMode = !IsLoginMode;
+        ErrorMessage = string.Empty;
+    }
+
+    [RelayCommand]
+    private async Task Submit()
+    {
+        if (IsLoading) return;
+
+        ErrorMessage = string.Empty;
+        IsLoading = true;
+
+        try
         {
-            _authService = authService;
-            _sessionService = sessionService;
-        }
+            AuthResult result;
 
-        // ====== OBSERVABLE PROPERTIES ======
-
-        [ObservableProperty]
-        [NotifyCanExecuteChangedFor(nameof(LoginCommand))]
-        [NotifyCanExecuteChangedFor(nameof(RegisterCommand))]
-        private string _email = string.Empty;
-
-        [ObservableProperty]
-        [NotifyCanExecuteChangedFor(nameof(LoginCommand))]
-        [NotifyCanExecuteChangedFor(nameof(RegisterCommand))]
-        private string _password = string.Empty;
-
-        [ObservableProperty]
-        [NotifyCanExecuteChangedFor(nameof(RegisterCommand))]
-        private string _shopName = string.Empty;
-
-        [ObservableProperty]
-        private string? _errorMessage;
-
-        [ObservableProperty]
-        private bool _isLoading;
-
-        [ObservableProperty]
-        private bool _isRegisterMode;
-
-        // ====== EVENTS ======
-
-        /// <summary>
-        /// Event raised when login is successful.
-        /// </summary>
-        public event EventHandler? LoginSuccessful;
-
-        // ====== VALIDATION ======
-
-        public bool IsEmailValid => !string.IsNullOrWhiteSpace(Email) && 
-            new EmailAddressAttribute().IsValid(Email);
-
-        public bool IsPasswordValid => !string.IsNullOrWhiteSpace(Password) && 
-            Password.Length >= 6;
-
-        public bool IsShopNameValid => !string.IsNullOrWhiteSpace(ShopName);
-
-        private bool CanLogin => IsEmailValid && IsPasswordValid && !IsLoading;
-
-        private bool CanRegister => IsEmailValid && IsPasswordValid && IsShopNameValid && !IsLoading;
-
-        // ====== COMMANDS ======
-
-        [RelayCommand(CanExecute = nameof(CanLogin))]
-        private async Task LoginAsync()
-        {
-            if (!CanLogin) return;
-
-            IsLoading = true;
-            ErrorMessage = null;
-
-            try
+            if (IsLoginMode)
             {
-                var result = await _authService.LoginAsync(Email, Password);
-
-                if (result.Success)
-                {
-                    LoginSuccessful?.Invoke(this, EventArgs.Empty);
-                }
-                else
-                {
-                    ErrorMessage = result.ErrorMessage ?? "Login failed. Please try again.";
-                }
+                result = await _authService.LoginAsync(Email, Password);
             }
-            catch (Exception ex)
+            else
             {
-                ErrorMessage = $"An error occurred: {ex.Message}";
+                result = await _authService.RegisterAsync(Email, Password, ShopName);
             }
-            finally
+
+            if (result.Success)
             {
-                IsLoading = false;
+                if (result.User != null)
+                {
+                    if (RememberMe)
+                    {
+                        var accessToken = _sessionService.AccessToken;
+                        var refreshToken = _sessionService.RefreshToken;
+
+                        if (!string.IsNullOrEmpty(accessToken)) _credentialService.SaveAccessToken(accessToken);
+                        if (!string.IsNullOrEmpty(refreshToken)) _credentialService.SaveRefreshToken(refreshToken);
+                    }
+                    else
+                    {
+                        // Explicitly clear credentials if Remember Me is not checked
+                        // This prevents auto-login next time if user previously had it on but now logs in without it.
+                        _credentialService.ClearCredentials();
+                    }
+                }
+                
+                LoginSuccessful?.Invoke(this, EventArgs.Empty);
+            }
+            else
+            {
+                ErrorMessage = result.ErrorMessage ?? "Authentication failed";
             }
         }
-
-        [RelayCommand(CanExecute = nameof(CanRegister))]
-        private async Task RegisterAsync()
+        finally
         {
-            if (!CanRegister) return;
-
-            IsLoading = true;
-            ErrorMessage = null;
-
-            try
-            {
-                var result = await _authService.RegisterAsync(Email, Password, ShopName);
-
-                if (result.Success)
-                {
-                    LoginSuccessful?.Invoke(this, EventArgs.Empty);
-                }
-                else
-                {
-                    ErrorMessage = result.ErrorMessage ?? "Registration failed. Please try again.";
-                }
-            }
-            catch (Exception ex)
-            {
-                ErrorMessage = $"An error occurred: {ex.Message}";
-            }
-            finally
-            {
-                IsLoading = false;
-            }
-        }
-
-        [RelayCommand]
-        private void ToggleMode()
-        {
-            IsRegisterMode = !IsRegisterMode;
-            ErrorMessage = null;
-        }
-
-        [RelayCommand]
-        private void ClearError()
-        {
-            ErrorMessage = null;
-        }
-
-        // ====== METHODS ======
-
-        /// <summary>
-        /// Try to restore session from stored credentials.
-        /// </summary>
-        public async Task<bool> TryRestoreSessionAsync()
-        {
-            if (await _sessionService.TryRestoreSessionAsync())
-            {
-                // Verify the session is still valid by fetching user info
-                var user = await _authService.GetCurrentUserAsync();
-                if (user != null)
-                {
-                    return true;
-                }
-                else
-                {
-                    // Try to refresh the token
-                    var result = await _authService.RefreshTokenAsync();
-                    return result.Success;
-                }
-            }
-
-            return false;
+            IsLoading = false;
         }
     }
 }

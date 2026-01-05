@@ -134,11 +134,66 @@ public partial class App : Application
     /// <summary>
     /// Invoked when the application is launched.
     /// </summary>
-    protected override void OnLaunched(LaunchActivatedEventArgs args)
+    /// <summary>
+    /// Invoked when the application is launched.
+    /// </summary>
+    protected override async void OnLaunched(LaunchActivatedEventArgs args)
     {
         _window = new MainWindow();
         MainWindow = _window;
         _window.Activate();
+
+        await CheckAutoLoginAsync();
+    }
+
+    private async System.Threading.Tasks.Task CheckAutoLoginAsync()
+    {
+        try
+        {
+            var credentialService = Services.GetRequiredService<ICredentialService>();
+            var authService = Services.GetRequiredService<IAuthService>();
+            var sessionService = Services.GetRequiredService<ISessionService>(); // Ensure session is ready
+
+            if (MainWindow is MainWindow mainWindow)
+            {
+                if (credentialService.HasStoredCredentials())
+                {
+                    Debug.WriteLine("=== App: Found stored credentials, attempting silent login... ===");
+                    // We need to preload the session with the token so AuthService can use it if needed,
+                    // or just rely on RefreshTokenAsync which uses CredentialService directly.
+                    // AuthService.RefreshTokenAsync uses CredentialService.GetRefreshToken().
+                    
+                    var result = await authService.RefreshTokenAsync();
+                    if (result.Success)
+                    {
+                        Debug.WriteLine("=== App: Silent login success ===");
+                        mainWindow.ShowMainContent();
+                        return;
+                    }
+                    else
+                    {
+                        Debug.WriteLine($"=== App: Silent login failed: {result.ErrorMessage} ===");
+                        // Token invalid/expired and refresh failed -> Clear and show login
+                        credentialService.ClearCredentials();
+                    }
+                }
+                else
+                {
+                    Debug.WriteLine("=== App: No stored credentials ===");
+                }
+
+                // Fallback to login page
+                mainWindow.ShowLoginPage();
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"=== App: Auto-login error: {ex.Message} ===");
+            if (MainWindow is MainWindow mw)
+            {
+                mw.ShowLoginPage();
+            }
+        }
     }
 }
 

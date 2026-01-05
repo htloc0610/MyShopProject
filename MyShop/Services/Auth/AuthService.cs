@@ -177,6 +177,11 @@ namespace MyShop.Services.Auth
                             tokenResponse.AccessToken,
                             tokenResponse.RefreshToken);
 
+                        // Persist new tokens to vault since we used vault to refresh
+                        // This maintains the "Remember Me" chain.
+                        _credentialService.SaveAccessToken(tokenResponse.AccessToken);
+                        _credentialService.SaveRefreshToken(tokenResponse.RefreshToken);
+
                         return new AuthResult
                         {
                             Success = true,
