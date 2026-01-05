@@ -257,20 +257,48 @@ namespace MyShop.Services.Auth
         /// <summary>
         /// Extract error message from API response.
         /// </summary>
+        /// <summary>
+        /// Extract error message from API response.
+        /// </summary>
         private static string? ExtractErrorMessage(string content)
         {
             try
             {
                 using var doc = JsonDocument.Parse(content);
-                if (doc.RootElement.TryGetProperty("message", out var message) ||
-                    doc.RootElement.TryGetProperty("Message", out message))
+                var root = doc.RootElement;
+                
+                // Check for 'errors' array (ASP.NET Identity format)
+                if (root.TryGetProperty("errors", out var errors) && errors.ValueKind == JsonValueKind.Array)
+                {
+                    var errorMessages = new System.Collections.Generic.List<string>();
+                    foreach (var error in errors.EnumerateArray())
+                    {
+                        if (error.TryGetProperty("description", out var description))
+                        {
+                            errorMessages.Add(description.GetString() ?? string.Empty);
+                        }
+                    }
+
+                    if (errorMessages.Count > 0)
+                    {
+                        return string.Join(Environment.NewLine, errorMessages);
+                    }
+                }
+
+                // Fallback to 'message' property
+                if (root.TryGetProperty("message", out var message) ||
+                    root.TryGetProperty("Message", out message))
                 {
                     return message.GetString();
                 }
             }
             catch
             {
-                // Ignore parsing errors
+                // Ignore parsing errors and return raw content if simple string
+                if (!string.IsNullOrWhiteSpace(content) && !content.TrimStart().StartsWith("{"))
+                {
+                    return content;
+                }
             }
             return null;
         }
