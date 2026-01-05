@@ -14,8 +14,12 @@ namespace MyShopAPI.Models
 
         public string Description { get; set; } = string.Empty;
 
-        // Foreign key
+        // Foreign key to Category
         public int CategoryId { get; set; }
+
+        // Data ownership - links product to specific user/shop
+        public string UserId { get; set; } = string.Empty;
+        public ApplicationUser User { get; set; } = null!;
 
         // Navigation
         public Category Category { get; set; } = null!;

@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="MyShop.Views.Auth.LoginView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:MyShop.Views.Auth"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Login Card -->
+        <Border Grid.Row="1"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                BorderThickness="1"
+                CornerRadius="8"
+                Padding="48"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                MinWidth="400"
+                MaxWidth="480">
+            
+            <StackPanel Spacing="24">
+                <!-- Header -->
+                <StackPanel Spacing="8" HorizontalAlignment="Center">
+                    <FontIcon Glyph="&#xE77B;" 
+                              FontSize="48" 
+                              Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"/>
+                    <TextBlock Text="MyShop"
+                               Style="{StaticResource TitleLargeTextBlockStyle}"
+                               HorizontalAlignment="Center"/>
+                    <TextBlock x:Name="SubtitleText"
+                               Text="Sign in to your account"
+                               Style="{StaticResource BodyTextBlockStyle}"
+                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                               HorizontalAlignment="Center"/>
+                </StackPanel>
+
+                <!-- Error Message -->
+                <InfoBar x:Name="ErrorInfoBar"
+                         IsOpen="False"
+                         Severity="Error"
+                         Title="Error"
+                         IsClosable="True"
+                         Closed="ErrorInfoBar_Closed"/>
+
+                <!-- Form Fields -->
+                <StackPanel Spacing="16">
+                    <!-- Email -->
+                    <TextBox x:Name="EmailTextBox"
+                             Header="Email"
+                             PlaceholderText="Enter your email"/>
+
+                    <!-- Password -->
+                    <PasswordBox x:Name="PasswordBox"
+                                 Header="Password"
+                                 PlaceholderText="Enter your password"
+                                 KeyDown="PasswordBox_KeyDown"/>
+
+                    <!-- Shop Name (Register Mode) -->
+                    <TextBox x:Name="ShopNameTextBox"
+                             Header="Shop Name"
+                             PlaceholderText="Enter your shop name"
+                             Visibility="Collapsed"/>
+                </StackPanel>
+
+                <!-- Buttons -->
+                <StackPanel Spacing="12">
+                    <!-- Primary Button -->
+                    <Button x:Name="PrimaryButton"
+                            Content="Sign In"
+                            HorizontalAlignment="Stretch"
+                            Style="{StaticResource AccentButtonStyle}"
+                            Click="PrimaryButton_Click"/>
+
+                    <!-- Loading Indicator -->
+                    <ProgressRing x:Name="LoadingRing"
+                                  IsActive="False"
+                                  Width="24"
+                                  Height="24"
+                                  HorizontalAlignment="Center"
+                                  Visibility="Collapsed"/>
+
+                    <!-- Toggle Mode -->
+                    <HyperlinkButton x:Name="ToggleModeButton"
+                                     Content="Don't have an account? Register"
+                                     HorizontalAlignment="Center"
+                                     Click="ToggleModeButton_Click"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- Footer -->
+        <StackPanel Grid.Row="2" 
+                    VerticalAlignment="Bottom" 
+                    HorizontalAlignment="Center"
+                    Margin="0,0,0,24">
+            <TextBlock Text="© 2024 MyShop - Product Management"
+                       Style="{StaticResource CaptionTextBlockStyle}"
+                       Foreground="{ThemeResource TextFillColorTertiaryBrush}"/>
+        </StackPanel>
+    </Grid>
+</Page>

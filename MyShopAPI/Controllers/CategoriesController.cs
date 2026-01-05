@@ -1,8 +1,10 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MyShopAPI.Data;
 using MyShopAPI.DTOs;
 using MyShopAPI.Models;
+using MyShopAPI.Services;
 
 namespace MyShopAPI.Controllers
 {
@@ -12,17 +14,21 @@ namespace MyShopAPI.Controllers
     /// </summary>
     [ApiController]
     [Route("api/categories")]
+    [Authorize] // Require authentication for all category operations
     public class CategoriesController : ControllerBase
     {
         private readonly AppDbContext _context;
         private readonly ILogger<CategoriesController> _logger;
+        private readonly IUserContextService _userContextService;
 
         public CategoriesController(
             AppDbContext context,
-            ILogger<CategoriesController> logger)
+            ILogger<CategoriesController> logger,
+            IUserContextService userContextService)
         {
             _context = context;
             _logger = logger;
+            _userContextService = userContextService;
         }
 
         /// <summary>
@@ -94,7 +100,12 @@ namespace MyShopAPI.Controllers
         {
             try
             {
-                // Validate name is unique
+                // Get current user ID
+                var userId = _userContextService.GetUserId();
+                if (string.IsNullOrEmpty(userId))
+                    return Unauthorized(new { message = "User not authenticated" });
+
+                // Validate name is unique for this user
                 var nameExists = await _context.Categories
                     .AnyAsync(c => c.Name.ToLower() == createDto.Name.ToLower());
 
@@ -104,7 +115,8 @@ namespace MyShopAPI.Controllers
                 var category = new Category
                 {
                     Name = createDto.Name,
-                    Description = createDto.Description ?? string.Empty
+                    Description = createDto.Description ?? string.Empty,
+                    UserId = userId
                 };
 
                 _context.Categories.Add(category);
@@ -184,8 +196,10 @@ namespace MyShopAPI.Controllers
         /// <summary>
         /// Delete category.
         /// Only allows deletion if no products are associated.
+        /// Owner only - Staff cannot delete categories.
         /// </summary>
         [HttpDelete("{id:int}")]
+        [Authorize(Policy = "OwnerOnly")]
         public async Task<IActionResult> Delete(int id)
         {
             try

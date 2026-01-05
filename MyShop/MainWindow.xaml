@@ -14,63 +14,82 @@
         <MicaBackdrop />
     </Window.SystemBackdrop>
     
-    <NavigationView x:Name="NavView"
-                    IsBackButtonVisible="Collapsed"
-                    IsSettingsVisible="False"
-                    PaneDisplayMode="Left"
-                    SelectionChanged="NavView_SelectionChanged">
+    <Grid>
+        <!-- Login Container (shown when not logged in) -->
+        <Grid x:Name="LoginContainer" Visibility="Visible">
+            <Frame x:Name="LoginFrame"/>
+        </Grid>
         
-        <NavigationView.MenuItems>
-            <NavigationViewItem Content="Dashboard" 
-                              Tag="Dashboard"
-                              Icon="Home">
-                <NavigationViewItem.InfoBadge>
-                    <InfoBadge Style="{StaticResource AttentionIconInfoBadgeStyle}"/>
-                </NavigationViewItem.InfoBadge>
-            </NavigationViewItem>
+        <!-- Main Content Container (shown when logged in) -->
+        <NavigationView x:Name="NavView"
+                        IsBackButtonVisible="Collapsed"
+                        IsSettingsVisible="False"
+                        PaneDisplayMode="Left"
+                        SelectionChanged="NavView_SelectionChanged"
+                        Visibility="Collapsed">
             
-            <NavigationViewItem Content="Danh Sách Sản Phẩm" 
-                              Tag="ProductList"
-                              Icon="Shop">
-                <NavigationViewItem.InfoBadge>
-                    <InfoBadge Value="{x:Bind ViewModel.TotalProducts, Mode=OneWay}" 
-                              Style="{StaticResource AttentionValueInfoBadgeStyle}"/>
-                </NavigationViewItem.InfoBadge>
-            </NavigationViewItem>
-            
-            <NavigationViewItemSeparator/>
-            
-            <NavigationViewItemHeader Content="Quản Lý"/>
-            
-            <NavigationViewItem Content="Thêm Sản Phẩm" 
-                              Tag="AddProduct"
-                              Icon="Add"/>
-            
-            <NavigationViewItem Content="Danh Mục" 
-                              Tag="Categories"
-                              Icon="Library"/>
-        </NavigationView.MenuItems>
+            <NavigationView.MenuItems>
+                <NavigationViewItem Content="Dashboard" 
+                                  Tag="Dashboard"
+                                  Icon="Home">
+                    <NavigationViewItem.InfoBadge>
+                        <InfoBadge Style="{StaticResource AttentionIconInfoBadgeStyle}"/>
+                    </NavigationViewItem.InfoBadge>
+                </NavigationViewItem>
+                
+                <NavigationViewItem Content="Danh Sách Sản Phẩm" 
+                                  Tag="ProductList"
+                                  Icon="Shop">
+                    <NavigationViewItem.InfoBadge>
+                        <InfoBadge Value="{x:Bind ViewModel.TotalProducts, Mode=OneWay}" 
+                                  Style="{StaticResource AttentionValueInfoBadgeStyle}"/>
+                    </NavigationViewItem.InfoBadge>
+                </NavigationViewItem>
+                
+                <NavigationViewItemSeparator/>
+                
+                <NavigationViewItemHeader Content="Quản Lý"/>
+                
+                <NavigationViewItem Content="Thêm Sản Phẩm" 
+                                  Tag="AddProduct"
+                                  Icon="Add"/>
+                
+                <NavigationViewItem Content="Danh Mục" 
+                                  Tag="Categories"
+                                  Icon="Library"/>
+            </NavigationView.MenuItems>
 
-        <NavigationView.PaneFooter>
-            <StackPanel Orientation="Vertical" Spacing="8" Padding="16">
-                <TextBlock Text="API Status" 
-                          Style="{StaticResource CaptionTextBlockStyle}"
-                          Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                    <FontIcon Glyph="&#xE774;" 
-                             FontSize="12"
-                             Foreground="LimeGreen"/>
-                    <TextBlock Text="Connected" 
-                              Style="{StaticResource BodyTextBlockStyle}"
-                              Foreground="LimeGreen"/>
+            <NavigationView.PaneFooter>
+                <StackPanel Orientation="Vertical" Spacing="8" Padding="16">
+                    <TextBlock Text="API Status" 
+                              Style="{StaticResource CaptionTextBlockStyle}"
+                              Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon Glyph="&#xE774;" 
+                                 FontSize="12"
+                                 Foreground="LimeGreen"/>
+                        <TextBlock Text="Connected" 
+                                  Style="{StaticResource BodyTextBlockStyle}"
+                                  Foreground="LimeGreen"/>
+                    </StackPanel>
+                    <TextBlock Text="http://localhost:5002" 
+                              Style="{StaticResource CaptionTextBlockStyle}"
+                              Foreground="{ThemeResource TextFillColorTertiaryBrush}"/>
+                    
+                    <!-- Logout Button -->
+                    <Button HorizontalAlignment="Stretch"
+                            Margin="0,8,0,0"
+                            Click="LogoutButton_Click">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xE8BB;" FontSize="14"/>
+                            <TextBlock Text="Logout"/>
+                        </StackPanel>
+                    </Button>
                 </StackPanel>
-                <TextBlock Text="http://localhost:5002" 
-                          Style="{StaticResource CaptionTextBlockStyle}"
-                          Foreground="{ThemeResource TextFillColorTertiaryBrush}"/>
-            </StackPanel>
-        </NavigationView.PaneFooter>
+            </NavigationView.PaneFooter>
 
-        <Frame x:Name="ContentFrame" Padding="0"/>
-        
-    </NavigationView>
+            <Frame x:Name="ContentFrame" Padding="0"/>
+            
+        </NavigationView>
+    </Grid>
 </Window>
