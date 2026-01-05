@@ -34,6 +34,9 @@ namespace MyShop.Services.Auth
         public string? AccessToken { get; private set; }
 
         /// <inheritdoc />
+        public string? RefreshToken { get; private set; }
+
+        /// <inheritdoc />
         public bool IsOwner => Role == "Owner";
 
         /// <inheritdoc />
@@ -44,11 +47,13 @@ namespace MyShop.Services.Auth
             ShopName = shopName;
             Role = role;
             AccessToken = accessToken;
+            RefreshToken = refreshToken;
             IsLoggedIn = true;
 
-            // Store tokens securely
-            _credentialService.SaveAccessToken(accessToken);
-            _credentialService.SaveRefreshToken(refreshToken);
+            IsLoggedIn = true;
+
+            // Tokens are NOT saved here automatically. 
+            // Persistence is handled by the caller (LoginViewModel or AuthService) based on context (Remember Me).
         }
 
         /// <inheritdoc />
@@ -59,6 +64,7 @@ namespace MyShop.Services.Auth
             ShopName = null;
             Role = null;
             AccessToken = null;
+            RefreshToken = null;
             IsLoggedIn = false;
 
             // Clear stored credentials

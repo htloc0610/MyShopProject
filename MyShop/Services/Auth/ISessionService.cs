@@ -38,6 +38,11 @@ namespace MyShop.Services.Auth
         string? AccessToken { get; }
 
         /// <summary>
+        /// Gets the current refresh token.
+        /// </summary>
+        string? RefreshToken { get; }
+
+        /// <summary>
         /// Check if the current user has the Owner role.
         /// </summary>
         bool IsOwner { get; }

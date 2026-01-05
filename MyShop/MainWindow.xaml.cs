@@ -36,8 +36,8 @@ public sealed partial class MainWindow : Window
             // Set window size
             this.AppWindow.Resize(new Windows.Graphics.SizeInt32(1400, 900));
 
-            // Show login page
-            ShowLoginPage();
+            // Initial state determined by App.xaml.cs
+            // ShowLoginPage(); 
             Debug.WriteLine("=== MainWindow: Initialization complete ===");
         }
         catch (Exception ex)
@@ -50,7 +50,7 @@ public sealed partial class MainWindow : Window
     /// <summary>
     /// Show the login page.
     /// </summary>
-    private void ShowLoginPage()
+    public void ShowLoginPage()
     {
         Debug.WriteLine("=== ShowLoginPage: Starting ===");
         
@@ -59,17 +59,21 @@ public sealed partial class MainWindow : Window
         NavView.Visibility = Visibility.Collapsed;
 
         var loginView = new LoginView();
-        loginView.LoginSuccessful += (s, e) => ShowMainContent();
         
         // Navigate to login page in the login frame
         LoginFrame.Content = loginView;
         Debug.WriteLine("=== ShowLoginPage: Done ===");
     }
 
+    public void OnLoginSuccess()
+    {
+        ShowMainContent();
+    }
+
     /// <summary>
     /// Show the main content after successful login.
     /// </summary>
-    private void ShowMainContent()
+    public void ShowMainContent()
     {
         Debug.WriteLine("=== ShowMainContent: Starting ===");
         

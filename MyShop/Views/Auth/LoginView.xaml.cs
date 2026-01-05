@@ -1,142 +1,127 @@
-using System;
-using System.Diagnostics;
-using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Data;
+using Microsoft.UI.Xaml;
 using MyShop.ViewModels.Auth;
+using MyShop;
+using System;
 
-namespace MyShop.Views.Auth
+namespace MyShop.Views.Auth;
+
+/// <summary>
+/// An empty page that can be used on its own or navigated to within a Frame.
+/// </summary>
+public sealed partial class LoginView : Page
 {
-    /// <summary>
-    /// Login page with email/password authentication.
-    /// </summary>
-    public sealed partial class LoginView : Page
+    public LoginViewModel ViewModel { get; }
+
+    public LoginView()
     {
-        public LoginViewModel ViewModel { get; private set; } = null!;
-        private bool _isRegisterMode = false;
+        this.InitializeComponent();
+        ViewModel = App.Current.Services.GetRequiredService<LoginViewModel>();
+        ViewModel.LoginSuccessful += ViewModel_LoginSuccessful;
+    }
 
-        /// <summary>
-        /// Event raised when login is successful.
-        /// </summary>
-        public event EventHandler? LoginSuccessful;
-
-        public LoginView()
+    private void ViewModel_LoginSuccessful(object? sender, EventArgs e)
+    {
+        if (App.MainWindow is MainWindow mainWindow)
         {
-            try
-            {
-                Debug.WriteLine("=== LoginView: Constructor start ===");
-                
-                InitializeComponent();
-                Debug.WriteLine("=== LoginView: InitializeComponent done ===");
-                
-                ViewModel = App.Current.Services.GetRequiredService<LoginViewModel>();
-                Debug.WriteLine("=== LoginView: Got LoginViewModel ===");
-
-                // Subscribe to ViewModel's login success event
-                ViewModel.LoginSuccessful += (s, e) => LoginSuccessful?.Invoke(this, EventArgs.Empty);
-                Debug.WriteLine("=== LoginView: Events subscribed ===");
-
-                // Subscribe to property changes for UI updates
-                ViewModel.PropertyChanged += ViewModel_PropertyChanged;
-                Debug.WriteLine("=== LoginView: PropertyChanged subscribed ===");
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"=== LoginView ERROR: {ex.GetType().Name}: {ex.Message} ===");
-                Debug.WriteLine($"=== Stack: {ex.StackTrace} ===");
-                throw;
-            }
+            mainWindow.OnLoginSuccess();
         }
+    }
+}
 
-        private void ViewModel_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+// Converters inside the same namespace for simplicity or move to Converters folder
+public class ModeToButtonTextConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, string language)
+    {
+        if (value is bool isLogin)
         {
-            try
-            {
-                switch (e.PropertyName)
-                {
-                    case nameof(ViewModel.IsLoading):
-                        LoadingRing.IsActive = ViewModel.IsLoading;
-                        LoadingRing.Visibility = ViewModel.IsLoading ? Visibility.Visible : Visibility.Collapsed;
-                        EmailTextBox.IsEnabled = !ViewModel.IsLoading;
-                        PasswordBox.IsEnabled = !ViewModel.IsLoading;
-                        ShopNameTextBox.IsEnabled = !ViewModel.IsLoading;
-                        PrimaryButton.IsEnabled = !ViewModel.IsLoading;
-                        break;
-                    case nameof(ViewModel.ErrorMessage):
-                        ErrorInfoBar.Message = ViewModel.ErrorMessage ?? string.Empty;
-                        ErrorInfoBar.IsOpen = !string.IsNullOrEmpty(ViewModel.ErrorMessage);
-                        break;
-                    case nameof(ViewModel.IsRegisterMode):
-                        UpdateUIForMode();
-                        break;
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"=== PropertyChanged ERROR: {ex.Message} ===");
-            }
+            return isLogin ? "Login" : "Register";
         }
+        return "Login"; // Default
+    }
 
-        private void UpdateUIForMode()
-        {
-            _isRegisterMode = ViewModel.IsRegisterMode;
-            ShopNameTextBox.Visibility = _isRegisterMode ? Visibility.Visible : Visibility.Collapsed;
-            PrimaryButton.Content = _isRegisterMode ? "Register" : "Sign In";
-            ToggleModeButton.Content = _isRegisterMode 
-                ? "Already have an account? Sign In" 
-                : "Don't have an account? Register";
-            SubtitleText.Text = _isRegisterMode 
-                ? "Create a new account" 
-                : "Sign in to your account";
-        }
+    public object ConvertBack(object value, Type targetType, object parameter, string language)
+    {
+        throw new NotImplementedException();
+    }
+}
 
-        private async void PrimaryButton_Click(object sender, RoutedEventArgs e)
-        {
-            // Bind UI to ViewModel
-            ViewModel.Email = EmailTextBox.Text;
-            ViewModel.Password = PasswordBox.Password;
-            ViewModel.ShopName = ShopNameTextBox.Text;
+public class StringIsNotEmptyToBoolConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, string language)
+    {
+        return !string.IsNullOrEmpty(value as string);
+    }
 
-            if (_isRegisterMode)
-            {
-                if (ViewModel.RegisterCommand.CanExecute(null))
-                {
-                    await ViewModel.RegisterCommand.ExecuteAsync(null);
-                }
-            }
-            else
-            {
-                if (ViewModel.LoginCommand.CanExecute(null))
-                {
-                    await ViewModel.LoginCommand.ExecuteAsync(null);
-                }
-            }
-        }
+    public object ConvertBack(object value, Type targetType, object parameter, string language)
+    {
+        throw new NotImplementedException();
+    }
+}
 
-        private void ToggleModeButton_Click(object sender, RoutedEventArgs e)
-        {
-            ViewModel.ToggleModeCommand.Execute(null);
-        }
+public class BoolToVisibilityConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, string language)
+    {
+        return (value is bool b && b) ? Visibility.Visible : Visibility.Collapsed;
+    }
 
-        private async void PasswordBox_KeyDown(object sender, KeyRoutedEventArgs e)
-        {
-            if (e.Key == Windows.System.VirtualKey.Enter)
-            {
-                // Bind UI to ViewModel
-                ViewModel.Email = EmailTextBox.Text;
-                ViewModel.Password = PasswordBox.Password;
-                ViewModel.ShopName = ShopNameTextBox.Text;
+    public object ConvertBack(object value, Type targetType, object parameter, string language)
+    {
+        throw new NotImplementedException();
+    }
+}
 
-                if (!_isRegisterMode && ViewModel.LoginCommand.CanExecute(null))
-                {
-                    await ViewModel.LoginCommand.ExecuteAsync(null);
-                }
-            }
-        }
+public class InverseBoolToVisibilityConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, string language)
+    {
+        return (value is bool b && b) ? Visibility.Collapsed : Visibility.Visible;
+    }
 
-        private void ErrorInfoBar_Closed(InfoBar sender, InfoBarClosedEventArgs args)
-        {
-            ViewModel.ClearErrorCommand.Execute(null);
-        }
+    public object ConvertBack(object value, Type targetType, object parameter, string language)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+public class ModeToTitleConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, string language)
+    {
+        return (value is bool b && b) ? "Login to your account" : "Create an account";
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, string language)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+public class ModeToToggleTextConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, string language)
+    {
+        return (value is bool b && b) ? "Don't have an account?" : "Already have an account?";
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, string language)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+public class ModeToToggleActionConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, string language)
+    {
+        return (value is bool b && b) ? "Sign up" : "Login";
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, string language)
+    {
+        throw new NotImplementedException();
     }
 }
