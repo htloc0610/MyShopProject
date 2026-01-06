@@ -37,5 +37,10 @@ namespace MyShopAPI.Models
         /// Navigation property for user's refresh tokens.
         /// </summary>
         public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
+
+        /// <summary>
+        /// Navigation property for user's customers.
+        /// </summary>
+        public ICollection<Customer> Customers { get; set; } = new List<Customer>();
     }
 }

@@ -57,6 +57,13 @@
                 <NavigationViewItem Content="Danh Mục" 
                                   Tag="Categories"
                                   Icon="Library"/>
+
+                <NavigationViewItem Content="Khách Hàng" 
+                                  Tag="Customers">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE77B;"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
             </NavigationView.MenuItems>
 
             <NavigationView.PaneFooter>

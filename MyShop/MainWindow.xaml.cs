@@ -6,6 +6,7 @@ using Microsoft.UI.Xaml.Controls;
 using MyShop.ViewModels;
 using MyShop.Views.Products;
 using MyShop.Views.Categories;
+using MyShop.Views.Customers;
 using MyShop.Views.Dashboard;
 using MyShop.Views.Auth;
 using MyShop.Services.Auth;
@@ -123,6 +124,7 @@ public sealed partial class MainWindow : Window
             "ProductList" => typeof(ProductListPage),
             "AddProduct" => typeof(AddProductPage),
             "Categories" => typeof(CategoryListPage),
+            "Customers" => typeof(CustomerListPage),
             _ => null
         };
 
