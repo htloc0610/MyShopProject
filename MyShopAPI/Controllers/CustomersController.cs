@@ -140,13 +140,22 @@ namespace MyShopAPI.Controllers
             if (phoneExists)
                 return BadRequest(new { message = "Số điện thoại này đã tồn tại trong hệ thống" });
 
+            // Convert Birthday to UTC if provided
+            DateTime? birthdayUtc = null;
+            if (createDto.Birthday.HasValue)
+            {
+                birthdayUtc = createDto.Birthday.Value.Kind == DateTimeKind.Utc
+                    ? createDto.Birthday.Value
+                    : DateTime.SpecifyKind(createDto.Birthday.Value, DateTimeKind.Utc);
+            }
+
             var customer = new Customer
             {
                 Id = Guid.NewGuid(),
                 Name = createDto.Name,
                 PhoneNumber = createDto.PhoneNumber,
                 Address = createDto.Address,
-                Birthday = createDto.Birthday,
+                Birthday = birthdayUtc,
                 TotalSpent = 0,
                 CreatedAt = DateTime.UtcNow,
                 UserId = userId
@@ -198,10 +207,19 @@ namespace MyShopAPI.Controllers
                     return BadRequest(new { message = "Số điện thoại này đã tồn tại trong hệ thống" });
             }
 
+            // Convert Birthday to UTC if provided
+            DateTime? birthdayUtc = null;
+            if (updateDto.Birthday.HasValue)
+            {
+                birthdayUtc = updateDto.Birthday.Value.Kind == DateTimeKind.Utc
+                    ? updateDto.Birthday.Value
+                    : DateTime.SpecifyKind(updateDto.Birthday.Value, DateTimeKind.Utc);
+            }
+
             customer.Name = updateDto.Name;
             customer.PhoneNumber = updateDto.PhoneNumber;
             customer.Address = updateDto.Address;
-            customer.Birthday = updateDto.Birthday;
+            customer.Birthday = birthdayUtc;
             customer.TotalSpent = updateDto.TotalSpent;
 
             await _context.SaveChangesAsync();
