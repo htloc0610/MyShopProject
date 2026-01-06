@@ -7,11 +7,13 @@ using MyShop.Services.Categories;
 using MyShop.Services.Dashboard;
 using MyShop.Services.Shared;
 using MyShop.Services.Auth;
+using MyShop.Services.Customers;
 using MyShop.ViewModels;
 using MyShop.ViewModels.Products;
 using MyShop.ViewModels.Categories;
 using MyShop.ViewModels.Dashboard;
 using MyShop.ViewModels.Auth;
+using MyShop.ViewModels.Customers;
 using System.Diagnostics;
 
 namespace MyShop;
@@ -101,6 +103,13 @@ public partial class App : Application
             return new DashboardService(httpClient);
         });
 
+        services.AddSingleton<ICustomerService>(sp =>
+        {
+            var sessionService = sp.GetRequiredService<ISessionService>();
+            var httpClient = CreateAuthenticatedHttpClient(baseAddress, sessionService);
+            return new CustomerService(httpClient);
+        });
+
         // ====================================================
         // Other Services
         // ====================================================
@@ -113,6 +122,7 @@ public partial class App : Application
         services.AddTransient<DashboardViewModel>();
         services.AddTransient<ProductViewModel>();
         services.AddTransient<CategoryViewModel>();
+        services.AddTransient<CustomerViewModel>();
         services.AddTransient<MainWindowViewModel>();
 
         return services.BuildServiceProvider();
