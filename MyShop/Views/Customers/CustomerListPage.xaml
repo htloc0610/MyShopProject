@@ -6,13 +6,13 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:MyShop.Models.Customers"
     mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    Background="{ThemeResource LayerFillColorDefaultBrush}">
 
-    <Grid Padding="24">
+    <Grid Padding="32,24">
         <Grid.ColumnDefinitions>
             <!-- Master Pane -->
-            <ColumnDefinition Width="380"/>
-            <ColumnDefinition Width="16"/>
+            <ColumnDefinition Width="420"/>
+            <ColumnDefinition Width="24"/>
             <!-- Detail Pane -->
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
@@ -27,62 +27,103 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <!-- Header -->
-            <StackPanel Grid.Row="0" Margin="0,0,0,16">
-                <TextBlock Text="Khách Hàng" 
-                          Style="{StaticResource TitleTextBlockStyle}"
-                          FontWeight="Bold"/>
-                <TextBlock Style="{StaticResource CaptionTextBlockStyle}"
-                          Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                          Margin="0,4,0,0">
-                    <Run Text="Tổng số:"/>
-                    <Run Text="{x:Bind ViewModel.CustomerCount, Mode=OneWay}"/>
-                    <Run Text="khách hàng"/>
-                </TextBlock>
-            </StackPanel>
+            <!-- Header with gradient background -->
+            <Border Grid.Row="0" 
+                    Background="#6366F1"
+                    CornerRadius="12"
+                    Padding="24,20"
+                    Margin="0,0,0,20">
+                <StackPanel>
+                    <TextBlock Text="Khách Hàng" 
+                              FontSize="28"
+                              FontWeight="Bold"
+                              Foreground="White"/>
+                    <StackPanel Orientation="Horizontal" Spacing="4" Margin="0,8,0,0">
+                        <TextBlock Text="Tổng số:"
+                                  FontSize="14"
+                                  Foreground="#E0E7FF"/>
+                        <TextBlock Text="{x:Bind ViewModel.CustomerCount, Mode=OneWay}"
+                                  FontSize="14"
+                                  FontWeight="SemiBold"
+                                  Foreground="White"/>
+                        <TextBlock Text="khách hàng"
+                                  FontSize="14"
+                                  Foreground="#E0E7FF"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
 
-            <!-- Search Bar -->
-            <Grid Grid.Row="1" Margin="0,0,0,12">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="8"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
+            <!-- Search Bar with improved design -->
+            <Border Grid.Row="1" 
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="10"
+                    Padding="4"
+                    Margin="0,0,0,16">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
 
-                <TextBox Grid.Column="0"
-                        PlaceholderText="🔍 Tìm theo tên hoặc SĐT..."
-                        Text="{x:Bind ViewModel.SearchKeyword, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                        VerticalAlignment="Center"/>
-                
-                <Button Grid.Column="2" 
-                       Command="{x:Bind ViewModel.SearchCommand}"
-                       Style="{StaticResource AccentButtonStyle}"
-                       ToolTipService.ToolTip="Tìm kiếm">
-                    <FontIcon Glyph="&#xE721;" FontSize="16"/>
-                </Button>
-            </Grid>
+                    <TextBox Grid.Column="0"
+                            PlaceholderText="🔍 Tìm theo tên hoặc SĐT..."
+                            Text="{x:Bind ViewModel.SearchKeyword, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            BorderThickness="0"
+                            Background="Transparent"
+                            VerticalAlignment="Center"
+                            Padding="12,8"/>
+                    
+                    <Button Grid.Column="1" 
+                           Command="{x:Bind ViewModel.SearchCommand}"
+                           Background="#6366F1"
+                           Foreground="White"
+                           CornerRadius="8"
+                           Padding="16,10"
+                           Margin="4"
+                           ToolTipService.ToolTip="Tìm kiếm">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <FontIcon Glyph="&#xE721;" FontSize="14"/>
+                            <TextBlock Text="Tìm" FontWeight="SemiBold"/>
+                        </StackPanel>
+                    </Button>
+                </Grid>
+            </Border>
 
-            <!-- Add Customer Button -->
+            <!-- Add Customer Button with gradient -->
             <Button Grid.Row="2" 
                    HorizontalAlignment="Stretch"
-                   Margin="0,0,0,12"
+                   Margin="0,0,0,16"
                    Click="AddCustomerButton_Click"
-                   Style="{StaticResource AccentButtonStyle}">
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                    <FontIcon Glyph="&#xE8FA;" FontSize="16"/>
-                    <TextBlock Text="Thêm Khách Hàng"/>
+                   Background="#10B981"
+                   CornerRadius="10"
+                   Padding="0,14"
+                   BorderThickness="0">
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                    <FontIcon Glyph="&#xE8FA;" FontSize="18" Foreground="White"/>
+                    <TextBlock Text="Thêm Khách Hàng Mới" 
+                              FontSize="15"
+                              FontWeight="SemiBold"
+                              Foreground="White"/>
                 </StackPanel>
             </Button>
 
-            <!-- Customer List -->
+            <!-- Customer List with shadow effect -->
             <Border Grid.Row="3"
                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                    BorderThickness="1"
-                   CornerRadius="8">
+                   CornerRadius="12"
+                   Padding="4">
+                <Border.Shadow>
+                    <ThemeShadow />
+                </Border.Shadow>
+                
                 <Grid>
                     <ProgressRing IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}"
-                                 Width="40" Height="40"
+                                 Width="48" Height="48"
+                                 Foreground="#6366F1"
                                  HorizontalAlignment="Center"
                                  VerticalAlignment="Center"/>
 
@@ -90,46 +131,76 @@
                              ItemsSource="{x:Bind ViewModel.FilteredCustomers, Mode=OneWay}"
                              SelectedItem="{x:Bind ViewModel.SelectedCustomer, Mode=TwoWay}"
                              SelectionMode="Single"
+                             Padding="4"
                              Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolToVisibilityInverseConverter}}">
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                <Setter Property="Margin" Value="0,2"/>
+                                <Setter Property="Padding" Value="0"/>
+                            </Style>
+                        </ListView.ItemContainerStyle>
                         <ListView.ItemTemplate>
                             <DataTemplate x:DataType="models:Customer">
-                                <Grid Padding="12,8" ColumnSpacing="12">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
+                                <Border Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                                       CornerRadius="10"
+                                       Padding="14,12"
+                                       Margin="4,2">
+                                    <Grid ColumnSpacing="14">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
 
-                                    <!-- Avatar Circle -->
-                                    <Border Grid.Column="0" 
-                                           Width="44" Height="44" 
-                                           CornerRadius="22"
-                                           Background="#7C3AED">
-                                        <TextBlock Text="{x:Bind NameInitial}"
-                                                  FontSize="18"
-                                                  FontWeight="SemiBold"
-                                                  Foreground="White"
-                                                  HorizontalAlignment="Center"
-                                                  VerticalAlignment="Center"/>
-                                    </Border>
+                                        <!-- Avatar Circle with gradient -->
+                                        <Border Grid.Column="0" 
+                                               Width="52" Height="52" 
+                                               CornerRadius="26">
+                                            <Border.Background>
+                                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                    <GradientStop Color="#6366F1" Offset="0"/>
+                                                    <GradientStop Color="#8B5CF6" Offset="1"/>
+                                                </LinearGradientBrush>
+                                            </Border.Background>
+                                            <TextBlock Text="{x:Bind NameInitial}"
+                                                      FontSize="20"
+                                                      FontWeight="Bold"
+                                                      Foreground="White"
+                                                      HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center"/>
+                                        </Border>
 
-                                    <!-- Customer Info -->
-                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                        <TextBlock Text="{x:Bind Name}"
-                                                  FontWeight="SemiBold"
-                                                  TextTrimming="CharacterEllipsis"
-                                                  MaxLines="1"/>
-                                        <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,2,0,0">
-                                            <FontIcon Glyph="&#xE717;" FontSize="12" 
-                                                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
-                                            <TextBlock Text="{x:Bind PhoneNumber}"
-                                                      Style="{StaticResource CaptionTextBlockStyle}"
-                                                      Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                        <!-- Customer Info -->
+                                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="4">
+                                            <TextBlock Text="{x:Bind Name}"
+                                                      FontSize="15"
+                                                      FontWeight="SemiBold"
+                                                      TextTrimming="CharacterEllipsis"
+                                                      MaxLines="1"/>
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <FontIcon Glyph="&#xE717;" 
+                                                         FontSize="12" 
+                                                         Foreground="#6366F1"/>
+                                                <TextBlock Text="{x:Bind PhoneNumber}"
+                                                          FontSize="13"
+                                                          Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                            </StackPanel>
                                         </StackPanel>
-                                        <TextBlock Text="{x:Bind LoyaltyStatus}"
-                                                  Style="{StaticResource CaptionTextBlockStyle}"
-                                                  Margin="0,2,0,0"/>
-                                    </StackPanel>
-                                </Grid>
+
+                                        <!-- Loyalty Badge -->
+                                        <Border Grid.Column="2"
+                                               Background="#FEF3C7"
+                                               CornerRadius="6"
+                                               Padding="10,6"
+                                               VerticalAlignment="Center">
+                                            <TextBlock Text="{x:Bind LoyaltyStatus}"
+                                                      FontSize="12"
+                                                      FontWeight="SemiBold"
+                                                      Foreground="#D97706"/>
+                                        </Border>
+                                    </Grid>
+                                </Border>
                             </DataTemplate>
                         </ListView.ItemTemplate>
                     </ListView>
@@ -137,48 +208,71 @@
                     <!-- Empty State -->
                     <StackPanel HorizontalAlignment="Center" 
                                VerticalAlignment="Center"
+                               Spacing="16"
                                Visibility="{x:Bind ViewModel.HasError, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                        <FontIcon Glyph="&#xE779;" FontSize="48" 
-                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                 Margin="0,0,0,12"/>
+                        <FontIcon Glyph="&#xE779;" 
+                                 FontSize="64" 
+                                 Foreground="#CBD5E1"/>
                         <TextBlock Text="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}"
+                                  FontSize="14"
                                   TextAlignment="Center"
                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
                     </StackPanel>
                 </Grid>
             </Border>
 
-            <!-- Pagination -->
-            <StackPanel Grid.Row="4" 
-                       Orientation="Horizontal" 
-                       HorizontalAlignment="Center"
-                       Spacing="8"
-                       Margin="0,12,0,0">
-                <Button Command="{x:Bind ViewModel.GoToPreviousPageCommand}"
-                       ToolTipService.ToolTip="Trang trước">
-                    <FontIcon Glyph="&#xE76B;" FontSize="14"/>
-                </Button>
-                <TextBlock Text="{x:Bind ViewModel.PaginationInfo, Mode=OneWay}"
-                          VerticalAlignment="Center"
-                          Style="{StaticResource CaptionTextBlockStyle}"/>
-                <Button Command="{x:Bind ViewModel.GoToNextPageCommand}"
-                       ToolTipService.ToolTip="Trang sau">
-                    <FontIcon Glyph="&#xE76C;" FontSize="14"/>
-                </Button>
-            </StackPanel>
+            <!-- Pagination with modern design -->
+            <Border Grid.Row="4"
+                   Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                   BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                   BorderThickness="1"
+                   CornerRadius="10"
+                   Padding="12,10"
+                   Margin="0,16,0,0">
+                <StackPanel Orientation="Horizontal" 
+                           HorizontalAlignment="Center"
+                           Spacing="12">
+                    <Button Command="{x:Bind ViewModel.GoToPreviousPageCommand}"
+                           Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                           CornerRadius="8"
+                           Padding="12,8"
+                           ToolTipService.ToolTip="Trang trước">
+                        <FontIcon Glyph="&#xE76B;" FontSize="14" Foreground="#6366F1"/>
+                    </Button>
+                    <Border Background="#EEF2FF"
+                           CornerRadius="8"
+                           Padding="16,8">
+                        <TextBlock Text="{x:Bind ViewModel.PaginationInfo, Mode=OneWay}"
+                                  FontSize="13"
+                                  FontWeight="SemiBold"
+                                  Foreground="#6366F1"
+                                  VerticalAlignment="Center"/>
+                    </Border>
+                    <Button Command="{x:Bind ViewModel.GoToNextPageCommand}"
+                           Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                           CornerRadius="8"
+                           Padding="12,8"
+                           ToolTipService.ToolTip="Trang sau">
+                        <FontIcon Glyph="&#xE76C;" FontSize="14" Foreground="#6366F1"/>
+                    </Button>
+                </StackPanel>
+            </Border>
         </Grid>
 
-        <!-- Detail Pane -->
+        <!-- Detail Pane with improved design -->
         <Border Grid.Column="2"
                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                BorderThickness="1"
-               CornerRadius="12"
-               Padding="24"
+               CornerRadius="16"
+               Padding="28"
                Visibility="{x:Bind ViewModel.IsDetailPaneVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+            <Border.Shadow>
+                <ThemeShadow />
+            </Border.Shadow>
 
             <ScrollViewer VerticalScrollBarVisibility="Auto">
-                <StackPanel Spacing="20">
+                <StackPanel Spacing="24">
                     <!-- Customer Header -->
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -187,14 +281,22 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
 
-                        <!-- Large Avatar -->
+                        <!-- Large Avatar with gradient -->
                         <Border Grid.Column="0" 
-                               Width="80" Height="80" 
-                               CornerRadius="40"
-                               Background="#7C3AED"
+                               Width="88" Height="88" 
+                               CornerRadius="44"
                                Margin="0,0,20,0">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                    <GradientStop Color="#6366F1" Offset="0"/>
+                                    <GradientStop Color="#8B5CF6" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                            <Border.Shadow>
+                                <ThemeShadow />
+                            </Border.Shadow>
                             <TextBlock Text="{x:Bind ViewModel.SelectedCustomer.NameInitial, Mode=OneWay, FallbackValue=''}"
-                                      FontSize="32"
+                                      FontSize="36"
                                       FontWeight="Bold"
                                       Foreground="White"
                                       HorizontalAlignment="Center"
@@ -202,81 +304,110 @@
                         </Border>
 
                         <!-- Name and Loyalty -->
-                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="8">
                             <TextBlock Text="{x:Bind ViewModel.SelectedCustomer.Name, Mode=OneWay}"
-                                      Style="{StaticResource SubtitleTextBlockStyle}"
+                                      FontSize="24"
                                       FontWeight="Bold"/>
-                            <Border Background="#F3E8FF" 
-                                   CornerRadius="4" 
-                                   Padding="8,4" 
-                                   HorizontalAlignment="Left"
-                                   Margin="0,8,0,0">
-                                <TextBlock Text="{x:Bind ViewModel.SelectedCustomer.LoyaltyStatus, Mode=OneWay}"
-                                          FontWeight="SemiBold"
-                                          Foreground="#7C3AED"/>
+                            <Border Background="#FEF3C7" 
+                                   CornerRadius="8" 
+                                   Padding="12,6" 
+                                   HorizontalAlignment="Left">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <FontIcon Glyph="&#xE735;" FontSize="14" Foreground="#D97706"/>
+                                    <TextBlock Text="{x:Bind ViewModel.SelectedCustomer.LoyaltyStatus, Mode=OneWay}"
+                                              FontSize="13"
+                                              FontWeight="SemiBold"
+                                              Foreground="#D97706"/>
+                                </StackPanel>
                             </Border>
                         </StackPanel>
 
                         <!-- Action Buttons -->
-                        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
+                        <StackPanel Grid.Column="2" Spacing="8">
                             <Button Click="EditCustomerButton_Click"
+                                   Background="#3B82F6"
+                                   Foreground="White"
+                                   CornerRadius="10"
+                                   Padding="16,12"
+                                   HorizontalAlignment="Stretch"
                                    ToolTipService.ToolTip="Sửa thông tin">
-                                <FontIcon Glyph="&#xE70F;" FontSize="16"/>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <FontIcon Glyph="&#xE70F;" FontSize="16"/>
+                                    <TextBlock Text="Sửa" FontWeight="SemiBold"/>
+                                </StackPanel>
                             </Button>
                             <Button Click="DeleteCustomerButton_Click"
-                                   ToolTipService.ToolTip="Xóa khách hàng"
-                                   Background="#FEE2E2">
-                                <FontIcon Glyph="&#xE74D;" FontSize="16" Foreground="#DC2626"/>
+                                   Background="#EF4444"
+                                   Foreground="White"
+                                   CornerRadius="10"
+                                   Padding="16,12"
+                                   HorizontalAlignment="Stretch"
+                                   ToolTipService.ToolTip="Xóa khách hàng">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <FontIcon Glyph="&#xE74D;" FontSize="16"/>
+                                    <TextBlock Text="Xóa" FontWeight="SemiBold"/>
+                                </StackPanel>
                             </Button>
                         </StackPanel>
                     </Grid>
 
-                    <Rectangle Fill="{ThemeResource DividerStrokeColorDefaultBrush}" Height="1"/>
+                    <Rectangle Fill="{ThemeResource DividerStrokeColorDefaultBrush}" 
+                              Height="1" 
+                              Opacity="0.5"/>
 
-                    <!-- Total Spent Card -->
-                    <Border Background="#F5F3FF" 
-                           CornerRadius="12" 
-                           Padding="20">
-                        <StackPanel>
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <FontIcon Glyph="&#xE7BF;" FontSize="20" Foreground="#7C3AED"/>
+                    <!-- Total Spent Card with gradient -->
+                    <Border CornerRadius="16" 
+                           Padding="24">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                <GradientStop Color="#6366F1" Offset="0"/>
+                                <GradientStop Color="#8B5CF6" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Border.Background>
+                        <Border.Shadow>
+                            <ThemeShadow />
+                        </Border.Shadow>
+                        <StackPanel Spacing="8">
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <FontIcon Glyph="&#xE7BF;" FontSize="24" Foreground="White"/>
                                 <TextBlock Text="Tổng Chi Tiêu"
-                                          Style="{StaticResource BodyStrongTextBlockStyle}"
-                                          Foreground="#7C3AED"/>
+                                          FontSize="16"
+                                          FontWeight="SemiBold"
+                                          Foreground="White"
+                                          VerticalAlignment="Center"/>
                             </StackPanel>
                             <TextBlock Text="{x:Bind ViewModel.SelectedCustomer.FormattedTotalSpent, Mode=OneWay}"
-                                      Style="{StaticResource TitleTextBlockStyle}"
+                                      FontSize="32"
                                       FontWeight="Bold"
-                                      Foreground="#7C3AED"
-                                      Margin="0,8,0,0"/>
+                                      Foreground="White"/>
                         </StackPanel>
                     </Border>
 
                     <!-- Info Cards -->
-                    <StackPanel Spacing="12">
+                    <StackPanel Spacing="14">
                         <!-- Phone -->
                         <Border Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
-                               CornerRadius="8"
-                               Padding="16">
-                            <Grid>
+                               CornerRadius="12"
+                               Padding="18">
+                            <Grid ColumnSpacing="16">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
 
                                 <Border Grid.Column="0" 
-                                       Width="40" Height="40" 
-                                       CornerRadius="8"
-                                       Background="#DBEAFE"
-                                       Margin="0,0,16,0">
-                                    <FontIcon Glyph="&#xE717;" FontSize="18" Foreground="#2563EB"/>
+                                       Width="48" Height="48" 
+                                       CornerRadius="12"
+                                       Background="#DBEAFE">
+                                    <FontIcon Glyph="&#xE717;" FontSize="20" Foreground="#3B82F6"/>
                                 </Border>
 
-                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="4">
                                     <TextBlock Text="Số điện thoại"
-                                              Style="{StaticResource CaptionTextBlockStyle}"
+                                              FontSize="13"
                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
                                     <TextBlock Text="{x:Bind ViewModel.SelectedCustomer.PhoneNumber, Mode=OneWay}"
+                                              FontSize="16"
                                               FontWeight="SemiBold"/>
                                 </StackPanel>
                             </Grid>
@@ -284,27 +415,27 @@
 
                         <!-- Address -->
                         <Border Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
-                               CornerRadius="8"
-                               Padding="16">
-                            <Grid>
+                               CornerRadius="12"
+                               Padding="18">
+                            <Grid ColumnSpacing="16">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
 
                                 <Border Grid.Column="0" 
-                                       Width="40" Height="40" 
-                                       CornerRadius="8"
-                                       Background="#DCFCE7"
-                                       Margin="0,0,16,0">
-                                    <FontIcon Glyph="&#xE707;" FontSize="18" Foreground="#16A34A"/>
+                                       Width="48" Height="48" 
+                                       CornerRadius="12"
+                                       Background="#D1FAE5">
+                                    <FontIcon Glyph="&#xE707;" FontSize="20" Foreground="#10B981"/>
                                 </Border>
 
-                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="4">
                                     <TextBlock Text="Địa chỉ"
-                                              Style="{StaticResource CaptionTextBlockStyle}"
+                                              FontSize="13"
                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
                                     <TextBlock Text="{x:Bind ViewModel.SelectedCustomer.FormattedAddress, Mode=OneWay}"
+                                              FontSize="16"
                                               FontWeight="SemiBold"
                                               TextWrapping="Wrap"/>
                                 </StackPanel>
@@ -313,27 +444,27 @@
 
                         <!-- Birthday -->
                         <Border Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
-                               CornerRadius="8"
-                               Padding="16">
-                            <Grid>
+                               CornerRadius="12"
+                               Padding="18">
+                            <Grid ColumnSpacing="16">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
 
                                 <Border Grid.Column="0" 
-                                       Width="40" Height="40" 
-                                       CornerRadius="8"
-                                       Background="#FEF3C7"
-                                       Margin="0,0,16,0">
-                                    <FontIcon Glyph="&#xEB51;" FontSize="18" Foreground="#D97706"/>
+                                       Width="48" Height="48" 
+                                       CornerRadius="12"
+                                       Background="#FEF3C7">
+                                    <FontIcon Glyph="&#xEB51;" FontSize="20" Foreground="#F59E0B"/>
                                 </Border>
 
-                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="4">
                                     <TextBlock Text="Ngày sinh"
-                                              Style="{StaticResource CaptionTextBlockStyle}"
+                                              FontSize="13"
                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
                                     <TextBlock Text="{x:Bind ViewModel.SelectedCustomer.FormattedBirthday, Mode=OneWay}"
+                                              FontSize="16"
                                               FontWeight="SemiBold"/>
                                 </StackPanel>
                             </Grid>
@@ -348,16 +479,32 @@
                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                BorderThickness="1"
-               CornerRadius="12"
+               CornerRadius="16"
                Visibility="{x:Bind ViewModel.IsDetailPaneVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityInverseConverter}}">
+            <Border.Shadow>
+                <ThemeShadow />
+            </Border.Shadow>
             <StackPanel HorizontalAlignment="Center" 
                        VerticalAlignment="Center"
-                       Spacing="12">
-                <FontIcon Glyph="&#xE77B;" FontSize="64" 
-                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
-                <TextBlock Text="Chọn một khách hàng để xem chi tiết"
-                          Style="{StaticResource BodyTextBlockStyle}"
-                          Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                       Spacing="20">
+                <Border Width="120" Height="120"
+                       CornerRadius="60"
+                       Background="#F1F5F9">
+                    <FontIcon Glyph="&#xE77B;" 
+                             FontSize="56" 
+                             Foreground="#94A3B8"/>
+                </Border>
+                <StackPanel Spacing="8">
+                    <TextBlock Text="Chọn một khách hàng"
+                              FontSize="18"
+                              FontWeight="SemiBold"
+                              TextAlignment="Center"
+                              Foreground="{ThemeResource TextFillColorPrimaryBrush}"/>
+                    <TextBlock Text="Chọn khách hàng từ danh sách để xem chi tiết"
+                              FontSize="14"
+                              TextAlignment="Center"
+                              Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                </StackPanel>
             </StackPanel>
         </Border>
     </Grid>
