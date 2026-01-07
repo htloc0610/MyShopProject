@@ -28,6 +28,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Remove="Views\Dashboard.xaml" />
+    <None Remove="Views\Reports\ReportPage.xaml" />
   </ItemGroup>
 
   <ItemGroup>
@@ -56,6 +57,7 @@
     <PackageReference Include="ClosedXML" Version="0.105.0" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="CommunityToolkit.WinUI.UI.Controls.DataGrid" Version="7.1.2" />
+    <PackageReference Include="LiveChartsCore.SkiaSharpView.WinUI" Version="2.0.0-rc6.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.4">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -69,7 +71,6 @@
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.4" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Converters\" />
     <Folder Include="Views\Dashboard\" />
   </ItemGroup>
   <ItemGroup>
@@ -82,6 +83,9 @@
     <None Update="Views\ProductListPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </None>
+    <Page Update="Views\Reports\ReportPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Page Update="Views\CategoryListPage.xaml">

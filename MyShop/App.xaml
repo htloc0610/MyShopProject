@@ -28,7 +28,8 @@
             <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
             <converters:NullToVisibilityInverseConverter x:Key="NullToVisibilityInverseConverter"/>
             <converters:InverseBoolConverter x:Key="InverseBoolConverter"/>
-            
+
+            <converters:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibilityConverter"/>
             <!-- Role-Based Converters -->
             <converters:RoleToVisibilityConverter x:Key="RoleToVisibilityConverter"/>
             <converters:OwnerOnlyVisibilityConverter x:Key="OwnerOnlyVisibilityConverter"/>

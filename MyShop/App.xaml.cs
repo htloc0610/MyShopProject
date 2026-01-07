@@ -1,20 +1,24 @@
-﻿using System;
-using System.Net.Http;
+﻿using LiveChartsCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
-using MyShop.Services.Products;
-using MyShop.Services.Categories;
-using MyShop.Services.Dashboard;
-using MyShop.Services.Shared;
 using MyShop.Services.Auth;
+using MyShop.Services.Categories;
 using MyShop.Services.Customers;
+using MyShop.Services.Dashboard;
+using MyShop.Services.Products;
+using MyShop.Services.Reports;
+using MyShop.Services.Shared;
 using MyShop.ViewModels;
-using MyShop.ViewModels.Products;
-using MyShop.ViewModels.Categories;
-using MyShop.ViewModels.Dashboard;
 using MyShop.ViewModels.Auth;
+using MyShop.ViewModels.Categories;
 using MyShop.ViewModels.Customers;
+using MyShop.ViewModels.Dashboard;
+using MyShop.ViewModels.Products;
+using MyShop.ViewModels.Reports;
+using System;
 using System.Diagnostics;
+using System.Net.Http;
+using LiveChartsCore.SkiaSharpView;
 
 namespace MyShop;
 
@@ -49,6 +53,8 @@ public partial class App : Application
     {
         Services = ConfigureServices();
         InitializeComponent();
+        LiveCharts.Configure(config =>
+            config.AddSkiaSharp());
     }
 
     /// <summary>
@@ -103,6 +109,13 @@ public partial class App : Application
             return new DashboardService(httpClient);
         });
 
+        services.AddSingleton<ReportService>(sp =>
+        {
+            var sessionService = sp.GetRequiredService<ISessionService>();
+            var httpClient = CreateAuthenticatedHttpClient(baseAddress, sessionService);
+            return new ReportService(httpClient);
+        });
+
         services.AddSingleton<ICustomerService>(sp =>
         {
             var sessionService = sp.GetRequiredService<ISessionService>();
@@ -123,6 +136,7 @@ public partial class App : Application
         services.AddTransient<ProductViewModel>();
         services.AddTransient<CategoryViewModel>();
         services.AddTransient<CustomerViewModel>();
+        services.AddTransient<ReportViewModel>();
         services.AddTransient<MainWindowViewModel>();
 
         return services.BuildServiceProvider();

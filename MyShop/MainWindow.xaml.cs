@@ -9,6 +9,7 @@ using MyShop.Views.Categories;
 using MyShop.Views.Customers;
 using MyShop.Views.Dashboard;
 using MyShop.Views.Auth;
+using MyShop.Views.Reports;
 using MyShop.Services.Auth;
 
 namespace MyShop;
@@ -125,6 +126,7 @@ public sealed partial class MainWindow : Window
             "AddProduct" => typeof(AddProductPage),
             "Categories" => typeof(CategoryListPage),
             "Customers" => typeof(CustomerListPage),
+            "Reports" => typeof(ReportPage),
             _ => null
         };
 
