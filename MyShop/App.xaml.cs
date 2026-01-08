@@ -8,6 +8,9 @@ using MyShop.Services.Dashboard;
 using MyShop.Services.Products;
 using MyShop.Services.Reports;
 using MyShop.Services.Shared;
+using MyShop.Services.Auth;
+using MyShop.Services.Customers;
+using MyShop.Services.Discounts;
 using MyShop.ViewModels;
 using MyShop.ViewModels.Auth;
 using MyShop.ViewModels.Categories;
@@ -16,6 +19,7 @@ using MyShop.ViewModels.Dashboard;
 using MyShop.ViewModels.Products;
 using MyShop.ViewModels.Reports;
 using System;
+using MyShop.ViewModels.Discounts;
 using System.Diagnostics;
 using System.Net.Http;
 using LiveChartsCore.SkiaSharpView;
@@ -123,6 +127,13 @@ public partial class App : Application
             return new CustomerService(httpClient);
         });
 
+        services.AddSingleton<IDiscountService>(sp =>
+        {
+            var sessionService = sp.GetRequiredService<ISessionService>();
+            var httpClient = CreateAuthenticatedHttpClient(baseAddress, sessionService);
+            return new DiscountService(httpClient);
+        });
+
         // ====================================================
         // Other Services
         // ====================================================
@@ -137,6 +148,7 @@ public partial class App : Application
         services.AddTransient<CategoryViewModel>();
         services.AddTransient<CustomerViewModel>();
         services.AddTransient<ReportViewModel>();
+        services.AddTransient<DiscountViewModel>();
         services.AddTransient<MainWindowViewModel>();
 
         return services.BuildServiceProvider();

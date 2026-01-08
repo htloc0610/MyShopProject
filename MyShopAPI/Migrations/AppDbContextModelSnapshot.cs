@@ -291,6 +291,55 @@ namespace MyShopAPI.Migrations
                     b.ToTable("Customers");
                 });
 
+            modelBuilder.Entity("MyShopAPI.Models.Discount", b =>
+                {
+                    b.Property<int>("DiscountId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("DiscountId"));
+
+                    b.Property<int>("Amount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("UsageLimit")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("UsedCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("DiscountId");
+
+                    b.HasIndex("UserId", "Code")
+                        .IsUnique();
+
+                    b.HasIndex("UserId", "StartDate");
+
+                    b.ToTable("Discounts");
+                });
+
             modelBuilder.Entity("MyShopAPI.Models.Order", b =>
                 {
                     b.Property<int>("OrderId")
@@ -501,6 +550,17 @@ namespace MyShopAPI.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("MyShopAPI.Models.Discount", b =>
+                {
+                    b.HasOne("MyShopAPI.Models.ApplicationUser", "User")
+                        .WithMany("Discounts")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("MyShopAPI.Models.Order", b =>
                 {
                     b.HasOne("MyShopAPI.Models.ApplicationUser", "User")
@@ -566,6 +626,8 @@ namespace MyShopAPI.Migrations
                     b.Navigation("Categories");
 
                     b.Navigation("Customers");
+
+                    b.Navigation("Discounts");
 
                     b.Navigation("Orders");
 

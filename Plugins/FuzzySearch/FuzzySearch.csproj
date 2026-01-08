@@ -1,0 +1,49 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+    <RootNamespace>MyShopPlugin</RootNamespace>
+    <UseWinUI>true</UseWinUI>
+    <Nullable>enable</Nullable>
+    <Platforms>x64</Platforms>
+    <PlatformTarget>x64</PlatformTarget>
+    <EnableMsixTooling>true</EnableMsixTooling>
+    <GenerateLibraryLayout>true</GenerateLibraryLayout>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FuzzySharp" Version="2.0.2" />
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.251106002" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\MyShop.Contracts\MyShop.Contracts.csproj">
+      <Private>false</Private>
+      <ExcludeAssets>runtime</ExcludeAssets>
+    </ProjectReference>
+  </ItemGroup>
+
+  <!-- Auto-copy plugin to MyShop after build -->
+  <Target Name="CopyPluginToMyShop" AfterTargets="Build">
+    <PropertyGroup>
+      <PluginOutputPath>$(MSBuildProjectDirectory)\..\..\MyShop\bin\$(Platform)\$(Configuration)\$(TargetFramework)\win-$(Platform)\AppX\Plugins\</PluginOutputPath>
+    </PropertyGroup>
+    
+    <!-- Create Plugins directory if it doesn't exist -->
+    <MakeDir Directories="$(PluginOutputPath)" />
+    
+    <!-- Copy the DLL to Plugins folder -->
+    <ItemGroup>
+      <PluginDll Include="$(TargetPath)" />
+      <!-- Also copy XRI (XAML Resource Index) file if it exists -->
+      <PluginXri Include="$(TargetDir)$(AssemblyName).xr.xml" Condition="Exists('$(TargetDir)$(AssemblyName).xr.xml')" />
+      <!-- Copy PRI files -->
+      <PluginPri Include="$(TargetDir)*.pri" />
+    </ItemGroup>
+    <Copy SourceFiles="@(PluginDll)" DestinationFolder="$(PluginOutputPath)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(PluginXri)" DestinationFolder="$(PluginOutputPath)" SkipUnchangedFiles="true" Condition="'@(PluginXri)' != ''" />
+    <Copy SourceFiles="@(PluginPri)" DestinationFolder="$(PluginOutputPath)" SkipUnchangedFiles="true" Condition="'@(PluginPri)' != ''" />
+    
+    <Message Text="✅ Plugin copied to: $(PluginOutputPath)" Importance="high" />
+  </Target>
+</Project>

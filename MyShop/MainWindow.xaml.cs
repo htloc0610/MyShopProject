@@ -7,6 +7,7 @@ using MyShop.ViewModels;
 using MyShop.Views.Products;
 using MyShop.Views.Categories;
 using MyShop.Views.Customers;
+using MyShop.Views.Discounts;
 using MyShop.Views.Dashboard;
 using MyShop.Views.Auth;
 using MyShop.Views.Reports;
@@ -127,6 +128,7 @@ public sealed partial class MainWindow : Window
             "Categories" => typeof(CategoryListPage),
             "Customers" => typeof(CustomerListPage),
             "Reports" => typeof(ReportPage),
+            "Discounts" => typeof(DiscountManagementPage),
             _ => null
         };
 

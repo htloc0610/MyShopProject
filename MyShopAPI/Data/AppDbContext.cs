@@ -35,6 +35,7 @@ namespace MyShopAPI.Data
         public DbSet<OrderItem> OrderItems => Set<OrderItem>();
         public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
         public DbSet<Customer> Customers => Set<Customer>();
+        public DbSet<Discount> Discounts => Set<Discount>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -67,6 +68,11 @@ namespace MyShopAPI.Data
                 entity.HasMany(u => u.Customers)
                     .WithOne(c => c.User)
                     .HasForeignKey(c => c.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasMany(u => u.Discounts)
+                    .WithOne(d => d.User)
+                    .HasForeignKey(d => d.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
@@ -102,6 +108,14 @@ namespace MyShopAPI.Data
                 entity.Property(c => c.PhoneNumber).IsRequired().HasMaxLength(20);
             });
 
+            // Configure Discount
+            modelBuilder.Entity<Discount>(entity =>
+            {
+                // Composite unique index: Code must be unique per shop (UserId)
+                entity.HasIndex(d => new { d.UserId, d.Code }).IsUnique();
+                entity.HasIndex(d => new { d.UserId, d.StartDate });
+            });
+
             // ====================================================
             // GLOBAL QUERY FILTERS for Multi-Tenant Data Isolation
             // These filters automatically filter queries by UserId
@@ -125,6 +139,9 @@ namespace MyShopAPI.Data
 
             modelBuilder.Entity<Customer>()
                 .HasQueryFilter(c => c.UserId == CurrentUserId);
+
+            modelBuilder.Entity<Discount>()
+                .HasQueryFilter(d => d.UserId == CurrentUserId);
         }
     }
 }

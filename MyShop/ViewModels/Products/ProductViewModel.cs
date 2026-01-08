@@ -1,4 +1,6 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -9,6 +11,7 @@ using MyShop.Models.Shared;
 using MyShop.Services.Products;
 using MyShop.Services.Categories;
 using MyShop.Services.Shared;
+using MyShop.Contracts.Helpers;
 
 namespace MyShop.ViewModels.Products;
 
@@ -47,6 +50,9 @@ public partial class ProductViewModel : ObservableObject
 
     [ObservableProperty]
     private int _productCount;
+
+    // Cache for fuzzy search results (client-side paging)
+    private List<Product> _fuzzySearchResults = new();
 
     #endregion
 
@@ -103,6 +109,12 @@ public partial class ProductViewModel : ObservableObject
 
     [ObservableProperty]
     private Category? _selectedCategory;
+
+    [ObservableProperty]
+    private bool _useFuzzySearch = true;
+
+    [ObservableProperty]
+    private int _fuzzyThreshold = 70;
 
     #endregion
 
@@ -177,25 +189,61 @@ public partial class ProductViewModel : ObservableObject
             double? minPriceFilter = MinPrice > 0 ? MinPrice : null;
             double? maxPriceFilter = MaxPrice > 0 ? MaxPrice : null;
 
-            var result = await _productService.GetProductsPagedAsync(
-                CurrentPage,
-                PageSize,
-                SortColumn,
-                IsDescending,
-                SearchKeyword,
-                SelectedCategoryId,
-                minPriceFilter,
-                maxPriceFilter);
-
-            Products.Clear();
-            foreach (var product in result.Items)
+            // Check if fuzzy search is enabled and has keyword
+            if (UseFuzzySearch && !string.IsNullOrWhiteSpace(SearchKeyword))
             {
-                Products.Add(product);
-            }
+                // Get ALL products with filters from backend
+                var allProducts = await _productService.GetAllProductsAsync(
+                    SelectedCategoryId,
+                    minPriceFilter,
+                    maxPriceFilter);
 
-            ProductCount = result.TotalCount;
-            TotalPages = result.TotalPages;
-            OnPropertyChanged(nameof(PaginationInfo));
+                // Apply fuzzy search IN PLUGIN using FuzzySearchHelper
+                _fuzzySearchResults = allProducts
+                    .Where(p => FuzzySearchHelper.IsMatch(SearchKeyword, p.Name, FuzzyThreshold))
+                    .ToList();
+
+                // Apply client-side paging
+                var pagedResults = _fuzzySearchResults
+                    .Skip((CurrentPage - 1) * PageSize)
+                    .Take(PageSize)
+                    .ToList();
+
+                Products.Clear();
+                foreach (var product in pagedResults)
+                {
+                    Products.Add(product);
+                }
+
+                ProductCount = _fuzzySearchResults.Count;
+                TotalPages = (int)Math.Ceiling((double)ProductCount / PageSize);
+                OnPropertyChanged(nameof(PaginationInfo));
+
+                System.Diagnostics.Debug.WriteLine($"🎯 Plugin fuzzy search: '{SearchKeyword}' found {ProductCount} products (threshold: {FuzzyThreshold})");
+            }
+            else
+            {
+                // Use normal server-side paging API
+                var result = await _productService.GetProductsPagedAsync(
+                    CurrentPage,
+                    PageSize,
+                    SortColumn,
+                    IsDescending,
+                    SearchKeyword,
+                    SelectedCategoryId,
+                    minPriceFilter,
+                    maxPriceFilter);
+
+                Products.Clear();
+                foreach (var product in result.Items)
+                {
+                    Products.Add(product);
+                }
+
+                ProductCount = result.TotalCount;
+                TotalPages = result.TotalPages;
+                OnPropertyChanged(nameof(PaginationInfo));
+            }
 
             if (ProductCount == 0)
             {

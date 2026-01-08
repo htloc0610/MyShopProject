@@ -1,0 +1,68 @@
+# Build results
+bin/
+obj/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Build outputs
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+
+# Files built by Visual Studio
+*_i.c
+*_p.c
+*_h.h
+*.ilk
+*.obj
+*.pch
+*.pdb
+*.pgc
+*.pgd
+*.rsp
+*.sbr
+*.tlb
+*.tli
+*.tlh
+*.tmp
+*.tmp_proj
+*_wpftmp.csproj
+*.log
+*.tlog
+*.vspscc
+*.vssscc
+.builds
+*.pidb
+*.svclog
+*.scc
+
+# WinUI/UWP specific
+*.g.cs
+*.g.i.cs
+*.xbf
+*.pri
+*.xr.xml
+priconfig.xml*
+resources.resfiles*
+embed/
+intermediatexaml/
+
+# NuGet
+*.nupkg
+*.snupkg
+**/packages/*
+project.assets.json
+project.nuget.cache
+*.nuget.props
+*.nuget.targets

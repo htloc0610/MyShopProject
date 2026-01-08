@@ -169,22 +169,7 @@ namespace MyShopAPI
 
             var app = builder.Build();
 
-            // ====================================================
-            // Create Roles on Startup
-            // ====================================================
-            using (var scope = app.Services.CreateScope())
-            {
-                var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-                
-                string[] roles = { "Owner", "Staff" };
-                foreach (var role in roles)
-                {
-                    if (!await roleManager.RoleExistsAsync(role))
-                    {
-                        await roleManager.CreateAsync(new IdentityRole(role));
-                    }
-                }
-            }
+
 
             // Seed database on startup (only in Development mode)
             if (app.Environment.IsDevelopment())

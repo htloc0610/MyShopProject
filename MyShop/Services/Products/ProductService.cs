@@ -67,6 +67,50 @@ public class ProductService : IProductService
     }
 
     /// <summary>
+    /// Gets ALL products with optional filters.
+    /// No keyword search - client applies fuzzy matching.
+    /// </summary>
+    public async Task<List<Product>> GetAllProductsAsync(
+        int? categoryId = null,
+        double? minPrice = null,
+        double? maxPrice = null)
+    {
+        try
+        {
+            var queryParams = new List<string>();
+
+            if (categoryId.HasValue && categoryId.Value > 0)
+            {
+                queryParams.Add($"categoryId={categoryId.Value}");
+            }
+
+            if (minPrice.HasValue && minPrice.Value >= 0)
+            {
+                queryParams.Add($"minPrice={minPrice.Value}");
+            }
+
+            if (maxPrice.HasValue && maxPrice.Value >= 0)
+            {
+                queryParams.Add($"maxPrice={maxPrice.Value}");
+            }
+
+            var queryString = queryParams.Count > 0 ? "?" + string.Join("&", queryParams) : "";
+            var url = $"{ProductsEndpoint}/all{queryString}";
+
+            System.Diagnostics.Debug.WriteLine($"Fetching all products: {url}");
+
+            var result = await _httpClient.GetFromJsonAsync<List<Product>>(url);
+            
+            return result ?? new List<Product>();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error getting all products: {ex.Message}");
+            return new List<Product>();
+        }
+    }
+
+    /// <summary>
     /// Gets a single product by ID.
     /// </summary>
     public async Task<Product?> GetProductByIdAsync(int id)
