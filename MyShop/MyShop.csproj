@@ -120,4 +120,12 @@
   <ItemGroup>
     <PRIResource Remove="MyShop\**" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="MyShop\PluginInterfaces\ISearchPlugin.cs" />
+    <Compile Include="MyShop\PluginInterfaces\SearchFilterArgs.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="MyShop\PLUGIN_DEPLOYMENT.md" />
+    <None Include="MyShop\PLUGIN_USER_GUIDE.md" />
+  </ItemGroup>
 </Project>

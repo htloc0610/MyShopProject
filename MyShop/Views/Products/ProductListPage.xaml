@@ -15,6 +15,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
@@ -40,6 +41,17 @@
             </StackPanel>
 
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
+                <!-- Toggle Filter Mode Button -->
+                <ToggleButton x:Name="FilterModeToggle"
+                             IsChecked="False"
+                             Click="FilterModeToggle_Click"
+                             ToolTipService.ToolTip="Chuyển đổi chế độ lọc">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon x:Name="FilterModeIcon" Glyph="&#xE713;" FontSize="16"/>
+                        <TextBlock x:Name="FilterModeText" Text="Plugin Filter"/>
+                    </StackPanel>
+                </ToggleButton>
+                
                 <Button Command="{x:Bind ViewModel.RefreshCommand}"
                        ToolTipService.ToolTip="Làm mới danh sách">
                     <StackPanel Orientation="Horizontal" Spacing="8">
@@ -50,8 +62,56 @@
             </StackPanel>
         </Grid>
 
-        <!-- Filter Bar -->
+        <!-- Plugin Filter Container (Dynamic) -->
         <Border Grid.Row="1" 
+                x:Name="PluginFilterBorder"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                BorderThickness="1"
+                CornerRadius="8"
+                Padding="16"
+                Margin="0,0,0,16"
+                Visibility="Collapsed">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                
+                <Grid Grid.Row="0" Margin="0,0,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon Glyph="&#xE74C;" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"/>
+                        <TextBlock Text="Advanced Search Plugin" 
+                                  FontWeight="SemiBold"
+                                  Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"/>
+                    </StackPanel>
+                    
+                    <Border Grid.Column="1"
+                           Background="{ThemeResource SystemFillColorSuccessBrush}"
+                           CornerRadius="4"
+                           Padding="8,4">
+                        <TextBlock Text="✓ Loaded" 
+                                  FontSize="12"
+                                  FontWeight="SemiBold"
+                                  Foreground="White"/>
+                    </Border>
+                </Grid>
+                
+                <!-- This will hold the dynamically loaded plugin UI -->
+                <ContentControl x:Name="FilterContainer" 
+                               Grid.Row="1"
+                               HorizontalContentAlignment="Stretch"/>
+            </Grid>
+        </Border>
+
+        <!-- Built-in Filter Bar (Fallback) -->
+        <Border Grid.Row="2" 
+                x:Name="BuiltInFilterBorder"
                 Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                 BorderThickness="1"
@@ -156,7 +216,7 @@
         </Border>
 
         <!-- Sorting Controls -->
-        <Grid Grid.Row="2" Margin="0,0,0,16">
+        <Grid Grid.Row="3" Margin="0,0,0,16">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
@@ -196,7 +256,7 @@
         </Grid>
 
         <!-- Error InfoBar -->
-        <InfoBar Grid.Row="3"
+        <InfoBar Grid.Row="4"
                  IsOpen="{x:Bind ViewModel.HasError, Mode=OneWay}"
                  Severity="Error"
                  Title="Lỗi"
@@ -205,7 +265,7 @@
                  Margin="0,0,0,16"/>
 
         <!-- DataGrid -->
-        <Grid Grid.Row="4">
+        <Grid Grid.Row="5">
             <!-- Progress Ring -->
             <ProgressRing IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}"
                          Width="60"
@@ -310,7 +370,7 @@
         </Grid>
 
         <!-- Pagination Controls -->
-        <Border Grid.Row="5" 
+        <Border Grid.Row="6" 
                 Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                 BorderThickness="1"
