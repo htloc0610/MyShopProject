@@ -71,25 +71,6 @@ public class CountToVisibilityConverter : IValueConverter
     }
 }
 
-/// <summary>
-/// Inverts bool to visibility.
-/// </summary>
-public class InverseBoolToVisibilityConverter : IValueConverter
-{
-    public object Convert(object value, Type targetType, object parameter, string language)
-    {
-        if (value is bool boolValue)
-        {
-            return boolValue ? Visibility.Collapsed : Visibility.Visible;
-        }
-        return Visibility.Visible;
-    }
-
-    public object ConvertBack(object value, Type targetType, object parameter, string language)
-    {
-        throw new NotImplementedException();
-    }
-}
 
 /// <summary>
 /// Converts IsActive bool to icon glyph (checkmark or block).
