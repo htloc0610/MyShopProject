@@ -42,5 +42,10 @@ namespace MyShopAPI.Models
         /// Navigation property for user's customers.
         /// </summary>
         public ICollection<Customer> Customers { get; set; } = new List<Customer>();
+
+        /// <summary>
+        /// Navigation property for user's discount codes.
+        /// </summary>
+        public ICollection<Discount> Discounts { get; set; } = new List<Discount>();
     }
 }
