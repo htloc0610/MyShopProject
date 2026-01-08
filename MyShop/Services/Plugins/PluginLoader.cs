@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Loader;
+using MyShop.Contracts;
+using MyShop.Contracts.Search;
 using Microsoft.UI.Xaml;
 
 namespace MyShop.Services.Plugins;

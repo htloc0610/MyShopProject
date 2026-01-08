@@ -24,6 +24,15 @@ public interface IProductService
         double? maxPrice = null);
 
     /// <summary>
+    /// Gets ALL products with optional filters (no paging, no keyword search).
+    /// Client should apply fuzzy search and paging.
+    /// </summary>
+    Task<List<Product>> GetAllProductsAsync(
+        int? categoryId = null,
+        double? minPrice = null,
+        double? maxPrice = null);
+
+    /// <summary>
     /// Gets a single product by ID.
     /// </summary>
     Task<Product?> GetProductByIdAsync(int id);

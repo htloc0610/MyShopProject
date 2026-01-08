@@ -2,16 +2,19 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Loader;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Navigation;
-using MyShop.Models.Products;
 using MyShop.ViewModels.Products;
+using MyShop.Models.Products;
+using MyShop.Services.Shared;
 using MyShop.Services.Plugins;
-using MyShopPlugin;
+using MyShop.Contracts;
+using MyShop.Contracts.Search;
 
 namespace MyShop.Views.Products;
 
@@ -70,7 +73,7 @@ public sealed partial class ProductListPage : Page
             // Get the application directory
             var appDirectory = AppContext.BaseDirectory;
             var pluginsDirectory = Path.Combine(appDirectory, "Plugins");
-            var pluginPath = Path.Combine(pluginsDirectory, "MyShopPlugin.dll");
+            var pluginPath = Path.Combine(pluginsDirectory, "FuzzySearch.dll");
 
             System.Diagnostics.Debug.WriteLine($"🔍 Looking for plugin at: {pluginPath}");
 
@@ -100,6 +103,24 @@ public sealed partial class ProductListPage : Page
             // Subscribe to plugin events
             _searchPlugin.OnFilterChanged += OnPluginFilterChanged;
 
+            // Provide categories from host to plugin (loaded from API)
+            if (ViewModel.Categories != null && ViewModel.Categories.Any())
+            {
+                var categoryOptions = ViewModel.Categories
+                    .Select(c => new CategoryOption 
+                    { 
+                        Id = c.CategoryId, 
+                        Name = c.Name 
+                    })
+                    .ToList();
+
+                // Add "All" option at the beginning
+                categoryOptions.Insert(0, new CategoryOption { Id = 0, Name = "Tất cả" });
+
+                _searchPlugin.SetCategories(categoryOptions);
+                System.Diagnostics.Debug.WriteLine($"✅ Provided {categoryOptions.Count} categories to plugin");
+            }
+
             // Try to get plugin-provided UI first
             UIElement? pluginUI = _searchPlugin.GetView();
 
@@ -111,15 +132,11 @@ public sealed partial class ProductListPage : Page
             }
             else
             {
-                // Fall back to host-rendered UI
-                System.Diagnostics.Debug.WriteLine("📝 Plugin UI not available, using host rendering");
-                
-                // Create ViewModel for plugin UI (Host-side)
-                var pluginViewModel = new PluginFilterViewModel(_searchPlugin);
-
-                // Create and set Host-rendered UI
-                var hostRenderedUI = new PluginFilterUI(pluginViewModel);
-                FilterContainer.Content = hostRenderedUI;
+                // Plugin doesn't provide UI - this shouldn't happen with current implementation
+                System.Diagnostics.Debug.WriteLine("⚠️ Plugin UI not available - no fallback UI");
+                ShowBuiltInFilters();
+                DisablePluginToggle();
+                return;
             }
             
             _isPluginAvailable = true;
@@ -161,6 +178,7 @@ public sealed partial class ProductListPage : Page
         BuiltInFilterBorder.Visibility = Visibility.Visible;
         FilterModeToggle.IsChecked = false;
         UpdateToggleButtonUI(false);
+        ViewModel.UseFuzzySearch = false;
     }
 
     /// <summary>
@@ -172,6 +190,7 @@ public sealed partial class ProductListPage : Page
         BuiltInFilterBorder.Visibility = Visibility.Collapsed;
         FilterModeToggle.IsChecked = true;
         UpdateToggleButtonUI(true);
+        ViewModel.UseFuzzySearch = true;
     }
 
     /// <summary>
@@ -254,12 +273,16 @@ public sealed partial class ProductListPage : Page
             System.Diagnostics.Debug.WriteLine($"  CategoryId: {e.CategoryId}");
             System.Diagnostics.Debug.WriteLine($"  MinPrice: {e.MinPrice}");
             System.Diagnostics.Debug.WriteLine($"  MaxPrice: {e.MaxPrice}");
+            System.Diagnostics.Debug.WriteLine($"  UseFuzzySearch: {e.UseFuzzySearch}");
+            System.Diagnostics.Debug.WriteLine($"  FuzzyThreshold: {e.FuzzyThreshold}");
 
             // Update ViewModel with filter values from plugin
             ViewModel.SearchKeyword = e.Keyword ?? string.Empty;
             ViewModel.SelectedCategoryId = e.CategoryId;
             ViewModel.MinPrice = e.MinPrice.HasValue ? (double)e.MinPrice.Value : 0;
             ViewModel.MaxPrice = e.MaxPrice.HasValue ? (double)e.MaxPrice.Value : 0;
+            ViewModel.UseFuzzySearch = e.UseFuzzySearch;
+            ViewModel.FuzzyThreshold = e.FuzzyThreshold;
 
             // Update built-in filter UI to sync with plugin
             if (e.CategoryId.HasValue && ViewModel.Categories != null)
@@ -267,6 +290,10 @@ public sealed partial class ProductListPage : Page
                 ViewModel.SelectedCategory = ViewModel.Categories
                     .FirstOrDefault(c => c.CategoryId == e.CategoryId.Value);
             }
+
+            // Note: Fuzzy search is handled by the plugin's event
+            // The filter arguments already include fuzzy search settings
+            // Host just needs to apply them when filtering
 
             // Reset to page 1 and reload products
             ViewModel.CurrentPage = 1;

@@ -80,6 +80,44 @@ namespace MyShopAPI.Controllers
         }
 
         /// <summary>
+        /// Get ALL products with optional filters (no paging).
+        /// Used by client-side fuzzy search and filtering.
+        /// </summary>
+        [HttpGet("all")]
+        public async Task<ActionResult<List<ProductResponseDto>>> GetAll(
+            [FromQuery] int? categoryId = null,
+            [FromQuery] decimal? minPrice = null,
+            [FromQuery] decimal? maxPrice = null)
+        {
+            // Build query with optional filters
+            var query = _context.Products.Include(p => p.Category).AsQueryable();
+
+            // Apply filters
+            if (categoryId.HasValue && categoryId.Value > 0)
+            {
+                query = query.Where(p => p.CategoryId == categoryId.Value);
+            }
+
+            if (minPrice.HasValue && minPrice.Value >= 0)
+            {
+                query = query.Where(p => p.ImportPrice >= minPrice.Value);
+            }
+
+            if (maxPrice.HasValue && maxPrice.Value >= 0)
+            {
+                query = query.Where(p => p.ImportPrice <= maxPrice.Value);
+            }
+
+            // Load ALL products (no paging)
+            var allProducts = await query.ToListAsync();
+            var productDtos = allProducts.Select(ProductMapper.ToDto).ToList();
+
+            _logger.LogInformation("Returning {Count} products for client-side processing", productDtos.Count);
+
+            return Ok(productDtos);
+        }
+
+        /// <summary>
         /// Get product by id.
         /// </summary>
         [HttpGet("{id:int}")]
