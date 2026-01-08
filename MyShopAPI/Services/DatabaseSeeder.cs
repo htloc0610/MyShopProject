@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MyShopAPI.Data;
 using MyShopAPI.Models;
@@ -100,6 +100,10 @@ public class DatabaseSeeder
             await SeedElectronicsProducts(categories[0].CategoryId, demoUserId);
             await SeedFashionProducts(categories[1].CategoryId, demoUserId);
             await SeedHomeLivingProducts(categories[2].CategoryId, demoUserId);
+
+            await _context.SaveChangesAsync();
+
+            await SeedOrdersAsync(demoUserId);
 
             await _context.SaveChangesAsync();
 
@@ -270,4 +274,99 @@ public class DatabaseSeeder
         await _context.Products.AddRangeAsync(products);
         _logger.LogInformation("Seeded {Count} Home & Living products", products.Length);
     }
+
+    private async Task SeedOrdersAsync(string userId)
+    {
+        // Nếu đã có order thì không seed nữa
+        var hasOrders = await _context.Orders.IgnoreQueryFilters().AnyAsync();
+        if (hasOrders)
+        {
+            _logger.LogInformation("Orders already exist. Skipping order seeding.");
+            return;
+        }
+
+        _logger.LogInformation("Seeding demo orders...");
+
+        var random = new Random();
+
+        // Lấy danh sách product của demo user
+        var products = await _context.Products
+            .IgnoreQueryFilters()
+            .Where(p => p.UserId == userId)
+            .ToListAsync();
+
+        if (!products.Any())
+        {
+            _logger.LogWarning($"UserId: {userId}");
+            //16406b84-16d0-4391-820d-000d034a53bd
+            _logger.LogWarning("No products found. Skipping order seeding.");
+            return;
+        }
+
+        var orders = new List<Order>();
+        var orderItems = new List<OrderItem>();
+
+        // Seed ~30 ngày trong tháng hiện tại
+        var today = DateTime.UtcNow.Date;
+        var startDate = today.AddDays(-29);
+
+        int orderIdCounter = 1;
+
+        for (int i = 0; i < 30; i++)
+        {
+            var orderDate = startDate.AddDays(i);
+
+            // mỗi ngày 1–4 đơn
+            var ordersPerDay = random.Next(1, 5);
+
+            for (int j = 0; j < ordersPerDay; j++)
+            {
+                var order = new Order
+                {
+                    CreatedTime = orderDate.AddHours(random.Next(8, 21)),
+                    UserId = userId
+                };
+
+                // mỗi order có 1–3 sản phẩm
+                var itemsCount = random.Next(1, 4);
+                var selectedProducts = products
+                    .OrderBy(_ => random.Next())
+                    .Take(itemsCount)
+                    .ToList();
+
+                int finalPrice = 0;
+
+                foreach (var product in selectedProducts)
+                {
+                    var quantity = random.Next(1, 4);
+                    var unitPrice = product.ImportPrice + random.Next(50, 300); // bán có lời
+
+                    var itemTotal = quantity * unitPrice;
+                    finalPrice += itemTotal;
+
+                    orderItems.Add(new OrderItem
+                    {
+                        Order = order,
+                        ProductId = product.ProductId,
+                        Quantity = quantity,
+                        UnitSalePrice = unitPrice,
+                        TotalPrice = itemTotal
+                    });
+                }
+
+                order.FinalPrice = finalPrice;
+                orders.Add(order);
+            }
+        }
+
+        await _context.Orders.AddRangeAsync(orders);
+        await _context.OrderItems.AddRangeAsync(orderItems);
+
+        _logger.LogInformation(
+            "Seeded {OrderCount} orders with {ItemCount} order items",
+            orders.Count,
+            orderItems.Count
+        );
+    }
+
 }
