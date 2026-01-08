@@ -29,6 +29,14 @@
             <converters:NullToVisibilityInverseConverter x:Key="NullToVisibilityInverseConverter"/>
             <converters:InverseBoolConverter x:Key="InverseBoolConverter"/>
             
+            <!-- Discount Converters -->
+            <converters:StatusToColorConverter x:Key="StatusToColorConverter"/>
+            <converters:DateConverter x:Key="DateConverter"/>
+            <converters:CountToVisibilityConverter x:Key="CountToVisibilityConverter"/>
+            <converters:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibilityConverter"/>
+            <converters:ActiveIconConverter x:Key="ActiveIconConverter"/>
+            <converters:ActiveTooltipConverter x:Key="ActiveTooltipConverter"/>
+            
             <!-- Role-Based Converters -->
             <converters:RoleToVisibilityConverter x:Key="RoleToVisibilityConverter"/>
             <converters:OwnerOnlyVisibilityConverter x:Key="OwnerOnlyVisibilityConverter"/>

@@ -42,8 +42,8 @@ public class DatabaseSeeder
     {
         try
         {
-            // Ensure database is created
-            await _context.Database.EnsureCreatedAsync();
+            // Apply any pending migrations (creates database if not exists)
+            await _context.Database.MigrateAsync();
 
             // Seed roles first
             await SeedRolesAsync();
