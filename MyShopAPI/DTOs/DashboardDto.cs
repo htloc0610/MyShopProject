@@ -36,8 +36,8 @@
     public class RecentOrderDto
     {
         public int OrderId { get; set; }
-        public DateTime CreatedTime { get; set; }
-        public decimal FinalPrice { get; set; }
+        public DateTime OrderDate { get; set; }
+        public decimal FinalAmount { get; set; }
     }
 
     // ==============================

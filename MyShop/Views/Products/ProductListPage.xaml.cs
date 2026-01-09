@@ -80,7 +80,7 @@ public sealed partial class ProductListPage : Page
             // Check if plugin file exists
             if (!File.Exists(pluginPath))
             {
-                System.Diagnostics.Debug.WriteLine("❌ Plugin file not found. Using built-in filters.");
+                System.Diagnostics.Debug.WriteLine("Plugin file not found. Using built-in filters.");
                 ShowBuiltInFilters();
                 DisablePluginToggle();
                 return;
@@ -91,14 +91,14 @@ public sealed partial class ProductListPage : Page
 
             if (_searchPlugin == null)
             {
-                System.Diagnostics.Debug.WriteLine("❌ Failed to load plugin.");
+                System.Diagnostics.Debug.WriteLine("Failed to load plugin.");
                 ShowBuiltInFilters();
                 DisablePluginToggle();
                 return;
             }
 
-            System.Diagnostics.Debug.WriteLine($"✅ Plugin loaded: {_searchPlugin.Name}");
-            System.Diagnostics.Debug.WriteLine($"   Description: {_searchPlugin.Description}");
+            System.Diagnostics.Debug.WriteLine($"Plugin loaded: {_searchPlugin.Name}");
+            System.Diagnostics.Debug.WriteLine($"Description: {_searchPlugin.Description}");
 
             // Subscribe to plugin events
             _searchPlugin.OnFilterChanged += OnPluginFilterChanged;
@@ -118,7 +118,7 @@ public sealed partial class ProductListPage : Page
                 categoryOptions.Insert(0, new CategoryOption { Id = 0, Name = "Tất cả" });
 
                 _searchPlugin.SetCategories(categoryOptions);
-                System.Diagnostics.Debug.WriteLine($"✅ Provided {categoryOptions.Count} categories to plugin");
+                System.Diagnostics.Debug.WriteLine($"Provided {categoryOptions.Count} categories to plugin");
             }
 
             // Try to get plugin-provided UI first
@@ -127,7 +127,7 @@ public sealed partial class ProductListPage : Page
             if (pluginUI != null)
             {
                 // Use plugin's custom UI (pure C# implementation)
-                System.Diagnostics.Debug.WriteLine("✅ Using plugin-provided custom UI");
+                System.Diagnostics.Debug.WriteLine("Using plugin-provided custom UI");
                 FilterContainer.Content = pluginUI;
             }
             else
@@ -145,14 +145,14 @@ public sealed partial class ProductListPage : Page
             ShowBuiltInFilters();
             EnablePluginToggle();
 
-            System.Diagnostics.Debug.WriteLine("✅ Plugin UI setup complete!");
+            System.Diagnostics.Debug.WriteLine("Plugin UI setup complete!");
             
             // Show success notification
             ShowPluginStatus($"Plugin loaded: {_searchPlugin.Name}", true);
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"❌ Error loading plugin: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"Error loading plugin: {ex.Message}");
             System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
             ShowBuiltInFilters();
             DisablePluginToggle();
@@ -234,7 +234,7 @@ public sealed partial class ProductListPage : Page
     /// </summary>
     private void ShowPluginStatus(string message, bool isSuccess)
     {
-        System.Diagnostics.Debug.WriteLine($"{(isSuccess ? "✅" : "❌")} {message}");
+        System.Diagnostics.Debug.WriteLine($"{(isSuccess ? "SUCCESS" : "ERROR")} {message}");
         // Optionally show a brief notification in the UI if needed
     }
 
@@ -301,7 +301,7 @@ public sealed partial class ProductListPage : Page
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"❌ Error handling plugin filter: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"Error handling plugin filter: {ex.Message}");
             
             // Show error dialog
             var dialog = new ContentDialog

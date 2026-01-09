@@ -325,12 +325,12 @@ public class AdvancedSearchUI : UserControl
 
             _plugin.ApplyFilter(filter);
 
-            System.Diagnostics.Debug.WriteLine("✅ Filter applied from plugin UI");
-            System.Diagnostics.Debug.WriteLine($"   Fuzzy: {filter.UseFuzzySearch}, Threshold: {filter.FuzzyThreshold}");
+            System.Diagnostics.Debug.WriteLine("Filter applied from plugin UI");
+            System.Diagnostics.Debug.WriteLine($"Fuzzy: {filter.UseFuzzySearch}, Threshold: {filter.FuzzyThreshold}");
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"❌ Filter error: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"Filter error: {ex.Message}");
             ShowErrorDialog($"Lỗi: {ex.Message}");
         }
     }
@@ -360,7 +360,7 @@ public class AdvancedSearchUI : UserControl
         }
 
         _plugin.ClearFilter();
-        System.Diagnostics.Debug.WriteLine("✅ Filter cleared");
+        System.Diagnostics.Debug.WriteLine("Filter cleared");
     }
 
     private async void ShowErrorDialog(string message)

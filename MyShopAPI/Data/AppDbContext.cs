@@ -60,6 +60,16 @@ namespace MyShopAPI.Data
                     .HasForeignKey(o => o.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
 
+                entity.HasMany(u => u.Customers)
+                    .WithOne(c => c.User)
+                    .HasForeignKey(c => c.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasMany(u => u.Discounts)
+                    .WithOne(d => d.User)
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
                 entity.HasMany(u => u.RefreshTokens)
                     .WithOne(r => r.User)
                     .HasForeignKey(r => r.UserId)
@@ -97,7 +107,19 @@ namespace MyShopAPI.Data
             // Configure Order
             modelBuilder.Entity<Order>(entity =>
             {
-                entity.HasIndex(o => new { o.UserId, o.CreatedTime });
+                entity.HasIndex(o => new { o.UserId, o.OrderDate });
+                
+                // Configure Order-Customer relationship
+                entity.HasOne(o => o.Customer)
+                    .WithMany()
+                    .HasForeignKey(o => o.CustomerId)
+                    .OnDelete(DeleteBehavior.SetNull);
+                
+                // Configure Order-Coupon relationship
+                entity.HasOne(o => o.Coupon)
+                    .WithMany()
+                    .HasForeignKey(o => o.CouponId)
+                    .OnDelete(DeleteBehavior.SetNull);
             });
 
             // Configure Customer indexes

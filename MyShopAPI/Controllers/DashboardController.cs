@@ -30,11 +30,11 @@ namespace MyShopAPI.Controllers
             var totalProducts = await _context.Products.CountAsync();
 
             var todayOrders = await _context.Orders
-                .CountAsync(o => o.CreatedTime >= today);
+                .CountAsync(o => o.OrderDate >= today);
 
             var todayRevenue = await _context.Orders
-                .Where(o => o.CreatedTime >= today)
-                .SumAsync(o => (decimal?)o.FinalPrice) ?? 0;
+                .Where(o => o.OrderDate >= today)
+                .SumAsync(o => (decimal?)o.FinalAmount) ?? 0;
             return Ok(new DashboardSummaryDto
             {
                 TotalProducts = totalProducts,
@@ -92,13 +92,13 @@ namespace MyShopAPI.Controllers
         public async Task<ActionResult<IEnumerable<RecentOrderDto>>> GetRecentOrders()
         {
             var orders = await _context.Orders
-                .OrderByDescending(o => o.CreatedTime)
+                .OrderByDescending(o => o.OrderDate)
                 .Take(3)
                 .Select(o => new RecentOrderDto
                 {
                     OrderId = o.OrderId,
-                    CreatedTime = o.CreatedTime,
-                    FinalPrice = o.FinalPrice
+                    OrderDate = o.OrderDate,
+                    FinalAmount = o.FinalAmount
                 })
                 .ToListAsync();
 
@@ -125,12 +125,12 @@ namespace MyShopAPI.Controllers
                 var end = start.AddMonths(1);
 
                 var revenue = await _context.Orders
-                    .Where(o => o.CreatedTime >= start && o.CreatedTime < end)
-                    .GroupBy(o => o.CreatedTime.Day)
+                    .Where(o => o.OrderDate >= start && o.OrderDate < end)
+                    .GroupBy(o => o.OrderDate.Day)
                     .Select(g => new RevenueByDayDto
                     {
                         Day = g.Key,
-                        Revenue = g.Sum(o => (decimal)o.FinalPrice)
+                        Revenue = g.Sum(o => (decimal)o.FinalAmount)
                     })
                     .OrderBy(x => x.Day)
                     .ToListAsync();

@@ -15,6 +15,17 @@
     <!-- Fix UTF-8 encoding issues -->
     <Utf8Output>true</Utf8Output>
     <LangVersion>latest</LangVersion>
+    
+    <!-- Enable debugging in Debug mode -->
+    <DebugType Condition="'$(Configuration)' == 'Debug'">portable</DebugType>
+    <DebugSymbols Condition="'$(Configuration)' == 'Debug'">true</DebugSymbols>
+    
+    <!-- Disable debug in Release mode -->
+    <DebugType Condition="'$(Configuration)' == 'Release'">none</DebugType>
+    <DebugSymbols Condition="'$(Configuration)' == 'Release'">false</DebugSymbols>
+    
+    <!-- Disable XAML debug breaks but keep debugging enabled -->
+    <DisableXamlGeneratedBreakOnUnhandledException>true</DisableXamlGeneratedBreakOnUnhandledException>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="MyShopAPI\**" />

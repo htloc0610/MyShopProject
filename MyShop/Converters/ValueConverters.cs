@@ -124,6 +124,10 @@ namespace MyShop.Converters
             {
                 return isDescending ? "\uE74B" : "\uE74A"; // Down arrow : Up arrow
             }
+            if (value is string direction)
+            {
+                return direction.Equals("desc", StringComparison.OrdinalIgnoreCase) ? "\uE74B" : "\uE74A";
+            }
             return "\uE74A"; // Default: Up arrow
         }
 

@@ -8,9 +8,8 @@ using MyShop.Services.Dashboard;
 using MyShop.Services.Products;
 using MyShop.Services.Reports;
 using MyShop.Services.Shared;
-using MyShop.Services.Auth;
-using MyShop.Services.Customers;
 using MyShop.Services.Discounts;
+using MyShop.Services.Orders;
 using MyShop.ViewModels;
 using MyShop.ViewModels.Auth;
 using MyShop.ViewModels.Categories;
@@ -18,8 +17,9 @@ using MyShop.ViewModels.Customers;
 using MyShop.ViewModels.Dashboard;
 using MyShop.ViewModels.Products;
 using MyShop.ViewModels.Reports;
-using System;
 using MyShop.ViewModels.Discounts;
+using MyShop.ViewModels.Orders;
+using System;
 using System.Diagnostics;
 using System.Net.Http;
 using LiveChartsCore.SkiaSharpView;
@@ -57,8 +57,32 @@ public partial class App : Application
     {
         Services = ConfigureServices();
         InitializeComponent();
+        
+        // Handle unhandled exceptions with logging
+        this.UnhandledException += OnUnhandledException;
+        
         LiveCharts.Configure(config =>
             config.AddSkiaSharp());
+            
+        // Disable all debug features
+        #if DEBUG
+        // Comment out all debug settings to disable debugging features
+        // this.DebugSettings.EnableFrameRateCounter = false;
+        // this.DebugSettings.IsBindingTracingEnabled = false;
+        // this.DebugSettings.IsOverdrawHeatMapEnabled = false;
+        #endif
+    }
+
+    private void OnUnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
+    {
+        Debug.WriteLine($"=== UNHANDLED EXCEPTION ===");
+        Debug.WriteLine($"Message: {e.Message}");
+        Debug.WriteLine($"Exception: {e.Exception}");
+        Debug.WriteLine($"Stack Trace: {e.Exception?.StackTrace}");
+        Debug.WriteLine($"===========================");
+        
+        // Mark as handled so app doesn't crash and debugger doesn't break
+        e.Handled = true;
     }
 
     /// <summary>
@@ -134,6 +158,13 @@ public partial class App : Application
             return new DiscountService(httpClient);
         });
 
+        services.AddSingleton<IOrderService>(sp =>
+        {
+            var sessionService = sp.GetRequiredService<ISessionService>();
+            var httpClient = CreateAuthenticatedHttpClient(baseAddress, sessionService);
+            return new OrderService(httpClient);
+        });
+
         // ====================================================
         // Other Services
         // ====================================================
@@ -150,6 +181,7 @@ public partial class App : Application
         services.AddTransient<ReportViewModel>();
         services.AddTransient<DiscountViewModel>();
         services.AddTransient<MainWindowViewModel>();
+        services.AddTransient<CreateOrderViewModel>();
 
         return services.BuildServiceProvider();
     }
@@ -170,9 +202,6 @@ public partial class App : Application
     /// <summary>
     /// Invoked when the application is launched.
     /// </summary>
-    /// <summary>
-    /// Invoked when the application is launched.
-    /// </summary>
     protected override async void OnLaunched(LaunchActivatedEventArgs args)
     {
         _window = new MainWindow();
@@ -188,43 +217,29 @@ public partial class App : Application
         {
             var credentialService = Services.GetRequiredService<ICredentialService>();
             var authService = Services.GetRequiredService<IAuthService>();
-            var sessionService = Services.GetRequiredService<ISessionService>(); // Ensure session is ready
+            var sessionService = Services.GetRequiredService<ISessionService>();
 
             if (MainWindow is MainWindow mainWindow)
             {
                 if (credentialService.HasStoredCredentials())
                 {
-                    Debug.WriteLine("=== App: Found stored credentials, attempting silent login... ===");
-                    // We need to preload the session with the token so AuthService can use it if needed,
-                    // or just rely on RefreshTokenAsync which uses CredentialService directly.
-                    // AuthService.RefreshTokenAsync uses CredentialService.GetRefreshToken().
-                    
                     var result = await authService.RefreshTokenAsync();
                     if (result.Success)
                     {
-                        Debug.WriteLine("=== App: Silent login success ===");
                         mainWindow.ShowMainContent();
                         return;
                     }
                     else
                     {
-                        Debug.WriteLine($"=== App: Silent login failed: {result.ErrorMessage} ===");
-                        // Token invalid/expired and refresh failed -> Clear and show login
                         credentialService.ClearCredentials();
                     }
                 }
-                else
-                {
-                    Debug.WriteLine("=== App: No stored credentials ===");
-                }
 
-                // Fallback to login page
                 mainWindow.ShowLoginPage();
             }
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            Debug.WriteLine($"=== App: Auto-login error: {ex.Message} ===");
             if (MainWindow is MainWindow mw)
             {
                 mw.ShowLoginPage();
@@ -250,17 +265,10 @@ internal class AuthenticatedHttpMessageHandler : HttpClientHandler
         System.Threading.CancellationToken cancellationToken)
     {
         var accessToken = _sessionService.AccessToken;
-        Debug.WriteLine($"=== API Request: {request.RequestUri} ===");
-        Debug.WriteLine($"=== Token Available: {!string.IsNullOrEmpty(accessToken)} ===");
         
         if (!string.IsNullOrEmpty(accessToken))
         {
             request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
-            Debug.WriteLine("=== Token attached to header ===");
-        }
-        else
-        {
-            Debug.WriteLine("=== NO TOKEN attached ===");
         }
 
         return await base.SendAsync(request, cancellationToken);

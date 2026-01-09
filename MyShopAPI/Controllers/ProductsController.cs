@@ -255,7 +255,7 @@ namespace MyShopAPI.Controllers
 
                 if (products == null || products.Count == 0)
                 {
-                    result.Errors.Add("⛔ Không có dữ liệu để import");
+                    result.Errors.Add("Không có dữ liệu để import");
                     return BadRequest(result);
                 }
 
@@ -274,30 +274,26 @@ namespace MyShopAPI.Controllers
                         // Validate required fields
                         if (string.IsNullOrWhiteSpace(dto.Name))
                         {
-                            validationErrors.Add($"❌ Sản phẩm {i + 1} (Dòng {rowNumber}): Tên không được để trống");
-                            continue;
-                        }
+                            validationErrors.Add($"Sản phẩm {i + 1} (Dòng {rowNumber}): Tên không được để trống");
+                            continue;                       }
 
                         if (string.IsNullOrWhiteSpace(dto.Sku))
                         {
-                            validationErrors.Add($"❌ Sản phẩm {i + 1} (Dòng {rowNumber}): SKU không được để trống");
-                            continue;
-                        }
+                            validationErrors.Add($"Sản phẩm {i + 1} (Dòng {rowNumber}): SKU không được để trống");
+                            continue;                       }
 
                         // Check duplicate SKU in the current batch
                         if (skuSet.Contains(dto.Sku))
                         {
-                            validationErrors.Add($"❌ Sản phẩm {i + 1} (Dòng {rowNumber}, '{dto.Name}'): SKU '{dto.Sku}' bị trùng trong file");
-                            continue;
-                        }
+                            validationErrors.Add($"Sản phẩm {i + 1} (Dòng {rowNumber}, '{dto.Name}'): SKU '{dto.Sku}' bị trùng trong file");
+                            continue;                       }
 
                         // Check if SKU already exists in database
                         var skuExists = await _context.Products.AnyAsync(p => p.Sku == dto.Sku);
                         if (skuExists)
                         {
-                            validationErrors.Add($"❌ Sản phẩm {i + 1} (Dòng {rowNumber}, '{dto.Name}'): SKU '{dto.Sku}' đã tồn tại trong hệ thống");
-                            continue;
-                        }
+                            validationErrors.Add($"Sản phẩm {i + 1} (Dòng {rowNumber}, '{dto.Name}'): SKU '{dto.Sku}' đã tồn tại trong hệ thống");
+                            continue;                       }
 
                         // Validate category exists
                         var categoryExists = await _context.Categories
@@ -305,23 +301,20 @@ namespace MyShopAPI.Controllers
 
                         if (!categoryExists)
                         {
-                            validationErrors.Add($"❌ Sản phẩm {i + 1} (Dòng {rowNumber}, '{dto.Name}'): CategoryId {dto.CategoryId} không hợp lệ");
-                            continue;
-                        }
+                            validationErrors.Add($"Sản phẩm {i + 1} (Dòng {rowNumber}, '{dto.Name}'): CategoryId {dto.CategoryId} không hợp lệ");
+                            continue;                       }
 
                         // Validate price
                         if (dto.Price <= 0)
                         {
-                            validationErrors.Add($"❌ Sản phẩm {i + 1} (Dòng {rowNumber}, '{dto.Name}'): Giá ({dto.Price}) phải lớn hơn 0");
-                            continue;
-                        }
+                            validationErrors.Add($"Sản phẩm {i + 1} (Dòng {rowNumber}, '{dto.Name}'): Giá ({dto.Price}) phải lớn hơn 0");
+                            continue;                       }
 
                         // Validate stock
                         if (dto.Stock < 0)
                         {
-                            validationErrors.Add($"❌ Sản phẩm {i + 1} (Dòng {rowNumber}, '{dto.Name}'): Số lượng ({dto.Stock}) không được âm");
-                            continue;
-                        }
+                            validationErrors.Add($"Sản phẩm {i + 1} (Dòng {rowNumber}, '{dto.Name}'): Số lượng ({dto.Stock}) không được âm");
+                            continue;                       }
 
                         // Add to SKU tracking set
                         skuSet.Add(dto.Sku);
@@ -330,9 +323,8 @@ namespace MyShopAPI.Controllers
                         var userId = _userContextService.GetUserId();
                         if (string.IsNullOrEmpty(userId))
                         {
-                            validationErrors.Add($"❌ User not authenticated");
-                            continue;
-                        }
+                            validationErrors.Add($"User not authenticated");
+                            continue;                       }
 
                         // Create product entity (but don't insert yet)
                         var product = new Product
@@ -350,8 +342,8 @@ namespace MyShopAPI.Controllers
                     }
                     catch (Exception ex)
                     {
-                        validationErrors.Add($"❌ Sản phẩm {i + 1} (Dòng {rowNumber}, '{dto.Name}'): Lỗi xử lý - {ex.Message}");
-                        _logger.LogError(ex, "Error processing product {Index}", i + 1);
+                        validationErrors.Add($"Sản phẩm {i + 1} (Dòng {rowNumber}, '{dto.Name}'): Lỗi xử lý - {ex.Message}");
+                        _logger.LogError(ex, "Eor processing product {Index}", i + 1);
                     }
                 }
 
@@ -359,15 +351,15 @@ namespace MyShopAPI.Controllers
                 if (validationErrors.Any())
                 {
                     // Reject the entire batch
-                    result.Errors.Add("⛔ BATCH BỊ TỪ CHỐI - Dữ liệu chứa lỗi");
-                    result.Errors.Add($"📊 Tổng số sản phẩm: {products.Count}");
-                    result.Errors.Add($"❌ Số lỗi phát hiện: {validationErrors.Count}");
-                    result.Errors.Add($"✅ Số sản phẩm hợp lệ: {validProducts.Count}");
+                    result.Errors.Add("BATCH BỊ TỪ CHỐI - Dữ liệu chứa lỗi");
+                    result.Errors.Add($"Tổng số sản phẩm: {products.Count}");
+                    result.Errors.Add($"Số lỗi phát hiện: {validationErrors.Count}");
+                    result.Errors.Add($"Số sản phẩm hợp lệ: {validProducts.Count}");
                     result.Errors.Add("");
-                    result.Errors.Add("📝 CHI TIẾT LỖI:");
+                    result.Errors.Add("CHI TIẾT LỖI:");
                     result.Errors.AddRange(validationErrors);
                     result.Errors.Add("");
-                    result.Errors.Add("💡 Vui lòng sửa TẤT CẢ các lỗi và thử lại. Không có sản phẩm nào được import.");
+                    result.Errors.Add("Vui lòng sửa TẤT CẢ các lỗi và thử lại. Không có sản phẩm nào được import.");
 
                     _logger.LogWarning("Bulk import rejected: {ErrorCount} validation errors found", validationErrors.Count);
                     
@@ -387,15 +379,15 @@ namespace MyShopAPI.Controllers
                 }
                 else
                 {
-                    result.Errors.Add("⛔ Không có sản phẩm hợp lệ để import");
+                    result.Errors.Add("Không có sản phẩm hợp lệ để import");
                     return BadRequest(result);
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error during bulk import");
-                result.Errors.Add($"⛔ LỖI HỆ THỐNG: {ex.Message}");
-                result.Errors.Add("💡 Vui lòng liên hệ quản trị viên nếu lỗi tiếp tục xảy ra.");
+                result.Errors.Add($"LỖI HỆ THỐNG: {ex.Message}");
+                result.Errors.Add("Vui lòng liên hệ quản trị viên nếu lỗi tiếp tục xảy ra.");
                 return StatusCode(500, result);
             }
         }

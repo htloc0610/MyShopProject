@@ -18,8 +18,8 @@
     {
         public int ProductId { get; set; }
         public string ProductName { get; set; } = string.Empty;
-        public long Revenue { get; set; }
-        public long Profit { get; set; }
+        public decimal Revenue { get; set; }
+        public decimal Profit { get; set; }
     }
 
     public class ProductRevenueProfitSummaryDto

@@ -32,14 +32,14 @@ namespace MyShopAPI.Controllers
                     from.Value.ToDateTime(TimeOnly.MinValue),
                     DateTimeKind.Utc);
 
-                query = query.Where(x => x.Order.CreatedTime >= fromUtc);
+                query = query.Where(x => x.Order.OrderDate >= fromUtc);
             }
 
             var toUtcExclusive = DateTime.SpecifyKind(
                 to.AddDays(1).ToDateTime(TimeOnly.MinValue),
                 DateTimeKind.Utc);
 
-            query = query.Where(x => x.Order.CreatedTime < toUtcExclusive);
+            query = query.Where(x => x.Order.OrderDate < toUtcExclusive);
 
             var items = await query
                 .GroupBy(x => new
@@ -78,14 +78,14 @@ namespace MyShopAPI.Controllers
                     from.Value.ToDateTime(TimeOnly.MinValue),
                     DateTimeKind.Utc);
 
-                query = query.Where(x => x.Order.CreatedTime >= fromUtc);
+                query = query.Where(x => x.Order.OrderDate >= fromUtc);
             }
 
             var toUtcExclusive = DateTime.SpecifyKind(
                 to.AddDays(1).ToDateTime(TimeOnly.MinValue),
                 DateTimeKind.Utc);
 
-            query = query.Where(x => x.Order.CreatedTime < toUtcExclusive);
+            query = query.Where(x => x.Order.OrderDate < toUtcExclusive);
 
             var items = await query
                 .GroupBy(x => new
@@ -99,7 +99,7 @@ namespace MyShopAPI.Controllers
                     ProductName = g.Key.Name,
                     Revenue = g.Sum(x => x.TotalPrice),
                     Profit = g.Sum(x =>
-                        (long)((x.UnitSalePrice - x.Product.ImportPrice) * x.Quantity)
+                        ((decimal)x.UnitPrice - (decimal)x.Product.ImportPrice) * x.Quantity
                     )
                 })
                 .OrderByDescending(x => x.Revenue)
