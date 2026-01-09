@@ -30,6 +30,9 @@
             <converters:NullToVisibilityInverseConverter x:Key="NullToVisibilityInverseConverter"/>
             <converters:InverseBoolConverter x:Key="InverseBoolConverter"/>
             <helperConverters:DecimalToFormattedStringConverter x:Key="DecimalToFormattedStringConverter"/>
+            <converters:RelativeToAbsoluteUrlConverter x:Key="RelativeToAbsoluteUrlConverter"/>
+            <converters:BoolToStringConverter x:Key="BoolToStringConverter"/>
+            <converters:BoolToGlyphConverter x:Key="BoolToGlyphConverter"/>
 
             <converters:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibilityConverter"/>
             

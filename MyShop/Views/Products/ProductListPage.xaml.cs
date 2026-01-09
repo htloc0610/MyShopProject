@@ -328,6 +328,17 @@ public sealed partial class ProductListPage : Page
     }
 
     /// <summary>
+    /// Handles click on Product Item Key in Grid View manual implementation.
+    /// </summary>
+    private void ProductItem_Click(object sender, RoutedEventArgs e)
+    {
+        if ((sender as FrameworkElement)?.DataContext is Product product)
+        {
+            NavigateToProductDetail(product);
+        }
+    }
+
+    /// <summary>
     /// Handles View Detail button click.
     /// </summary>
     private void ViewDetailButton_Click(object sender, RoutedEventArgs e)

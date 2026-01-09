@@ -36,6 +36,7 @@ namespace MyShopAPI.Data
         public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
         public DbSet<Customer> Customers => Set<Customer>();
         public DbSet<Discount> Discounts => Set<Discount>();
+        public DbSet<ProductImage> ProductImages => Set<ProductImage>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -102,6 +103,11 @@ namespace MyShopAPI.Data
             modelBuilder.Entity<Product>(entity =>
             {
                 entity.HasIndex(p => new { p.UserId, p.Sku });
+
+                entity.HasMany(p => p.Images)
+                    .WithOne(i => i.Product)
+                    .HasForeignKey(i => i.ProductId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             // Configure Order
@@ -139,10 +145,6 @@ namespace MyShopAPI.Data
             });
 
             // ====================================================
-            // GLOBAL QUERY FILTERS for Multi-Tenant Data Isolation
-            // These filters automatically filter queries by UserId
-            // ====================================================
-
             // GLOBAL QUERY FILTERS for Multi-Tenant Data Isolation
             // These filters automatically filter queries by UserId
             // ====================================================

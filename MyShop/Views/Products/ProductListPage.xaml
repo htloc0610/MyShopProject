@@ -14,14 +14,13 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <!-- Header -->
         <Grid Grid.Row="0" Margin="0,0,0,20">
+            <!-- ... existing header content ... -->
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
@@ -41,6 +40,24 @@
             </StackPanel>
 
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
+                <!-- Toggle View Mode Button -->
+                <ToggleButton IsChecked="{x:Bind ViewModel.IsGridView, Mode=TwoWay}"
+                             ToolTipService.ToolTip="Chuyển đổi dạng danh sách / lưới">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon Glyph="{x:Bind ViewModel.IsGridView, Mode=OneWay, Converter={StaticResource BoolToGlyphConverter}, ConverterParameter='&#xE80A;|&#xE80B;'}" FontSize="16"/>
+                        <TextBlock Text="{x:Bind ViewModel.IsGridView, Mode=OneWay, Converter={StaticResource BoolToStringConverter}, ConverterParameter='Dạng lưới|Dạng danh sách'}" />
+                    </StackPanel>
+                </ToggleButton>
+
+                <!-- Toggle Visibility Button -->
+                <ToggleButton IsChecked="{x:Bind ViewModel.IsFilterVisible, Mode=TwoWay}"
+                             ToolTipService.ToolTip="Hiện/Ẩn bộ lọc và sắp xếp">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon Glyph="&#xE71C;" FontSize="16"/>
+                        <TextBlock Text="Bộ lọc" />
+                    </StackPanel>
+                </ToggleButton>
+
                 <!-- Toggle Filter Mode Button -->
                 <ToggleButton x:Name="FilterModeToggle"
                              IsChecked="False"
@@ -62,201 +79,208 @@
             </StackPanel>
         </Grid>
 
-        <!-- Plugin Filter Container (Dynamic) -->
-        <Border Grid.Row="1" 
-                x:Name="PluginFilterBorder"
-                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                BorderThickness="1"
-                CornerRadius="8"
-                Padding="16"
-                Margin="0,0,0,16"
-                Visibility="Collapsed">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
-                
-                <Grid Grid.Row="0" Margin="0,0,0,12">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
+        <!-- Filter and Sort Section Container -->
+        <StackPanel Grid.Row="1" 
+                    x:Name="FilterSectionContainer"
+                    Visibility="{x:Bind ViewModel.IsFilterVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
+                    Spacing="0">
+            <!-- ... existing content ... -->
+            
+            <!-- Plugin Filter Container (Dynamic) -->
+            <Border x:Name="PluginFilterBorder"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="16"
+                    Margin="0,0,0,16"
+                    Visibility="Collapsed">
+                 <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
                     
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <FontIcon Glyph="&#xE74C;" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"/>
-                        <TextBlock Text="Advanced Search Plugin" 
-                                  FontWeight="SemiBold"
-                                  Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"/>
-                    </StackPanel>
-                    
-                    <Border Grid.Column="1"
-                           Background="{ThemeResource SystemFillColorSuccessBrush}"
-                           CornerRadius="4"
-                           Padding="8,4">
-                        <TextBlock Text="✓ Loaded" 
-                                  FontSize="12"
-                                  FontWeight="SemiBold"
-                                  Foreground="White"/>
-                    </Border>
-                </Grid>
-                
-                <!-- This will hold the dynamically loaded plugin UI -->
-                <ContentControl x:Name="FilterContainer" 
-                               Grid.Row="1"
-                               HorizontalContentAlignment="Stretch"/>
-            </Grid>
-        </Border>
-
-        <!-- Built-in Filter Bar (Fallback) -->
-        <Border Grid.Row="2" 
-                x:Name="BuiltInFilterBorder"
-                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                BorderThickness="1"
-                CornerRadius="8"
-                Padding="16"
-                Margin="0,0,0,16">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
-
-                <!-- First Row: Search and Category -->
-                <Grid Grid.Row="0" Margin="0,0,0,12">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="2*"/>
-                        <ColumnDefinition Width="12"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-
-                    <!-- Search Box -->
-                    <TextBox Grid.Column="0"
-                            PlaceholderText="Tìm kiếm theo tên sản phẩm..."
-                            Text="{x:Bind ViewModel.SearchKeyword, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                            VerticalAlignment="Center">
-                        <TextBox.Header>
-                            <TextBlock Text="Tìm kiếm" FontWeight="SemiBold"/>
-                        </TextBox.Header>
-                    </TextBox>
-
-                    <!-- Category Filter -->
-                    <ComboBox Grid.Column="2"
-                             ItemsSource="{x:Bind ViewModel.Categories, Mode=OneWay}"
-                             SelectedItem="{x:Bind ViewModel.SelectedCategory, Mode=TwoWay}"
-                             DisplayMemberPath="Name"
-                             HorizontalAlignment="Stretch"
-                             VerticalAlignment="Center">
-                        <ComboBox.Header>
-                            <TextBlock Text="Loại sản phẩm" FontWeight="SemiBold"/>
-                        </ComboBox.Header>
-                    </ComboBox>
-                </Grid>
-
-                <!-- Second Row: Price Range and Buttons -->
-                <Grid Grid.Row="1">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="12"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="12"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-
-                    <!-- Min Price -->
-                    <NumberBox Grid.Column="0"
-                              Value="{x:Bind ViewModel.MinPrice, Mode=TwoWay}"
-                              PlaceholderText="0"
-                              SpinButtonPlacementMode="Compact"
-                              Minimum="0"
-                              VerticalAlignment="Center">
-                        <NumberBox.Header>
-                            <TextBlock Text="Giá tối thiểu (VNĐ)" FontWeight="SemiBold"/>
-                        </NumberBox.Header>
-                    </NumberBox>
-
-                    <!-- Max Price -->
-                    <NumberBox Grid.Column="2"
-                              Value="{x:Bind ViewModel.MaxPrice, Mode=TwoWay}"
-                              PlaceholderText="0"
-                              SpinButtonPlacementMode="Compact"
-                              Minimum="0"
-                              VerticalAlignment="Center">
-                        <NumberBox.Header>
-                            <TextBlock Text="Giá tối đa (VNĐ)" FontWeight="SemiBold"/>
-                        </NumberBox.Header>
-                    </NumberBox>
-
-                    <!-- Filter Buttons -->
-                    <StackPanel Grid.Column="4" 
-                               Orientation="Horizontal" 
-                               Spacing="8"
-                               VerticalAlignment="Bottom">
-                        <Button Command="{x:Bind ViewModel.ApplyFiltersCommand}"
-                               Style="{StaticResource AccentButtonStyle}"
-                               Width="100">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <FontIcon Glyph="&#xE71C;" FontSize="16"/>
-                                <TextBlock Text="Lọc"/>
-                            </StackPanel>
-                        </Button>
+                    <Grid Grid.Row="0" Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
                         
-                        <Button Command="{x:Bind ViewModel.ClearFiltersCommand}"
-                               Width="120">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <FontIcon Glyph="&#xE894;" FontSize="16"/>
-                                <TextBlock Text="Xóa lọc"/>
-                            </StackPanel>
-                        </Button>
-                    </StackPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xE74C;" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"/>
+                            <TextBlock Text="Advanced Search Plugin" 
+                                      FontWeight="SemiBold"
+                                      Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"/>
+                        </StackPanel>
+                        
+                        <Border Grid.Column="1"
+                               Background="{ThemeResource SystemFillColorSuccessBrush}"
+                               CornerRadius="4"
+                               Padding="8,4">
+                            <TextBlock Text="✓ Loaded" 
+                                      FontSize="12"
+                                      FontWeight="SemiBold"
+                                      Foreground="White"/>
+                        </Border>
+                    </Grid>
+                    
+                    <!-- This will hold the dynamically loaded plugin UI -->
+                    <ContentControl x:Name="FilterContainer" 
+                                   Grid.Row="1"
+                                   HorizontalContentAlignment="Stretch"/>
                 </Grid>
+            </Border>
+
+            <!-- Built-in Filter Bar (Fallback) -->
+            <Border x:Name="BuiltInFilterBorder"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="16"
+                    Margin="0,0,0,16">
+                 <!-- ... -->
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- First Row: Search and Category -->
+                    <Grid Grid.Row="0" Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="2*"/>
+                            <ColumnDefinition Width="12"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Search Box -->
+                        <TextBox Grid.Column="0"
+                                PlaceholderText="Tìm kiếm theo tên sản phẩm..."
+                                Text="{x:Bind ViewModel.SearchKeyword, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                VerticalAlignment="Center">
+                            <TextBox.Header>
+                                <TextBlock Text="Tìm kiếm" FontWeight="SemiBold"/>
+                            </TextBox.Header>
+                        </TextBox>
+
+                        <!-- Category Filter -->
+                        <ComboBox Grid.Column="2"
+                                 ItemsSource="{x:Bind ViewModel.Categories, Mode=OneWay}"
+                                 SelectedItem="{x:Bind ViewModel.SelectedCategory, Mode=TwoWay}"
+                                 DisplayMemberPath="Name"
+                                 HorizontalAlignment="Stretch"
+                                 VerticalAlignment="Center">
+                            <ComboBox.Header>
+                                <TextBlock Text="Loại sản phẩm" FontWeight="SemiBold"/>
+                            </ComboBox.Header>
+                        </ComboBox>
+                    </Grid>
+
+                    <!-- Second Row: Price Range and Buttons -->
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="12"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="12"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Min Price -->
+                        <NumberBox Grid.Column="0"
+                                   Value="{x:Bind ViewModel.MinPrice, Mode=TwoWay}"
+                                   PlaceholderText="0"
+                                   SpinButtonPlacementMode="Compact"
+                                   Minimum="0"
+                                   VerticalAlignment="Center">
+                            <NumberBox.Header>
+                                <TextBlock Text="Giá tối thiểu (VNĐ)" FontWeight="SemiBold"/>
+                            </NumberBox.Header>
+                        </NumberBox>
+
+                        <!-- Max Price -->
+                        <NumberBox Grid.Column="2"
+                                   Value="{x:Bind ViewModel.MaxPrice, Mode=TwoWay}"
+                                   PlaceholderText="0"
+                                   SpinButtonPlacementMode="Compact"
+                                   Minimum="0"
+                                   VerticalAlignment="Center">
+                            <NumberBox.Header>
+                                <TextBlock Text="Giá tối đa (VNĐ)" FontWeight="SemiBold"/>
+                            </NumberBox.Header>
+                        </NumberBox>
+
+                        <!-- Filter Buttons -->
+                        <StackPanel Grid.Column="4" 
+                                   Orientation="Horizontal" 
+                                   Spacing="8" 
+                                   VerticalAlignment="Bottom">
+                            <Button Command="{x:Bind ViewModel.ApplyFiltersCommand}"
+                                   Style="{StaticResource AccentButtonStyle}"
+                                   Width="100">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <FontIcon Glyph="&#xE71C;" FontSize="16"/>
+                                    <TextBlock Text="Lọc"/>
+                                </StackPanel>
+                            </Button>
+                            
+                            <Button Command="{x:Bind ViewModel.ClearFiltersCommand}"
+                                   Width="120">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <FontIcon Glyph="&#xE894;" FontSize="16"/>
+                                    <TextBlock Text="Xóa lọc"/>
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <!-- Sorting Controls -->
+            <Grid Margin="0,0,0,16">
+                 <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="12">
+                    <TextBlock Text="Sắp xếp theo:" 
+                              VerticalAlignment="Center"
+                              Style="{StaticResource BodyTextBlockStyle}"/>
+                    
+                    <Button Content="Mã SP" 
+                           Command="{x:Bind ViewModel.ChangeSortCommand}"
+                           CommandParameter="id"
+                           Style="{StaticResource AccentButtonStyle}"
+                           Height="32"/>
+                    
+                    <Button Content="Tên" 
+                           Command="{x:Bind ViewModel.ChangeSortCommand}"
+                           CommandParameter="name"
+                           Height="32"/>
+                    
+                    <Button Content="Giá" 
+                           Command="{x:Bind ViewModel.ChangeSortCommand}"
+                           CommandParameter="price"
+                           Height="32"/>
+                    
+                    <Button Content="Tồn kho" 
+                           Command="{x:Bind ViewModel.ChangeSortCommand}"
+                           CommandParameter="stock"
+                           Height="32"/>
+                    
+                    <FontIcon Glyph="{x:Bind ViewModel.IsDescending, Mode=OneWay, Converter={StaticResource SortDirectionToGlyphConverter}}"
+                             FontSize="16"
+                             VerticalAlignment="Center"
+                             Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"/>
+                </StackPanel>
             </Grid>
-        </Border>
-
-        <!-- Sorting Controls -->
-        <Grid Grid.Row="3" Margin="0,0,0,16">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-
-            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="12">
-                <TextBlock Text="Sắp xếp theo:" 
-                          VerticalAlignment="Center"
-                          Style="{StaticResource BodyTextBlockStyle}"/>
-                
-                <Button Content="Mã SP" 
-                       Command="{x:Bind ViewModel.ChangeSortCommand}"
-                       CommandParameter="id"
-                       Style="{StaticResource AccentButtonStyle}"
-                       Height="32"/>
-                
-                <Button Content="Tên" 
-                       Command="{x:Bind ViewModel.ChangeSortCommand}"
-                       CommandParameter="name"
-                       Height="32"/>
-                
-                <Button Content="Giá" 
-                       Command="{x:Bind ViewModel.ChangeSortCommand}"
-                       CommandParameter="price"
-                       Height="32"/>
-                
-                <Button Content="Tồn kho" 
-                       Command="{x:Bind ViewModel.ChangeSortCommand}"
-                       CommandParameter="stock"
-                       Height="32"/>
-                
-                <FontIcon Glyph="{x:Bind ViewModel.IsDescending, Mode=OneWay, Converter={StaticResource SortDirectionToGlyphConverter}}"
-                         FontSize="16"
-                         VerticalAlignment="Center"
-                         Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"/>
-            </StackPanel>
-        </Grid>
+        </StackPanel>
 
         <!-- Error InfoBar -->
-        <InfoBar Grid.Row="4"
+        <InfoBar Grid.Row="2"
                  IsOpen="{x:Bind ViewModel.HasError, Mode=OneWay}"
                  Severity="Error"
                  Title="Lỗi"
@@ -264,16 +288,17 @@
                  IsClosable="True"
                  Margin="0,0,0,16"/>
 
-        <!-- DataGrid -->
-        <Grid Grid.Row="5">
+        <!-- Product Display Area (DataGrid or GridView) -->
+        <Grid Grid.Row="3">
             <!-- Progress Ring -->
             <ProgressRing IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}"
                          Width="60"
                          Height="60"
                          HorizontalAlignment="Center"
-                         VerticalAlignment="Center"/>
+                         VerticalAlignment="Center"
+                         Canvas.ZIndex="10"/>
 
-            <!-- DataGrid -->
+            <!-- List View (DataGrid) -->
             <controls:DataGrid x:Name="ProductDataGrid"
                               ItemsSource="{x:Bind ViewModel.Products, Mode=OneWay}"
                               SelectedItem="{x:Bind ViewModel.SelectedProduct, Mode=TwoWay}"
@@ -286,9 +311,22 @@
                               CanUserSortColumns="False"
                               SelectionMode="Single"
                               DoubleTapped="ProductDataGrid_DoubleTapped"
-                              Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolToVisibilityInverseConverter}}">
-                
+                              Visibility="{x:Bind ViewModel.IsGridView, Mode=OneWay, Converter={StaticResource BoolToVisibilityInverseConverter}}">
                 <controls:DataGrid.Columns>
+                    <!-- Image Column -->
+                    <controls:DataGridTemplateColumn Header="Hình Ảnh" Width="80">
+                        <controls:DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate x:DataType="models:Product">
+                                <Grid Width="50" Height="50">
+                                    <Image Source="{x:Bind DisplayImage, Converter={StaticResource RelativeToAbsoluteUrlConverter}}"
+                                           Stretch="UniformToFill"
+                                           VerticalAlignment="Center"
+                                           HorizontalAlignment="Center"/>
+                                </Grid>
+                            </DataTemplate>
+                        </controls:DataGridTemplateColumn.CellTemplate>
+                    </controls:DataGridTemplateColumn>
+
                     <!-- ID Column -->
                     <controls:DataGridTextColumn Header="Mã SP"
                                                 Binding="{Binding Id}"
@@ -367,10 +405,74 @@
                     </controls:DataGridTemplateColumn>
                 </controls:DataGrid.Columns>
             </controls:DataGrid>
+
+            <!-- Grid View (Manual Implementation) -->
+            <ScrollViewer Grid.Row="3" 
+                          Visibility="{x:Bind ViewModel.IsGridView, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
+                          Padding="0,0,16,0">
+                <ItemsControl ItemsSource="{x:Bind ViewModel.Products, Mode=OneWay}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <controls:WrapPanel Orientation="Horizontal" HorizontalSpacing="12" VerticalSpacing="12" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="models:Product">
+                            <Button Style="{StaticResource SubtleButtonStyle}"
+                                    Padding="0"
+                                    Margin="0"
+                                    BorderThickness="0"
+                                    Click="ProductItem_Click"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Top">
+                                <Border Width="220"
+                                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="8"
+                                        Padding="12">
+                                    <StackPanel Spacing="8">
+                                        <!-- Image -->
+                                        <Border CornerRadius="6" Height="160" Background="#F3F3F3">
+                                            <Image Source="{Binding DisplayImage, Converter={StaticResource RelativeToAbsoluteUrlConverter}}"
+                                                   Stretch="UniformToFill"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"/>
+                                        </Border>
+
+                                        <!-- Details -->
+                                        <TextBlock Text="{x:Bind Name}" 
+                                                  FontWeight="SemiBold" 
+                                                  FontSize="14"
+                                                  TextTrimming="CharacterEllipsis"
+                                                  MaxLines="2"
+                                                  Height="40"/>
+                                        
+                                        <TextBlock Text="{x:Bind FormattedPrice}" 
+                                                  Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                                  FontWeight="Bold"
+                                                  FontSize="16"/>
+
+                                        <Grid>
+                                            <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                                <Ellipse Width="8" Height="8" Fill="{x:Bind StockColor}"/>
+                                                <TextBlock Text="{x:Bind StockStatus}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                            </StackPanel>
+                                            
+                                            <!-- Icon -->
+                                            <FontIcon Glyph="&#xE70F;" FontSize="16" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </Border>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
         </Grid>
 
         <!-- Pagination Controls -->
-        <Border Grid.Row="6" 
+        <Border Grid.Row="4" 
                 Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                 BorderThickness="1"

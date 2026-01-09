@@ -189,6 +189,9 @@ namespace MyShopAPI
             
             // app.UseHttpsRedirection(); // Disable for local dev to avoid Auth header stripping
 
+            // Serve static files (for product images)
+            app.UseStaticFiles();
+
             // IMPORTANT: UseAuthentication must come BEFORE UseAuthorization
             app.UseAuthentication();
             app.UseAuthorization();

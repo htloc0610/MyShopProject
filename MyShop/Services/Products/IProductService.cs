@@ -56,4 +56,9 @@ public interface IProductService
     /// Imports multiple products from Excel.
     /// </summary>
     Task<(bool Success, int ImportedCount, List<string> Errors)> ImportProductsAsync(List<ProductImportDto> products);
+
+    /// <summary>
+    /// Uploads an image file to the server.
+    /// </summary>
+    Task<string?> UploadImageAsync(System.IO.Stream fileStream, string fileName);
 }

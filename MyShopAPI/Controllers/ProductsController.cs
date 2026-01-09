@@ -50,7 +50,10 @@ namespace MyShopAPI.Controllers
             if (pageSize > 100) pageSize = 100; // Max 100 items per page
 
             // Build query
-            var query = _context.Products.Include(p => p.Category).AsQueryable();
+            var query = _context.Products
+                .Include(p => p.Category)
+                .Include(p => p.Images.OrderByDescending(i => i.IsMain).ThenBy(i => i.ImageId))
+                .AsQueryable();
 
             // Apply filters
             query = ApplyFilters(query, keyword, categoryId, minPrice, maxPrice);
@@ -90,7 +93,10 @@ namespace MyShopAPI.Controllers
             [FromQuery] decimal? maxPrice = null)
         {
             // Build query with optional filters
-            var query = _context.Products.Include(p => p.Category).AsQueryable();
+            var query = _context.Products
+                .Include(p => p.Category)
+                .Include(p => p.Images.OrderByDescending(i => i.IsMain).ThenBy(i => i.ImageId))
+                .AsQueryable();
 
             // Apply filters
             if (categoryId.HasValue && categoryId.Value > 0)
@@ -125,6 +131,7 @@ namespace MyShopAPI.Controllers
         {
             var product = await _context.Products
                 .Include(p => p.Category)
+                .Include(p => p.Images.OrderByDescending(i => i.IsMain).ThenBy(i => i.ImageId))
                 .FirstOrDefaultAsync(p => p.ProductId == id);
 
             if (product == null)
@@ -209,6 +216,27 @@ namespace MyShopAPI.Controllers
             product.Count = updateDto.Count;
             product.Description = updateDto.Description;
             product.CategoryId = updateDto.CategoryId;
+
+            // Update images
+            if (updateDto.Images != null)
+            {
+                // Remove existing images
+                var existingImages = await _context.ProductImages.Where(i => i.ProductId == id).ToListAsync();
+                _context.ProductImages.RemoveRange(existingImages);
+
+                // Add new images
+                if (updateDto.Images.Any())
+                {
+                    var newImages = updateDto.Images.Select((url, index) => new ProductImage
+                    {
+                        ProductId = id,
+                        ImageUrl = url,
+                        IsMain = index == 0
+                    }).ToList();
+                    
+                    await _context.ProductImages.AddRangeAsync(newImages);
+                }
+            }
 
             await _context.SaveChangesAsync();
             _logger.LogInformation("Product {ProductId} updated successfully", id);

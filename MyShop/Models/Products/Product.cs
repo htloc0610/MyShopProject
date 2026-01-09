@@ -23,26 +23,34 @@ namespace MyShop.Models.Products
         public int CategoryId { get; set; }
 
         /// <summary>
+        /// List of images from API
+        /// </summary>
+        public List<string> Images { get; set; } = new();
+
+        /// <summary>
         /// List of image URLs for the product (for FlipView)
         /// </summary>
         public List<string> ImageUrls
         {
             get
             {
+                // If API returns images, use them
+                if (Images != null && Images.Count > 0)
+                {
+                    return Images;
+                }
+
                 // If ImageUrl is empty, return placeholder images from internet
                 if (string.IsNullOrWhiteSpace(ImageUrl))
                 {
                     return new List<string>
                     {
-                        "https://via.placeholder.com/400x400/0078D4/FFFFFF?text=Product+Image+1",
-                        "https://via.placeholder.com/400x400/107C10/FFFFFF?text=Product+Image+2",
-                        "https://via.placeholder.com/400x400/D83B01/FFFFFF?text=Product+Image+3"
+                        "/Assets/StoreLogo.png" // Local fallback
                     };
                 }
 
-                // If there's a single image, duplicate it 3 times for demo
-                // In real scenario, API should provide multiple images
-                return new List<string> { ImageUrl, ImageUrl, ImageUrl };
+                // If only main image exists
+                return new List<string> { ImageUrl };
             }
         }
 
@@ -60,5 +68,10 @@ namespace MyShop.Models.Products
         /// Stock color indicator
         /// </summary>
         public string StockColor => Stock > 10 ? "Green" : Stock > 0 ? "Orange" : "Red";
+
+        /// <summary>
+        /// Gets the first image for display in lists (Grid/DataGrid)
+        /// </summary>
+        public string DisplayImage => ImageUrls.FirstOrDefault() ?? "/Assets/StoreLogo.png";
     }
 }

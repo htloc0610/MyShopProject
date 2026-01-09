@@ -84,6 +84,22 @@ public sealed partial class ProductDetailPage : Page, INotifyPropertyChanged
             {
                 await ViewModel.LoadCategoriesCommand.ExecuteAsync(null);
             }
+
+            // Populate images for editing
+            ViewModel.SelectedImageUrls.Clear();
+            if (Product.Images != null)
+            {
+                foreach (var img in Product.Images)
+                {
+                    ViewModel.SelectedImageUrls.Add(img);
+                }
+            }
+            else if (!string.IsNullOrEmpty(Product.ImageUrl))
+            {
+                // Legacy support for single image
+                ViewModel.SelectedImageUrls.Add(Product.ImageUrl);
+            }
+
             _isEditMode = true;
         }
         
@@ -178,8 +194,14 @@ public sealed partial class ProductDetailPage : Page, INotifyPropertyChanged
         SkuTextBlock.Visibility = _isEditMode ? Visibility.Collapsed : Visibility.Visible;
         SkuTextBox.Visibility = _isEditMode ? Visibility.Visible : Visibility.Collapsed;
         
+
+        
         DescriptionBorder.Visibility = _isEditMode ? Visibility.Collapsed : Visibility.Visible;
         DescriptionTextBox.Visibility = _isEditMode ? Visibility.Visible : Visibility.Collapsed;
+
+        // Toggle Image Panels
+        ImageGalleryPanel.Visibility = _isEditMode ? Visibility.Collapsed : Visibility.Visible;
+        ImageEditorPanel.Visibility = _isEditMode ? Visibility.Visible : Visibility.Collapsed;
 
         if (_isEditMode)
         {

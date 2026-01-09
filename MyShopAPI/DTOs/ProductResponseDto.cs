@@ -1,4 +1,6 @@
-﻿namespace MyShopAPI.DTOs
+﻿using System.Collections.Generic;
+
+namespace MyShopAPI.DTOs
 {
     public class ProductResponseDto
     {
@@ -11,5 +13,6 @@
         public string Category { get; set; } = string.Empty;
         public int CategoryId { get; set; }
         public string ImageUrl { get; set; } = string.Empty;
+        public List<string> Images { get; set; } = new List<string>();
     }
 }
