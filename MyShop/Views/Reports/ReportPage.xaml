@@ -1,8 +1,10 @@
 <Page
     x:Class="MyShop.Views.Reports.ReportPage"
+    x:Name="Root"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:lvc="using:LiveChartsCore.SkiaSharpView.WinUI">
+    xmlns:lvc="using:LiveChartsCore.SkiaSharpView.WinUI"
+    xmlns:viewmodels="using:MyShop.ViewModels.Reports">
 
     <ScrollViewer>
         <StackPanel Padding="32" Spacing="32">
@@ -22,14 +24,19 @@
                     <TextBlock Text="Số lượng bán theo thời gian"
                                FontWeight="SemiBold"/>
 
-                    <lvc:CartesianChart
-                        x:Name="ProductSalesChart"
-                        Height="240"
-                        Series="{x:Bind ViewModel.ProductSalesSeries, Mode=OneWay}"
-                        XAxes="{x:Bind ViewModel.ProductSalesXAxes, Mode=OneWay}"
-                        YAxes="{x:Bind ViewModel.ProductSalesYAxes, Mode=OneWay}"
-                        ZoomMode="X"
-                        LegendPosition="Hidden"/>
+                    <ItemsControl ItemsSource="{x:Bind ViewModel.ProductSalesChartHosts, Mode=OneWay}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="viewmodels:ReportViewModel">
+                                <lvc:CartesianChart
+                                    Height="240"
+                                    Series="{x:Bind ProductSalesSeries}"
+                                    XAxes="{x:Bind ProductSalesXAxes}"
+                                    YAxes="{x:Bind ProductSalesYAxes}"
+                                    ZoomMode="X"
+                                    LegendPosition="Hidden"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
                 </StackPanel>
             </Border>
 
@@ -39,13 +46,18 @@
                     <TextBlock Text="Doanh thu và Lợi nhuận theo thời gian"
                                FontWeight="SemiBold"/>
 
-                    <lvc:CartesianChart
-                        x:Name="RevenueProfitChart"
-                        Height="260"
-                        Series="{x:Bind ViewModel.RevenueProfitSeries, Mode=OneWay}"
-                        XAxes="{x:Bind ViewModel.RevenueProfitXAxes, Mode=OneWay}"
-                        YAxes="{x:Bind ViewModel.RevenueProfitYAxes, Mode=OneWay}"
-                        LegendPosition="Right"/>
+                    <ItemsControl ItemsSource="{x:Bind ViewModel.RevenueProfitChartHosts, Mode=OneWay}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="viewmodels:ReportViewModel">
+                                <lvc:CartesianChart
+                                    Height="260"
+                                    Series="{x:Bind RevenueProfitSeries}"
+                                    XAxes="{x:Bind RevenueProfitXAxes}"
+                                    YAxes="{x:Bind RevenueProfitYAxes}"
+                                    LegendPosition="Right"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
                 </StackPanel>
             </Border>
 

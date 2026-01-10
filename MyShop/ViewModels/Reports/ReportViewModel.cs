@@ -47,12 +47,14 @@ namespace MyShop.ViewModels.Reports
         [ObservableProperty] private ObservableCollection<ICartesianAxis> productSalesXAxes = new();
         [ObservableProperty] private ObservableCollection<ICartesianAxis> productSalesYAxes = new();
         [ObservableProperty] private double productSalesChartWidth = 700;
+        [ObservableProperty] private ObservableCollection<ReportViewModel> productSalesChartHosts = new();
 
         // ================= BAR CHART (REVENUE + PROFIT) =================
         [ObservableProperty] private ObservableCollection<ISeries> revenueProfitSeries = new();
         [ObservableProperty] private ObservableCollection<ICartesianAxis> revenueProfitXAxes = new();
         [ObservableProperty] private ObservableCollection<ICartesianAxis> revenueProfitYAxes = new();
         [ObservableProperty] private double revenueProfitChartWidth = 700;
+        [ObservableProperty] private ObservableCollection<ReportViewModel> revenueProfitChartHosts = new();
 
         public ReportViewModel(ReportService reportService)
         {
@@ -232,6 +234,8 @@ namespace MyShop.ViewModels.Reports
 
                 BuildProductSalesLine();
                 BuildRevenueProfitBars();
+                ProductSalesChartHosts = new ObservableCollection<ReportViewModel> { this };
+                RevenueProfitChartHosts = new ObservableCollection<ReportViewModel> { this };
             }
             catch (Exception ex)
             {
