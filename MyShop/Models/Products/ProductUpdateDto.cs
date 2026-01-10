@@ -13,4 +13,5 @@ public class ProductUpdateDto
     public int Count { get; set; }
     public string Description { get; set; } = string.Empty;
     public int CategoryId { get; set; }
+    public System.Collections.Generic.List<string> Images { get; set; } = new();
 }

@@ -71,6 +71,26 @@ public class CountToVisibilityConverter : IValueConverter
     }
 }
 
+/// <summary>
+/// Converts int to visibility (> 0 = Visible, 0 = Collapsed).
+/// Use for showing lists when they have items.
+/// </summary>
+public class IntToVisibilityConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, string language)
+    {
+        if (value is int count)
+        {
+            return count > 0 ? Visibility.Visible : Visibility.Collapsed;
+        }
+        return Visibility.Collapsed;
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, string language)
+    {
+        throw new NotImplementedException();
+    }
+}
 
 /// <summary>
 /// Converts IsActive bool to icon glyph (checkmark or block).

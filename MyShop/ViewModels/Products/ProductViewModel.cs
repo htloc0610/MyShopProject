@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
 using System.Linq;
+using System.IO;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -115,6 +116,20 @@ public partial class ProductViewModel : ObservableObject
 
     [ObservableProperty]
     private int _fuzzyThreshold = 70;
+
+    [ObservableProperty]
+    private bool _isFilterVisible = true;
+
+    [ObservableProperty]
+    private bool _isGridView = false;
+
+
+
+    [ObservableProperty]
+    private ObservableCollection<string> _selectedImageUrls = new();
+
+    [ObservableProperty]
+    private ObservableCollection<System.IO.FileInfo> _selectedImageFiles = new();
 
     #endregion
 
@@ -386,6 +401,9 @@ public partial class ProductViewModel : ObservableObject
     {
         if (product == null) return;
 
+        // Assign images from selected list
+        product.Images = SelectedImageUrls.ToList();
+
         try
         {
             IsLoading = true;
@@ -443,7 +461,8 @@ public partial class ProductViewModel : ObservableObject
                 ImportPrice = product.Price,
                 Count = product.Stock,
                 Description = product.Description,
-                CategoryId = product.CategoryId
+                CategoryId = product.CategoryId,
+                Images = SelectedImageUrls.ToList()
             };
 
             var updatedProduct = await _productService.UpdateProductAsync(product.Id, updateDto);
@@ -529,6 +548,67 @@ public partial class ProductViewModel : ObservableObject
             IsLoading = false;
         }
     }
+
+    #region Commands - Image Management
+
+    [RelayCommand]
+    private async Task PickImagesAsync()
+    {
+        try
+        {
+            var picker = new Windows.Storage.Pickers.FileOpenPicker();
+            
+            // Get the current window handle (HWND)
+            var windowHandle = WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindow);
+            WinRT.Interop.InitializeWithWindow.Initialize(picker, windowHandle);
+
+            picker.ViewMode = Windows.Storage.Pickers.PickerViewMode.Thumbnail;
+            picker.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.PicturesLibrary;
+            picker.FileTypeFilter.Add(".jpg");
+            picker.FileTypeFilter.Add(".jpeg");
+            picker.FileTypeFilter.Add(".png");
+
+            var files = await picker.PickMultipleFilesAsync();
+            if (files != null && files.Count > 0)
+            {
+                foreach (var file in files)
+                {
+                    // Limit to 3 images total
+                    if (SelectedImageUrls.Count >= 3)
+                    {
+                        ErrorMessage = "Chỉ được phép tải lên tối đa 3 ảnh.";
+                        HasError = true;
+                        break;
+                    }
+
+                    // Upload immediately to get URL (simplest approach for now)
+                    using var stream = await file.OpenStreamForReadAsync();
+                    var imageUrl = await _productService.UploadImageAsync(stream, file.Name);
+                    
+                    if (!string.IsNullOrEmpty(imageUrl))
+                    {
+                        SelectedImageUrls.Add(imageUrl);
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Lỗi chọn ảnh: {ex.Message}";
+            HasError = true;
+        }
+    }
+
+    [RelayCommand]
+    private void RemoveImage(string imageUrl)
+    {
+        if (SelectedImageUrls.Contains(imageUrl))
+        {
+            SelectedImageUrls.Remove(imageUrl);
+        }
+    }
+
+    #endregion
 
     #endregion
 

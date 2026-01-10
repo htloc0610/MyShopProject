@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
+    x:Name="RootPage"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Grid>
@@ -123,47 +124,91 @@
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
 
-                    <TextBlock Grid.Row="0"
-                              Text="Hình ảnh sản phẩm" 
-                              FontSize="13"
-                              FontWeight="SemiBold"
-                              Margin="0,0,0,10"/>
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="8" Margin="0,0,0,10">
+                        <TextBlock Text="Hình ảnh sản phẩm" 
+                                  FontSize="13"
+                                  FontWeight="SemiBold"
+                                  VerticalAlignment="Center"/>
+                        <TextBlock TextAlignment="Right"
+                                  FontSize="12"
+                                  Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                  VerticalAlignment="Center">
+                            <Run Text="{x:Bind ViewModel.SelectedImageUrls.Count, Mode=OneWay}"/>
+                            <Run Text="/ 3"/>
+                        </TextBlock>
+                    </StackPanel>
                     
-                    <Border Grid.Row="1"
-                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                            BorderThickness="1"
-                            CornerRadius="8"
-                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                            Height="400">
-                        <Grid>
-                            <!-- Placeholder when no image -->
-                            <StackPanel VerticalAlignment="Center"
-                                       HorizontalAlignment="Center"
-                                       Spacing="12"
-                                       Opacity="0.5">
-                                <FontIcon Glyph="&#xEB9F;" 
-                                         FontSize="64"
-                                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
-                                <TextBlock Text="Chưa có hình ảnh" 
-                                          FontSize="14"
-                                          Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
-                            </StackPanel>
+                    <ScrollViewer Grid.Row="1">
+                        <StackPanel Spacing="16">
+                            <!-- Info Tip -->
+                            <InfoBar Severity="Informational"
+                                     IsOpen="True"
+                                     IsClosable="False"
+                                     Title="Mẹo"
+                                     Message="Kéo thả ảnh để thay đổi thứ tự. Ảnh đầu tiên sẽ được dùng làm ảnh đại diện." />
 
-                            <!-- Upload Button Overlay -->
-                            <Button VerticalAlignment="Bottom"
-                                   HorizontalAlignment="Center"
-                                   Margin="16"
-                                   Background="{ThemeResource AccentFillColorDefaultBrush}"
-                                   Foreground="White"
-                                   Padding="16,8"
-                                   Click="UploadImageButton_Click">
+                            <!-- Image List (GridView for Drag & Drop) -->
+                            <GridView ItemsSource="{x:Bind ViewModel.SelectedImageUrls, Mode=OneWay}"
+                                      CanReorderItems="True"
+                                      CanDragItems="True"
+                                      AllowDrop="True"
+                                      SelectionMode="None">
+                                <GridView.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="4" Width="200" Height="200">
+                                            <Border CornerRadius="8" 
+                                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                                    BorderThickness="1"
+                                                    Background="{ThemeResource LayerFillColorDefaultBrush}">
+                                                <Grid>
+                                                    <Image Source="{Binding Converter={StaticResource RelativeToAbsoluteUrlConverter}}" 
+                                                           Stretch="UniformToFill"
+                                                           HorizontalAlignment="Center"
+                                                           VerticalAlignment="Center"/>
+                                                    
+                                                    <!-- Remove Button Overlay -->
+                                                    <Button Command="{Binding ElementName=RootPage, Path=ViewModel.RemoveImageCommand}"
+                                                            CommandParameter="{Binding}"
+                                                            VerticalAlignment="Top"
+                                                            HorizontalAlignment="Right"
+                                                            Margin="8"
+                                                            Padding="8"
+                                                            Background="#CCFF0000"
+                                                            Foreground="White"
+                                                            CornerRadius="4">
+                                                        <FontIcon Glyph="&#xE74D;" FontSize="14"/>
+                                                    </Button>
+                                                </Grid>
+                                            </Border>
+                                        </Grid>
+                                    </DataTemplate>
+                                </GridView.ItemTemplate>
+                                <GridView.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <ItemsWrapGrid Orientation="Horizontal" />
+                                    </ItemsPanelTemplate>
+                                </GridView.ItemsPanel>
+                            </GridView>
+
+                            <!-- Add Image Button -->
+                            <Button Command="{x:Bind ViewModel.PickImagesCommand}"
+                                    HorizontalAlignment="Stretch"
+                                    Height="50"
+                                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                    BorderThickness="1">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <FontIcon Glyph="&#xEB9F;" FontSize="16"/>
-                                    <TextBlock Text="Tải ảnh lên" FontSize="13"/>
+                                    <FontIcon Glyph="&#xE710;" FontSize="16"/>
+                                    <TextBlock Text="Thêm ảnh (Tối đa 3)" FontSize="13"/>
                                 </StackPanel>
                             </Button>
-                        </Grid>
-                    </Border>
+                            
+                            <TextBlock Text="Hỗ trợ: .jpg, .png, .jpeg" 
+                                      FontSize="11" 
+                                      Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                      HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </ScrollViewer>
                 </Grid>
 
                 <!-- Right Column: Product Information Form -->

@@ -13,5 +13,6 @@ namespace MyShopAPI.DTOs
         public int Count { get; set; }
         public string Description { get; set; } = string.Empty;
         public int CategoryId { get; set; }
+        public List<string> Images { get; set; } = new List<string>();
     }
 }

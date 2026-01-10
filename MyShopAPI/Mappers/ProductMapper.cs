@@ -1,5 +1,6 @@
 ﻿using MyShopAPI.DTOs;
 using MyShopAPI.Models;
+using System.Linq;
 
 namespace MyShopAPI.Mappers
 {
@@ -17,7 +18,8 @@ namespace MyShopAPI.Mappers
                 Stock = product.Count,
                 Category = product.Category.Name,
                 CategoryId = product.CategoryId,
-                ImageUrl = string.Empty
+                ImageUrl = product.Images.FirstOrDefault(i => i.IsMain)?.ImageUrl ?? product.Images.FirstOrDefault()?.ImageUrl ?? string.Empty,
+                Images = product.Images.Select(i => i.ImageUrl).ToList()
             };
         }
     }

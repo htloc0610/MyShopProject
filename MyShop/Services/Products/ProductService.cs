@@ -228,6 +228,34 @@ public class ProductService : IProductService
         }
     }
 
+    /// <summary>
+    /// Uploads an image file to the server.
+    /// </summary>
+    public async Task<string?> UploadImageAsync(System.IO.Stream fileStream, string fileName)
+    {
+        try
+        {
+            var content = new MultipartFormDataContent();
+            var streamContent = new StreamContent(fileStream);
+            content.Add(streamContent, "file", fileName);
+
+            var response = await _httpClient.PostAsync("/api/upload", content);
+            
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<System.Text.Json.Nodes.JsonNode>();
+                return result?["url"]?.ToString();
+            }
+            
+            return null;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error uploading image: {ex.Message}");
+            return null;
+        }
+    }
+
     #region Private Helper Methods
 
     /// <summary>

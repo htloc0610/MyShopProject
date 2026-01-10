@@ -124,6 +124,10 @@ namespace MyShop.Converters
             {
                 return isDescending ? "\uE74B" : "\uE74A"; // Down arrow : Up arrow
             }
+            if (value is string direction)
+            {
+                return direction.Equals("desc", StringComparison.OrdinalIgnoreCase) ? "\uE74B" : "\uE74A";
+            }
             return "\uE74A"; // Default: Up arrow
         }
 
@@ -226,6 +230,86 @@ namespace MyShop.Converters
         public object Convert(object value, Type targetType, object parameter, string language)
         {
             return value == null ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, string language)
+        {
+            throw new NotImplementedException();
+        }
+    }
+    /// <summary>
+    /// Converts relative URL to absolute URL (prepending API base address).
+    /// </summary>
+    public class RelativeToAbsoluteUrlConverter : IValueConverter
+    {
+        private const string BaseUrl = "http://localhost:5002";
+
+        public object Convert(object value, Type targetType, object parameter, string language)
+        {
+            if (value is string url && !string.IsNullOrWhiteSpace(url))
+            {
+                if (url.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+                {
+                    return url;
+                }
+                
+                // Handle leading slash
+                var cleanUrl = url.StartsWith("/") ? url : "/" + url;
+                return BaseUrl + cleanUrl;
+            }
+            // Return placeholder or empty
+            return "/Assets/StoreLogo.png"; // Or null
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, string language)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    /// <summary>
+    /// Converts boolean to string based on parameter.
+    /// Parameter format: "TrueString|FalseString"
+    /// </summary>
+    public class BoolToStringConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, string language)
+        {
+            if (value is bool boolValue && parameter is string paramStr)
+            {
+                var parts = paramStr.Split('|');
+                if (parts.Length == 2)
+                {
+                    return boolValue ? parts[0] : parts[1];
+                }
+            }
+            return value?.ToString() ?? "";
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, string language)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    /// <summary>
+    /// Converts boolean to Glyph string based on parameter.
+    /// Parameter format: "TrueGlyph|FalseGlyph"
+    /// </summary>
+    public class BoolToGlyphConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, string language)
+        {
+            if (value is bool boolValue && parameter is string paramStr)
+            {
+                // Unescape strings if needed, but XAML usually handles passing unicode chars
+                var parts = paramStr.Split('|');
+                if (parts.Length == 2)
+                {
+                    return boolValue ? parts[0] : parts[1];
+                }
+            }
+            return "";
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, string language)

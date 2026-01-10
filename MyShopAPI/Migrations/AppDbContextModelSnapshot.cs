@@ -348,11 +348,23 @@ namespace MyShopAPI.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("OrderId"));
 
-                    b.Property<DateTime>("CreatedTime")
+                    b.Property<int?>("CouponId")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid?>("CustomerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("FinalAmount")
+                        .HasColumnType("numeric");
+
+                    b.Property<DateTime>("OrderDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("FinalPrice")
+                    b.Property<int>("Status")
                         .HasColumnType("integer");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("numeric");
 
                     b.Property<string>("UserId")
                         .IsRequired()
@@ -360,7 +372,11 @@ namespace MyShopAPI.Migrations
 
                     b.HasKey("OrderId");
 
-                    b.HasIndex("UserId", "CreatedTime");
+                    b.HasIndex("CouponId");
+
+                    b.HasIndex("CustomerId");
+
+                    b.HasIndex("UserId", "OrderDate");
 
                     b.ToTable("Orders");
                 });
@@ -382,11 +398,11 @@ namespace MyShopAPI.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("integer");
 
-                    b.Property<int>("TotalPrice")
-                        .HasColumnType("integer");
+                    b.Property<decimal>("TotalPrice")
+                        .HasColumnType("numeric");
 
-                    b.Property<float>("UnitSalePrice")
-                        .HasColumnType("real");
+                    b.Property<decimal>("UnitPrice")
+                        .HasColumnType("numeric");
 
                     b.HasKey("OrderItemId");
 
@@ -437,6 +453,31 @@ namespace MyShopAPI.Migrations
                     b.HasIndex("UserId", "Sku");
 
                     b.ToTable("Products");
+                });
+
+            modelBuilder.Entity("MyShopAPI.Models.ProductImage", b =>
+                {
+                    b.Property<int>("ImageId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ImageId"));
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsMain")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("ImageId");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("ProductImages");
                 });
 
             modelBuilder.Entity("MyShopAPI.Models.RefreshToken", b =>
@@ -563,11 +604,25 @@ namespace MyShopAPI.Migrations
 
             modelBuilder.Entity("MyShopAPI.Models.Order", b =>
                 {
+                    b.HasOne("MyShopAPI.Models.Discount", "Coupon")
+                        .WithMany()
+                        .HasForeignKey("CouponId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("MyShopAPI.Models.Customer", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("MyShopAPI.Models.ApplicationUser", "User")
                         .WithMany("Orders")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Coupon");
+
+                    b.Navigation("Customer");
 
                     b.Navigation("User");
                 });
@@ -610,6 +665,17 @@ namespace MyShopAPI.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("MyShopAPI.Models.ProductImage", b =>
+                {
+                    b.HasOne("MyShopAPI.Models.Product", "Product")
+                        .WithMany("Images")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+                });
+
             modelBuilder.Entity("MyShopAPI.Models.RefreshToken", b =>
                 {
                     b.HasOne("MyShopAPI.Models.ApplicationUser", "User")
@@ -648,6 +714,8 @@ namespace MyShopAPI.Migrations
 
             modelBuilder.Entity("MyShopAPI.Models.Product", b =>
                 {
+                    b.Navigation("Images");
+
                     b.Navigation("OrderItems");
                 });
 #pragma warning restore 612, 618

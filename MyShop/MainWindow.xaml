@@ -65,6 +65,13 @@
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
 
+                <NavigationViewItem Content="Đơn Hàng" 
+                                  Tag="OrdersList">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE7BF;"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+
                 <NavigationViewItem Content="Báo Cáo"
                     Tag="Reports">
                     <NavigationViewItem.Icon>

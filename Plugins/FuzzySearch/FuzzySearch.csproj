@@ -44,6 +44,6 @@
     <Copy SourceFiles="@(PluginXri)" DestinationFolder="$(PluginOutputPath)" SkipUnchangedFiles="true" Condition="'@(PluginXri)' != ''" />
     <Copy SourceFiles="@(PluginPri)" DestinationFolder="$(PluginOutputPath)" SkipUnchangedFiles="true" Condition="'@(PluginPri)' != ''" />
     
-    <Message Text="✅ Plugin copied to: $(PluginOutputPath)" Importance="high" />
+    <Message Text="Plugin copied to: $(PluginOutputPath)" Importance="high" />
   </Target>
 </Project>

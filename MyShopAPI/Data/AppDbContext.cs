@@ -36,6 +36,7 @@ namespace MyShopAPI.Data
         public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
         public DbSet<Customer> Customers => Set<Customer>();
         public DbSet<Discount> Discounts => Set<Discount>();
+        public DbSet<ProductImage> ProductImages => Set<ProductImage>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -58,6 +59,16 @@ namespace MyShopAPI.Data
                 entity.HasMany(u => u.Orders)
                     .WithOne(o => o.User)
                     .HasForeignKey(o => o.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasMany(u => u.Customers)
+                    .WithOne(c => c.User)
+                    .HasForeignKey(c => c.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasMany(u => u.Discounts)
+                    .WithOne(d => d.User)
+                    .HasForeignKey(d => d.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasMany(u => u.RefreshTokens)
@@ -92,12 +103,29 @@ namespace MyShopAPI.Data
             modelBuilder.Entity<Product>(entity =>
             {
                 entity.HasIndex(p => new { p.UserId, p.Sku });
+
+                entity.HasMany(p => p.Images)
+                    .WithOne(i => i.Product)
+                    .HasForeignKey(i => i.ProductId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             // Configure Order
             modelBuilder.Entity<Order>(entity =>
             {
-                entity.HasIndex(o => new { o.UserId, o.CreatedTime });
+                entity.HasIndex(o => new { o.UserId, o.OrderDate });
+                
+                // Configure Order-Customer relationship
+                entity.HasOne(o => o.Customer)
+                    .WithMany()
+                    .HasForeignKey(o => o.CustomerId)
+                    .OnDelete(DeleteBehavior.SetNull);
+                
+                // Configure Order-Coupon relationship
+                entity.HasOne(o => o.Coupon)
+                    .WithMany()
+                    .HasForeignKey(o => o.CouponId)
+                    .OnDelete(DeleteBehavior.SetNull);
             });
 
             // Configure Customer indexes
@@ -117,10 +145,6 @@ namespace MyShopAPI.Data
             });
 
             // ====================================================
-            // GLOBAL QUERY FILTERS for Multi-Tenant Data Isolation
-            // These filters automatically filter queries by UserId
-            // ====================================================
-
             // GLOBAL QUERY FILTERS for Multi-Tenant Data Isolation
             // These filters automatically filter queries by UserId
             // ====================================================
