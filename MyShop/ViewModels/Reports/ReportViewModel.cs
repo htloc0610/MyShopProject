@@ -21,6 +21,7 @@ namespace MyShop.ViewModels.Reports
             new(new SKColor(107, 114, 128));
         private static readonly SolidColorPaint AxisSeparatorPaint =
             new(new SKColor(229, 231, 235)) { StrokeThickness = 1 };
+        private bool _isReady;
 
         [ObservableProperty] private bool isLoading;
         [ObservableProperty] private string errorMessage = string.Empty;
@@ -28,47 +29,61 @@ namespace MyShop.ViewModels.Reports
         [ObservableProperty] private DateOnly? fromDate = new(2000, 1, 1);
         [ObservableProperty] private DateOnly toDate = DateOnly.FromDateTime(DateTime.Today);
 
-        public ObservableCollection<ProductSalesSummaryItem> ProductSales { get; } = new();
-        public ObservableCollection<ProductRevenueProfitSummaryItem> ProductRevenueProfit { get; } = new();
+        public ObservableCollection<SalesTimeSeriesItem> SalesTimeSeries { get; } = new();
+        public ObservableCollection<RevenueProfitTimeSeriesItem> RevenueProfitTimeSeries { get; } = new();
+
+        public ObservableCollection<ReportGroupByOption> GroupByOptions { get; } = new()
+        {
+            new ReportGroupByOption("day", "Theo ngày"),
+            new ReportGroupByOption("week", "Theo tuần"),
+            new ReportGroupByOption("month", "Theo tháng"),
+            new ReportGroupByOption("year", "Theo năm")
+        };
+
+        [ObservableProperty] private ReportGroupByOption selectedGroupBy;
 
         // ================= LINE CHART =================
-        public ObservableCollection<ISeries> ProductSalesSeries { get; } = new();
-        public ObservableCollection<ICartesianAxis> ProductSalesXAxes { get; } = new();
-        public ObservableCollection<ICartesianAxis> ProductSalesYAxes { get; } = new();
+        [ObservableProperty] private ObservableCollection<ISeries> productSalesSeries = new();
+        [ObservableProperty] private ObservableCollection<ICartesianAxis> productSalesXAxes = new();
+        [ObservableProperty] private ObservableCollection<ICartesianAxis> productSalesYAxes = new();
         [ObservableProperty] private double productSalesChartWidth = 700;
 
         // ================= BAR CHART (REVENUE + PROFIT) =================
-        public ObservableCollection<ISeries> RevenueProfitSeries { get; } = new();
-        public ObservableCollection<ICartesianAxis> RevenueProfitXAxes { get; } = new();
-        public ObservableCollection<ICartesianAxis> RevenueProfitYAxes { get; } = new();
+        [ObservableProperty] private ObservableCollection<ISeries> revenueProfitSeries = new();
+        [ObservableProperty] private ObservableCollection<ICartesianAxis> revenueProfitXAxes = new();
+        [ObservableProperty] private ObservableCollection<ICartesianAxis> revenueProfitYAxes = new();
         [ObservableProperty] private double revenueProfitChartWidth = 700;
 
         public ReportViewModel(ReportService reportService)
         {
             _reportService = reportService;
+            SelectedGroupBy = GroupByOptions.First();
+            _isReady = true;
+        }
+
+        partial void OnSelectedGroupByChanged(ReportGroupByOption value)
+        {
+            if (!_isReady)
+                return;
+
+            LoadReportCommand.Execute(null);
         }
 
         // ---------- LINE: SỐ LƯỢNG BÁN ----------
         private void BuildProductSalesLine()
         {
-            ProductSalesSeries.Clear();
-            ProductSalesXAxes.Clear();
-            ProductSalesYAxes.Clear();
-
-            if (ProductSales.Count == 0)
-                return;
-
             var primary = new SKColor(37, 99, 235);
-            var values = ProductSales
+            var values = SalesTimeSeries
                 .Select(x => (double)x.TotalQuantity)
                 .ToArray();
 
-            var productLabels = ProductSales
-                .Select(x => x.ProductName)
+            var labels = SalesTimeSeries
+                .Select(x => x.Label)
                 .ToArray();
-            ProductSalesChartWidth = CalculateChartWidth(productLabels.Length, 80, 700);
+            ProductSalesChartWidth = 700;
 
-            ProductSalesSeries.Add(
+            ProductSalesSeries = new ObservableCollection<ISeries>
+            {
                 new LineSeries<double>
                 {
                     Values = values,
@@ -82,65 +97,63 @@ namespace MyShop.ViewModels.Reports
                     GeometryStroke = new SolidColorPaint(primary, 3),
                     GeometryFill = new SolidColorPaint(SKColors.White)
                 }
-            );
+            };
 
-            ProductSalesXAxes.Add(
+            ProductSalesXAxes = new ObservableCollection<ICartesianAxis>
+            {
                 new Axis
                 {
-                    Labels = productLabels,
+                    Labels = labels,
                     LabelsRotation = 0,
                     TextSize = 10,
                     LabelsPaint = AxisTextPaint,
                     SeparatorsPaint = AxisSeparatorPaint,
                     TicksPaint = AxisSeparatorPaint
                 }
-            );
+            };
 
-            ProductSalesYAxes.Add(
+            ProductSalesYAxes = new ObservableCollection<ICartesianAxis>
+            {
                 new Axis
                 {
                     MinLimit = 0,
+                    MaxLimit = values.Length == 0 ? 1 : values.Max(),
                     TextSize = 12,
                     LabelsPaint = AxisTextPaint,
                     SeparatorsPaint = AxisSeparatorPaint,
                     TicksPaint = AxisSeparatorPaint
                 }
-            );
+            };
         }
 
         // ---------- BAR: DOANH THU + LỢI NHUẬN ----------
         private void BuildRevenueProfitBars()
         {
-            RevenueProfitSeries.Clear();
-            RevenueProfitXAxes.Clear();
-            RevenueProfitYAxes.Clear();
-
-            if (ProductRevenueProfit.Count == 0)
-                return;
-
-            var revenueValues = ProductRevenueProfit
+            var revenueValues = RevenueProfitTimeSeries
                 .Select(x => (double)x.Revenue)
                 .ToArray();
 
-            var profitValues = ProductRevenueProfit
+            var profitValues = RevenueProfitTimeSeries
                 .Select(x => (double)x.Profit)
                 .ToArray();
 
-            var labels = ProductRevenueProfit
-                .Select(x => x.ProductName)
+            var labels = RevenueProfitTimeSeries
+                .Select(x => x.Label)
                 .ToArray();
-            RevenueProfitChartWidth = CalculateChartWidth(labels.Length, 90, 700);
+            RevenueProfitChartWidth = 700;
 
             double max = Math.Max(
                 revenueValues.DefaultIfEmpty(0).Max(),
                 profitValues.Select(Math.Abs).DefaultIfEmpty(0).Max()
             );
+            if (max <= 0)
+                max = 1;
 
             var revenueColor = new SKColor(37, 99, 235);
             var profitColor = new SKColor(16, 185, 129);
 
-            // Doanh thu
-            RevenueProfitSeries.Add(
+            RevenueProfitSeries = new ObservableCollection<ISeries>
+            {
                 new ColumnSeries<double>
                 {
                     Name = "Doanh thu",
@@ -150,11 +163,7 @@ namespace MyShop.ViewModels.Reports
                         new SKPoint(0, 0),
                         new SKPoint(0, 1)),
                     Stroke = new SolidColorPaint(revenueColor.WithAlpha(220), 1)
-                }
-            );
-
-            // Lợi nhuận
-            RevenueProfitSeries.Add(
+                },
                 new ColumnSeries<double>
                 {
                     Name = "Lợi nhuận",
@@ -165,9 +174,10 @@ namespace MyShop.ViewModels.Reports
                         new SKPoint(0, 1)),
                     Stroke = new SolidColorPaint(profitColor.WithAlpha(220), 1)
                 }
-            );
+            };
 
-            RevenueProfitXAxes.Add(
+            RevenueProfitXAxes = new ObservableCollection<ICartesianAxis>
+            {
                 new Axis
                 {
                     Labels = labels,
@@ -177,9 +187,10 @@ namespace MyShop.ViewModels.Reports
                     SeparatorsPaint = AxisSeparatorPaint,
                     TicksPaint = AxisSeparatorPaint
                 }
-            );
+            };
 
-            RevenueProfitYAxes.Add(
+            RevenueProfitYAxes = new ObservableCollection<ICartesianAxis>
+            {
                 new Axis
                 {
                     MinLimit = -max,
@@ -189,13 +200,9 @@ namespace MyShop.ViewModels.Reports
                     SeparatorsPaint = AxisSeparatorPaint,
                     TicksPaint = AxisSeparatorPaint
                 }
-            );
+            };
         }
 
-        private static double CalculateChartWidth(int labelCount, double perLabel, double minWidth)
-        {
-            return Math.Max(minWidth, labelCount * perLabel);
-        }
         // ---------- LOAD ----------
         [RelayCommand]
         private async Task LoadReportAsync()
@@ -205,20 +212,23 @@ namespace MyShop.ViewModels.Reports
 
             try
             {
-                ProductSales.Clear();
-                ProductRevenueProfit.Clear();
+                SalesTimeSeries.Clear();
+                RevenueProfitTimeSeries.Clear();
+
+                var groupBy = SelectedGroupBy?.Key ?? "day";
+                var effectiveFrom = ResolveFromDate(groupBy, toDate, fromDate);
 
                 var sales =
-                    await _reportService.GetProductSalesSummaryAsync(fromDate, toDate);
+                    await _reportService.GetSalesTimeSeriesAsync(effectiveFrom, toDate, groupBy);
                 if (sales != null)
                     foreach (var i in sales.Items)
-                        ProductSales.Add(i);
+                        SalesTimeSeries.Add(i);
 
                 var profits =
-                    await _reportService.GetProductRevenueProfitSummaryAsync(fromDate, toDate);
+                    await _reportService.GetRevenueProfitTimeSeriesAsync(effectiveFrom, toDate, groupBy);
                 if (profits != null)
                     foreach (var i in profits.Items)
-                        ProductRevenueProfit.Add(i);
+                        RevenueProfitTimeSeries.Add(i);
 
                 BuildProductSalesLine();
                 BuildRevenueProfitBars();
@@ -232,5 +242,34 @@ namespace MyShop.ViewModels.Reports
                 IsLoading = false;
             }
         }
+
+        private static DateOnly? ResolveFromDate(string groupBy, DateOnly to, DateOnly? fallback)
+        {
+            switch (groupBy)
+            {
+                case "day":
+                    return to.AddDays(-29);
+                case "month":
+                    return new DateOnly(to.Year, to.Month, 1).AddMonths(-11);
+                case "year":
+                    return new DateOnly(to.Year, 1, 1).AddYears(-9);
+                default:
+                    return fallback;
+            }
+        }
+    }
+
+    public class ReportGroupByOption
+    {
+        public string Key { get; }
+        public string Label { get; }
+
+        public ReportGroupByOption(string key, string label)
+        {
+            Key = key;
+            Label = label;
+        }
+
+        public override string ToString() => Label;
     }
 }

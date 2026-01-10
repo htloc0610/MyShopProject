@@ -7,44 +7,45 @@
     <ScrollViewer>
         <StackPanel Padding="32" Spacing="32">
 
+            <StackPanel Orientation="Horizontal" Spacing="12">
+                <TextBlock Text="Nhóm theo:" VerticalAlignment="Center"/>
+                <ComboBox
+                    Width="180"
+                    ItemsSource="{x:Bind ViewModel.GroupByOptions}"
+                    SelectedItem="{x:Bind ViewModel.SelectedGroupBy, Mode=TwoWay}"
+                    DisplayMemberPath="Label"/>
+            </StackPanel>
+
             <!-- LINE CHART -->
             <Border Padding="16">
                 <StackPanel Spacing="12">
-                    <TextBlock Text="Số lượng bán theo sản phẩm"
+                    <TextBlock Text="Số lượng bán theo thời gian"
                                FontWeight="SemiBold"/>
 
-                    <ScrollViewer
-                        HorizontalScrollBarVisibility="Auto"
-                        VerticalScrollBarVisibility="Disabled">
-                        <lvc:CartesianChart
-                            Height="240"
-                            Width="{x:Bind ViewModel.ProductSalesChartWidth, Mode=OneWay}"
-                            Series="{x:Bind ViewModel.ProductSalesSeries}"
-                            XAxes="{x:Bind ViewModel.ProductSalesXAxes}"
-                            YAxes="{x:Bind ViewModel.ProductSalesYAxes}"
-                            ZoomMode="X"
-                            LegendPosition="Hidden"/>
-                    </ScrollViewer>
+                    <lvc:CartesianChart
+                        x:Name="ProductSalesChart"
+                        Height="240"
+                        Series="{x:Bind ViewModel.ProductSalesSeries, Mode=OneWay}"
+                        XAxes="{x:Bind ViewModel.ProductSalesXAxes, Mode=OneWay}"
+                        YAxes="{x:Bind ViewModel.ProductSalesYAxes, Mode=OneWay}"
+                        ZoomMode="X"
+                        LegendPosition="Hidden"/>
                 </StackPanel>
             </Border>
 
             <!-- BAR CHART -->
             <Border Padding="16">
                 <StackPanel Spacing="12">
-                    <TextBlock Text="Doanh thu và Lợi nhuận theo sản phẩm"
+                    <TextBlock Text="Doanh thu và Lợi nhuận theo thời gian"
                                FontWeight="SemiBold"/>
 
-                    <ScrollViewer
-                        HorizontalScrollBarVisibility="Auto"
-                        VerticalScrollBarVisibility="Disabled">
-                        <lvc:CartesianChart
-                            Height="260"
-                            Width="{x:Bind ViewModel.RevenueProfitChartWidth, Mode=OneWay}"
-                            Series="{x:Bind ViewModel.RevenueProfitSeries}"
-                            XAxes="{x:Bind ViewModel.RevenueProfitXAxes}"
-                            YAxes="{x:Bind ViewModel.RevenueProfitYAxes}"
-                            LegendPosition="Right"/>
-                    </ScrollViewer>
+                    <lvc:CartesianChart
+                        x:Name="RevenueProfitChart"
+                        Height="260"
+                        Series="{x:Bind ViewModel.RevenueProfitSeries, Mode=OneWay}"
+                        XAxes="{x:Bind ViewModel.RevenueProfitXAxes, Mode=OneWay}"
+                        YAxes="{x:Bind ViewModel.RevenueProfitYAxes, Mode=OneWay}"
+                        LegendPosition="Right"/>
                 </StackPanel>
             </Border>
 
