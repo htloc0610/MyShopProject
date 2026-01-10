@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:MyShop.Models.Dashboard"
+    xmlns:lvc="using:LiveChartsCore.SkiaSharpView.WinUI"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
@@ -99,33 +100,12 @@
             <Border Grid.Row="2" Style="{StaticResource DashboardCardStyle}">
                 <StackPanel Spacing="20">
                     <TextBlock Text="Biểu đồ doanh thu theo ngày" Style="{ThemeResource SubtitleTextBlockStyle}" FontWeight="SemiBold"/>
-                    <Grid Height="180">
-                        <ItemsControl ItemsSource="{x:Bind ViewModel.MonthlyRevenue, Mode=OneWay}">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <StackPanel Orientation="Horizontal" Spacing="16" VerticalAlignment="Bottom" HorizontalAlignment="Center"/>
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate x:DataType="models:RevenueByDay">
-                                    <StackPanel Spacing="6" VerticalAlignment="Bottom">
-                                        <Rectangle
-                                            Width="24"
-                                            Height="{x:Bind BarHeight}"
-                                            Fill="{ThemeResource SystemAccentColor}"
-                                            RadiusX="4"
-                                            RadiusY="4"
-                                            VerticalAlignment="Bottom"/>
-                                        <TextBlock
-                                            Text="{x:Bind Day}"
-                                            FontSize="10"
-                                            HorizontalAlignment="Center"
-                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
-                                    </StackPanel>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </Grid>
+                    <lvc:CartesianChart
+                        Height="200"
+                        Series="{x:Bind ViewModel.MonthlyRevenueSeries, Mode=OneWay}"
+                        XAxes="{x:Bind ViewModel.MonthlyRevenueXAxes, Mode=OneWay}"
+                        YAxes="{x:Bind ViewModel.MonthlyRevenueYAxes, Mode=OneWay}"
+                        LegendPosition="Hidden"/>
                 </StackPanel>
             </Border>
 

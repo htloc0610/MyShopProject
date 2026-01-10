@@ -17,6 +17,10 @@ namespace MyShop.ViewModels.Reports
     public partial class ReportViewModel : ObservableObject
     {
         private readonly ReportService _reportService;
+        private static readonly SolidColorPaint AxisTextPaint =
+            new(new SKColor(107, 114, 128));
+        private static readonly SolidColorPaint AxisSeparatorPaint =
+            new(new SKColor(229, 231, 235)) { StrokeThickness = 1 };
 
         [ObservableProperty] private bool isLoading;
         [ObservableProperty] private string errorMessage = string.Empty;
@@ -31,11 +35,13 @@ namespace MyShop.ViewModels.Reports
         public ObservableCollection<ISeries> ProductSalesSeries { get; } = new();
         public ObservableCollection<ICartesianAxis> ProductSalesXAxes { get; } = new();
         public ObservableCollection<ICartesianAxis> ProductSalesYAxes { get; } = new();
+        [ObservableProperty] private double productSalesChartWidth = 700;
 
         // ================= BAR CHART (REVENUE + PROFIT) =================
         public ObservableCollection<ISeries> RevenueProfitSeries { get; } = new();
         public ObservableCollection<ICartesianAxis> RevenueProfitXAxes { get; } = new();
         public ObservableCollection<ICartesianAxis> RevenueProfitYAxes { get; } = new();
+        [ObservableProperty] private double revenueProfitChartWidth = 700;
 
         public ReportViewModel(ReportService reportService)
         {
@@ -52,30 +58,53 @@ namespace MyShop.ViewModels.Reports
             if (ProductSales.Count == 0)
                 return;
 
+            var primary = new SKColor(37, 99, 235);
+            var values = ProductSales
+                .Select(x => (double)x.TotalQuantity)
+                .ToArray();
+
+            var productLabels = ProductSales
+                .Select(x => x.ProductName)
+                .ToArray();
+            ProductSalesChartWidth = CalculateChartWidth(productLabels.Length, 80, 700);
+
             ProductSalesSeries.Add(
                 new LineSeries<double>
                 {
-                    Values = ProductSales
-                        .Select(x => (double)x.TotalQuantity)
-                        .ToArray(),
-                    GeometrySize = 8,
-                    Stroke = new SolidColorPaint(SKColors.DodgerBlue, 2),
-                    Fill = null
+                    Values = values,
+                    GeometrySize = 10,
+                    LineSmoothness = 0.6,
+                    Stroke = new SolidColorPaint(primary, 3) { StrokeCap = SKStrokeCap.Round },
+                    Fill = new LinearGradientPaint(
+                        new[] { primary.WithAlpha(80), primary.WithAlpha(0) },
+                        new SKPoint(0, 0),
+                        new SKPoint(0, 1)),
+                    GeometryStroke = new SolidColorPaint(primary, 3),
+                    GeometryFill = new SolidColorPaint(SKColors.White)
                 }
             );
 
             ProductSalesXAxes.Add(
                 new Axis
                 {
-                    Labels = ProductSales
-                        .Select(x => x.ProductName)
-                        .ToArray(),
-                    LabelsRotation = 15
+                    Labels = productLabels,
+                    LabelsRotation = 0,
+                    TextSize = 10,
+                    LabelsPaint = AxisTextPaint,
+                    SeparatorsPaint = AxisSeparatorPaint,
+                    TicksPaint = AxisSeparatorPaint
                 }
             );
 
             ProductSalesYAxes.Add(
-                new Axis { MinLimit = 0 }
+                new Axis
+                {
+                    MinLimit = 0,
+                    TextSize = 12,
+                    LabelsPaint = AxisTextPaint,
+                    SeparatorsPaint = AxisSeparatorPaint,
+                    TicksPaint = AxisSeparatorPaint
+                }
             );
         }
 
@@ -100,11 +129,15 @@ namespace MyShop.ViewModels.Reports
             var labels = ProductRevenueProfit
                 .Select(x => x.ProductName)
                 .ToArray();
+            RevenueProfitChartWidth = CalculateChartWidth(labels.Length, 90, 700);
 
             double max = Math.Max(
                 revenueValues.DefaultIfEmpty(0).Max(),
                 profitValues.Select(Math.Abs).DefaultIfEmpty(0).Max()
             );
+
+            var revenueColor = new SKColor(37, 99, 235);
+            var profitColor = new SKColor(16, 185, 129);
 
             // Doanh thu
             RevenueProfitSeries.Add(
@@ -112,8 +145,11 @@ namespace MyShop.ViewModels.Reports
                 {
                     Name = "Doanh thu",
                     Values = revenueValues,
-                    Fill = new SolidColorPaint(SKColors.DodgerBlue),
-                    Stroke = null
+                    Fill = new LinearGradientPaint(
+                        new[] { revenueColor.WithAlpha(220), revenueColor.WithAlpha(120) },
+                        new SKPoint(0, 0),
+                        new SKPoint(0, 1)),
+                    Stroke = new SolidColorPaint(revenueColor.WithAlpha(220), 1)
                 }
             );
 
@@ -123,8 +159,11 @@ namespace MyShop.ViewModels.Reports
                 {
                     Name = "Lợi nhuận",
                     Values = profitValues,
-                    Fill = new SolidColorPaint(SKColors.MediumSeaGreen),
-                    Stroke = null
+                    Fill = new LinearGradientPaint(
+                        new[] { profitColor.WithAlpha(220), profitColor.WithAlpha(120) },
+                        new SKPoint(0, 0),
+                        new SKPoint(0, 1)),
+                    Stroke = new SolidColorPaint(profitColor.WithAlpha(220), 1)
                 }
             );
 
@@ -132,7 +171,11 @@ namespace MyShop.ViewModels.Reports
                 new Axis
                 {
                     Labels = labels,
-                    LabelsRotation = 15
+                    LabelsRotation = 0,
+                    TextSize = 10,
+                    LabelsPaint = AxisTextPaint,
+                    SeparatorsPaint = AxisSeparatorPaint,
+                    TicksPaint = AxisSeparatorPaint
                 }
             );
 
@@ -140,11 +183,19 @@ namespace MyShop.ViewModels.Reports
                 new Axis
                 {
                     MinLimit = -max,
-                    MaxLimit = max
+                    MaxLimit = max,
+                    TextSize = 12,
+                    LabelsPaint = AxisTextPaint,
+                    SeparatorsPaint = AxisSeparatorPaint,
+                    TicksPaint = AxisSeparatorPaint
                 }
             );
         }
 
+        private static double CalculateChartWidth(int labelCount, double perLabel, double minWidth)
+        {
+            return Math.Max(minWidth, labelCount * perLabel);
+        }
         // ---------- LOAD ----------
         [RelayCommand]
         private async Task LoadReportAsync()

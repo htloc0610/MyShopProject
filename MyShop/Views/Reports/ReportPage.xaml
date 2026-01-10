@@ -13,13 +13,18 @@
                     <TextBlock Text="Số lượng bán theo sản phẩm"
                                FontWeight="SemiBold"/>
 
-                    <lvc:CartesianChart
-                        Height="240"
-                        Series="{x:Bind ViewModel.ProductSalesSeries}"
-                        XAxes="{x:Bind ViewModel.ProductSalesXAxes}"
-                        YAxes="{x:Bind ViewModel.ProductSalesYAxes}"
-                        ZoomMode="X"
-                        LegendPosition="Hidden"/>
+                    <ScrollViewer
+                        HorizontalScrollBarVisibility="Auto"
+                        VerticalScrollBarVisibility="Disabled">
+                        <lvc:CartesianChart
+                            Height="240"
+                            Width="{x:Bind ViewModel.ProductSalesChartWidth, Mode=OneWay}"
+                            Series="{x:Bind ViewModel.ProductSalesSeries}"
+                            XAxes="{x:Bind ViewModel.ProductSalesXAxes}"
+                            YAxes="{x:Bind ViewModel.ProductSalesYAxes}"
+                            ZoomMode="X"
+                            LegendPosition="Hidden"/>
+                    </ScrollViewer>
                 </StackPanel>
             </Border>
 
@@ -29,12 +34,17 @@
                     <TextBlock Text="Doanh thu và Lợi nhuận theo sản phẩm"
                                FontWeight="SemiBold"/>
 
-                    <lvc:CartesianChart
-                        Height="260"
-                        Series="{x:Bind ViewModel.RevenueProfitSeries}"
-                        XAxes="{x:Bind ViewModel.RevenueProfitXAxes}"
-                        YAxes="{x:Bind ViewModel.RevenueProfitYAxes}"
-                        LegendPosition="Right"/>
+                    <ScrollViewer
+                        HorizontalScrollBarVisibility="Auto"
+                        VerticalScrollBarVisibility="Disabled">
+                        <lvc:CartesianChart
+                            Height="260"
+                            Width="{x:Bind ViewModel.RevenueProfitChartWidth, Mode=OneWay}"
+                            Series="{x:Bind ViewModel.RevenueProfitSeries}"
+                            XAxes="{x:Bind ViewModel.RevenueProfitXAxes}"
+                            YAxes="{x:Bind ViewModel.RevenueProfitYAxes}"
+                            LegendPosition="Right"/>
+                    </ScrollViewer>
                 </StackPanel>
             </Border>
 
