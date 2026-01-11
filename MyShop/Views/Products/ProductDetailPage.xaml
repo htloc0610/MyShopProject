@@ -285,30 +285,64 @@
                         </StackPanel>
                     </Border>
 
-                    <!-- Price -->
-                    <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                            BorderThickness="1"
-                            CornerRadius="8"
-                            Padding="16">
-                        <StackPanel Spacing="8">
-                            <TextBlock Text="Giá bán" 
-                                      FontSize="11"
-                                      Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
-                            <TextBlock x:Name="PriceTextBlock"
-                                      Text="{x:Bind Product.FormattedPrice, Mode=OneWay, FallbackValue='N/A'}"
-                                      FontSize="24"
-                                      Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
-                                      FontWeight="Bold"/>
-                            <NumberBox x:Name="PriceNumberBox"
-                                      Visibility="Collapsed"
-                                      PlaceholderText="Nhập giá sản phẩm"
-                                      SpinButtonPlacementMode="Inline"
-                                      Minimum="0"
-                                      LargeChange="100000"
-                                      SmallChange="10000"/>
-                        </StackPanel>
-                    </Border>
+                    <!-- Import Price & Selling Price -->
+                    <Grid ColumnSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Import Price -->
+                        <Border Grid.Column="0"
+                                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                BorderThickness="1"
+                                CornerRadius="8"
+                                Padding="16">
+                            <StackPanel Spacing="8">
+                                <TextBlock Text="Giá nhập (VNĐ)" 
+                                          FontSize="11"
+                                          Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                <TextBlock x:Name="ImportPriceTextBlock"
+                                          Text="{x:Bind Product.FormattedImportPrice, Mode=OneWay, FallbackValue='N/A'}"
+                                          FontSize="18"
+                                          FontWeight="SemiBold"/>
+                                <NumberBox x:Name="ImportPriceNumberBox"
+                                          Visibility="Collapsed"
+                                          PlaceholderText="Giá nhập sản phẩm"
+                                          SpinButtonPlacementMode="Inline"
+                                          Minimum="0"
+                                          LargeChange="100000"
+                                          SmallChange="10000"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Selling Price -->
+                        <Border Grid.Column="1"
+                                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                BorderThickness="1"
+                                CornerRadius="8"
+                                Padding="16">
+                            <StackPanel Spacing="8">
+                                <TextBlock Text="Giá bán (VNĐ)" 
+                                          FontSize="11"
+                                          Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                <TextBlock x:Name="SellingPriceTextBlock"
+                                          Text="{x:Bind Product.FormattedPrice, Mode=OneWay, FallbackValue='N/A'}"
+                                          FontSize="24"
+                                          Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                          FontWeight="Bold"/>
+                                <NumberBox x:Name="SellingPriceNumberBox"
+                                          Visibility="Collapsed"
+                                          PlaceholderText="Giá bán sản phẩm"
+                                          SpinButtonPlacementMode="Inline"
+                                          Minimum="0"
+                                          LargeChange="100000"
+                                          SmallChange="10000"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
 
                     <!-- Category & Stock -->
                     <Grid ColumnSpacing="12">

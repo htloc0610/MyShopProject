@@ -230,25 +230,55 @@
                         </StackPanel>
                     </Border>
 
-                    <!-- Price -->
-                    <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                            BorderThickness="1"
-                            CornerRadius="8"
-                            Padding="16">
-                        <StackPanel Spacing="8">
-                            <TextBlock Text="Giá nhập (VNĐ) *" 
-                                      FontSize="11"
-                                      Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
-                            <NumberBox x:Name="PriceNumberBox"
-                                      PlaceholderText="Nhập giá sản phẩm"
-                                      SpinButtonPlacementMode="Inline"
-                                      Minimum="0"
-                                      LargeChange="100000"
-                                      SmallChange="10000"
-                                      Value="0"/>
-                        </StackPanel>
-                    </Border>
+                    <!-- Import Price & Selling Price -->
+                    <Grid ColumnSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Import Price -->
+                        <Border Grid.Column="0"
+                                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                BorderThickness="1"
+                                CornerRadius="8"
+                                Padding="16">
+                            <StackPanel Spacing="8">
+                                <TextBlock Text="Giá nhập (VNĐ) *" 
+                                          FontSize="11"
+                                          Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                <NumberBox x:Name="ImportPriceNumberBox"
+                                          PlaceholderText="Giá nhập sản phẩm"
+                                          SpinButtonPlacementMode="Inline"
+                                          Minimum="0"
+                                          LargeChange="100000"
+                                          SmallChange="10000"
+                                          Value="0"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Selling Price -->
+                        <Border Grid.Column="1"
+                                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                BorderThickness="1"
+                                CornerRadius="8"
+                                Padding="16">
+                            <StackPanel Spacing="8">
+                                <TextBlock Text="Giá bán (VNĐ) *" 
+                                          FontSize="11"
+                                          Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                <NumberBox x:Name="SellingPriceNumberBox"
+                                          PlaceholderText="Giá bán sản phẩm"
+                                          SpinButtonPlacementMode="Inline"
+                                          Minimum="0"
+                                          LargeChange="100000"
+                                          SmallChange="10000"
+                                          Value="0"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
 
                     <!-- Category & Stock -->
                     <Grid ColumnSpacing="12">

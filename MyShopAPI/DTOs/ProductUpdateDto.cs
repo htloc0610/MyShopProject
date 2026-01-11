@@ -10,6 +10,7 @@ namespace MyShopAPI.DTOs
         public string Sku { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
         public decimal ImportPrice { get; set; }
+        public decimal SellingPrice { get; set; }
         public int Count { get; set; }
         public string Description { get; set; } = string.Empty;
         public int CategoryId { get; set; }

@@ -10,6 +10,8 @@ namespace MyShopAPI.Models
 
         public int ImportPrice { get; set; }
 
+        public int SellingPrice { get; set; }
+
         public int Count { get; set; }
 
         public string Description { get; set; } = string.Empty;

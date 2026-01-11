@@ -182,8 +182,11 @@ public sealed partial class ProductDetailPage : Page, INotifyPropertyChanged
         NameTextBlock.Visibility = _isEditMode ? Visibility.Collapsed : Visibility.Visible;
         NameTextBox.Visibility = _isEditMode ? Visibility.Visible : Visibility.Collapsed;
         
-        PriceTextBlock.Visibility = _isEditMode ? Visibility.Collapsed : Visibility.Visible;
-        PriceNumberBox.Visibility = _isEditMode ? Visibility.Visible : Visibility.Collapsed;
+        ImportPriceTextBlock.Visibility = _isEditMode ? Visibility.Collapsed : Visibility.Visible;
+        ImportPriceNumberBox.Visibility = _isEditMode ? Visibility.Visible : Visibility.Collapsed;
+
+        SellingPriceTextBlock.Visibility = _isEditMode ? Visibility.Collapsed : Visibility.Visible;
+        SellingPriceNumberBox.Visibility = _isEditMode ? Visibility.Visible : Visibility.Collapsed;
         
         CategoryBadge.Visibility = _isEditMode ? Visibility.Collapsed : Visibility.Visible;
         CategoryComboBox.Visibility = _isEditMode ? Visibility.Visible : Visibility.Collapsed;
@@ -207,7 +210,8 @@ public sealed partial class ProductDetailPage : Page, INotifyPropertyChanged
         {
             // Populate edit controls with current values
             NameTextBox.Text = Product.Name;
-            PriceNumberBox.Value = (double)Product.Price;
+            ImportPriceNumberBox.Value = (double)Product.ImportPrice;
+            SellingPriceNumberBox.Value = (double)Product.SellingPrice;
             CategoryComboBox.SelectedValue = Product.CategoryId;
             StockNumberBox.Value = Product.Stock;
             SkuTextBox.Text = Product.Sku;
@@ -218,6 +222,16 @@ public sealed partial class ProductDetailPage : Page, INotifyPropertyChanged
             EditText.Text = "Hủy";
             SaveButton.Visibility = Visibility.Visible;
             DeleteButton.Visibility = Visibility.Collapsed;
+
+            // Toggle visibility - hide TextBlocks, show edit inputs
+            NameTextBlock.Visibility = Visibility.Collapsed;
+            NameTextBox.Visibility = Visibility.Visible;
+            
+            ImportPriceTextBlock.Visibility = Visibility.Collapsed;
+            ImportPriceNumberBox.Visibility = Visibility.Visible;
+            
+            SellingPriceTextBlock.Visibility = Visibility.Collapsed;
+            SellingPriceNumberBox.Visibility = Visibility.Visible;
         }
         else
         {
@@ -226,6 +240,16 @@ public sealed partial class ProductDetailPage : Page, INotifyPropertyChanged
             EditText.Text = "Chỉnh sửa";
             SaveButton.Visibility = Visibility.Collapsed;
             DeleteButton.Visibility = Visibility.Visible;
+
+            // Toggle visibility - show TextBlocks, hide edit inputs
+            NameTextBlock.Visibility = Visibility.Visible;
+            NameTextBox.Visibility = Visibility.Collapsed;
+            
+            ImportPriceTextBlock.Visibility = Visibility.Visible;
+            ImportPriceNumberBox.Visibility = Visibility.Collapsed;
+            
+            SellingPriceTextBlock.Visibility = Visibility.Visible;
+            SellingPriceNumberBox.Visibility = Visibility.Collapsed;
         }
     }
 
@@ -240,11 +264,18 @@ public sealed partial class ProductDetailPage : Page, INotifyPropertyChanged
             return false;
         }
 
-        // Validate price
-        if (PriceNumberBox.Value <= 0)
+        // Validate import price
+        if (ImportPriceNumberBox.Value < 0)
         {
-            _ = ShowDialogAsync("Lỗi", "Giá sản phẩm phải lớn hơn 0.");
+            _ = ShowDialogAsync("Lỗi", "Giá nhập không được âm.");
             return false;
+        }
+
+        // Validate selling price
+        if (SellingPriceNumberBox.Value <= 0)
+        {
+             _ = ShowDialogAsync("Lỗi", "Giá bán phải lớn hơn 0.");
+             return false;
         }
 
         // Validate category
@@ -263,7 +294,8 @@ public sealed partial class ProductDetailPage : Page, INotifyPropertyChanged
 
         // Update product properties from UI
         Product.Name = NameTextBox.Text;
-        Product.Price = (decimal)PriceNumberBox.Value;
+        Product.ImportPrice = (decimal)ImportPriceNumberBox.Value;
+        Product.SellingPrice = (decimal)SellingPriceNumberBox.Value;
         Product.Stock = (int)StockNumberBox.Value;
         Product.Sku = SkuTextBox.Text;
         Product.Description = DescriptionTextBox.Text;

@@ -22,9 +22,9 @@ public partial class CartItem : ObservableObject
     private int _quantity = 1;
 
     /// <summary>
-    /// Total price for this cart item (Quantity * Product.Price).
+    /// Total price for this cart item (Quantity * Product.SellingPrice).
     /// </summary>
-    public decimal Total => Quantity * Product.Price;
+    public decimal Total => Quantity * Product.SellingPrice;
 
     /// <summary>
     /// Constructor for creating a cart item.

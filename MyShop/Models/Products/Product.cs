@@ -13,7 +13,8 @@ namespace MyShop.Models.Products
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
-        public decimal Price { get; set; }
+        public decimal ImportPrice { get; set; }
+        public decimal SellingPrice { get; set; }
         public int Stock { get; set; }
         public string Category { get; set; } = string.Empty;
         public string ImageUrl { get; set; } = string.Empty;
@@ -55,9 +56,14 @@ namespace MyShop.Models.Products
         }
 
         /// <summary>
-        /// Formatted price for display in VND
+        /// Formatted selling price for display in VND
         /// </summary>
-        public string FormattedPrice => $"{Price:N0} VND";
+        public string FormattedPrice => $"{SellingPrice:N0} VND";
+
+        /// <summary>
+        /// Formatted import price for display in VND
+        /// </summary>
+        public string FormattedImportPrice => $"{ImportPrice:N0} VND";
 
         /// <summary>
         /// Stock status for display

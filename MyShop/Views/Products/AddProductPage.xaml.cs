@@ -68,7 +68,8 @@ public sealed partial class AddProductPage : Page
             {
                 Sku = SkuTextBox.Text.Trim(),
                 Name = NameTextBox.Text.Trim(),
-                Price = (decimal)PriceNumberBox.Value,
+                ImportPrice = (decimal)ImportPriceNumberBox.Value,
+                SellingPrice = (decimal)SellingPriceNumberBox.Value,
                 Stock = (int)StockNumberBox.Value,
                 Description = string.IsNullOrWhiteSpace(DescriptionTextBox.Text) 
                     ? "" 
@@ -288,7 +289,8 @@ public sealed partial class AddProductPage : Page
     private void ClearForm()
     {
         NameTextBox.Text = string.Empty;
-        PriceNumberBox.Value = 0;
+        ImportPriceNumberBox.Value = 0;
+        SellingPriceNumberBox.Value = 0;
         StockNumberBox.Value = 0;
         SkuTextBox.Text = string.Empty;
         DescriptionTextBox.Text = string.Empty;
@@ -313,11 +315,19 @@ public sealed partial class AddProductPage : Page
             return false;
         }
 
-        // Validate price
-        if (PriceNumberBox.Value <= 0)
+        // Validate import price
+        if (ImportPriceNumberBox.Value < 0)
         {
-            _ = ShowDialogAsync("Lỗi", "Giá sản phẩm phải lớn hơn 0.");
-            PriceNumberBox.Focus(FocusState.Programmatic);
+            _ = ShowDialogAsync("Lỗi", "Giá nhập không được âm.");
+            ImportPriceNumberBox.Focus(FocusState.Programmatic);
+            return false;
+        }
+
+        // Validate selling price
+        if (SellingPriceNumberBox.Value <= 0)
+        {
+            _ = ShowDialogAsync("Lỗi", "Giá bán phải lớn hơn 0.");
+            SellingPriceNumberBox.Focus(FocusState.Programmatic);
             return false;
         }
 

@@ -213,6 +213,7 @@ namespace MyShopAPI.Controllers
             product.Sku = updateDto.Sku;
             product.Name = updateDto.Name;
             product.ImportPrice = (int)Math.Round(updateDto.ImportPrice); // Convert decimal to int
+            product.SellingPrice = (int)Math.Round(updateDto.SellingPrice); // Convert decimal to int
             product.Count = updateDto.Count;
             product.Description = updateDto.Description;
             product.CategoryId = updateDto.CategoryId;
