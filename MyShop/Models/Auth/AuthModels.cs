@@ -10,6 +10,7 @@ namespace MyShop.Models.Auth
         public bool Success { get; set; }
         public string? ErrorMessage { get; set; }
         public UserInfo? User { get; set; }
+        public AccountStatusInfo? AccountStatus { get; set; }
     }
 
     /// <summary>
@@ -32,6 +33,7 @@ namespace MyShop.Models.Auth
         public string RefreshToken { get; set; } = string.Empty;
         public DateTime ExpiresAt { get; set; }
         public UserInfo User { get; set; } = null!;
+        public AccountStatusInfo AccountStatus { get; set; } = null!;
     }
 
     /// <summary>
@@ -60,5 +62,42 @@ namespace MyShop.Models.Auth
     public class RefreshTokenRequest
     {
         public string RefreshToken { get; set; } = string.Empty;
+    }
+
+    /// <summary>
+    /// Account status enum matching the backend.
+    /// </summary>
+    public enum AccountStatus
+    {
+        Active,
+        Trial,
+        Expired
+    }
+
+    /// <summary>
+    /// Account status information for trial/licensing.
+    /// </summary>
+    public class AccountStatusInfo
+    {
+        public AccountStatus Status { get; set; }
+        public int DaysRemaining { get; set; }
+        public bool IsLicensed { get; set; }
+    }
+
+    /// <summary>
+    /// Request to activate account with license key.
+    /// </summary>
+    public class ActivationRequest
+    {
+        public string Code { get; set; } = string.Empty;
+    }
+
+    /// <summary>
+    /// Result of activation attempt.
+    /// </summary>
+    public class ActivationResult
+    {
+        public bool Success { get; set; }
+        public string? ErrorMessage { get; set; }
     }
 }

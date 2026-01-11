@@ -9,6 +9,7 @@ namespace MyShopAPI.DTOs.Auth
         public string RefreshToken { get; set; } = string.Empty;
         public DateTime ExpiresAt { get; set; }
         public UserInfoDto User { get; set; } = null!;
+        public AccountStatusDto AccountStatus { get; set; } = null!;
     }
 
     /// <summary>

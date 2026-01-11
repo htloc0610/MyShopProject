@@ -34,7 +34,7 @@ public partial class LoginViewModel : ObservableObject
     [ObservableProperty]
     private bool _rememberMe;
 
-    public event EventHandler? LoginSuccessful;
+    public event EventHandler<AccountStatusInfo?>? LoginSuccessful;
 
     public LoginViewModel(IAuthService authService, ICredentialService credentialService, ISessionService sessionService)
     {
@@ -91,7 +91,8 @@ public partial class LoginViewModel : ObservableObject
                     }
                 }
                 
-                LoginSuccessful?.Invoke(this, EventArgs.Empty);
+                // Pass account status to the event handler
+                LoginSuccessful?.Invoke(this, result.AccountStatus);
             }
             else
             {

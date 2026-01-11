@@ -40,6 +40,22 @@ namespace MyShop.Services.Reports
                 url,
                 JsonOptions);
         }
+
+        public async Task<SalesTimeSeriesResponse?> GetSalesTimeSeriesAsync(
+            DateOnly? from,
+            DateOnly to,
+            string groupBy)
+        {
+            var url = BuildUrl(
+                "api/reports/sales-quantity-series",
+                from,
+                to,
+                groupBy);
+
+            return await _httpClient.GetFromJsonAsync<SalesTimeSeriesResponse>(
+                url,
+                JsonOptions);
+        }
         public async Task<ProductRevenueProfitSummaryResponse?> GetProductRevenueProfitSummaryAsync(
             DateOnly? from,
             DateOnly to)
@@ -54,15 +70,34 @@ namespace MyShop.Services.Reports
                 JsonOptions);
         }
 
+        public async Task<RevenueProfitTimeSeriesResponse?> GetRevenueProfitTimeSeriesAsync(
+            DateOnly? from,
+            DateOnly to,
+            string groupBy)
+        {
+            var url = BuildUrl(
+                "api/reports/revenue-profit-series",
+                from,
+                to,
+                groupBy);
+
+            return await _httpClient.GetFromJsonAsync<RevenueProfitTimeSeriesResponse>(
+                url,
+                JsonOptions);
+        }
+
         private static string BuildUrl(
             string basePath,
             DateOnly? from,
-            DateOnly to)
+            DateOnly to,
+            string? groupBy = null)
         {
             var url = $"{basePath}?to={to:yyyy-MM-dd}";
 
             if (from.HasValue)
                 url += $"&from={from.Value:yyyy-MM-dd}";
+            if (!string.IsNullOrWhiteSpace(groupBy))
+                url += $"&groupBy={groupBy}";
 
             return url;
         }
