@@ -32,5 +32,10 @@ namespace MyShop.Services.Auth
         /// Get current user info from the API.
         /// </summary>
         Task<UserInfo?> GetCurrentUserAsync();
+
+        /// <summary>
+        /// Activate account with a license key.
+        /// </summary>
+        Task<ActivationResult> ActivateAsync(string activationCode);
     }
 }

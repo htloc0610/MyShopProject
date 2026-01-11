@@ -95,6 +95,24 @@ public sealed partial class MainWindow : Window
     }
 
     /// <summary>
+    /// Show the activation page for expired trial users.
+    /// </summary>
+    public void ShowActivationPage()
+    {
+        Debug.WriteLine("=== ShowActivationPage: Starting ===");
+        
+        // Show login container (reuse for activation), hide main nav
+        LoginContainer.Visibility = Visibility.Visible;
+        NavView.Visibility = Visibility.Collapsed;
+
+        var activationPage = new ActivationPage();
+        
+        // Navigate to activation page in the login frame
+        LoginFrame.Content = activationPage;
+        Debug.WriteLine("=== ShowActivationPage: Done ===");
+    }
+
+    /// <summary>
     /// Handle logout.
     /// </summary>
     private async void LogoutButton_Click(object sender, RoutedEventArgs e)

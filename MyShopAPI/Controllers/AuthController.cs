@@ -79,6 +79,14 @@ namespace MyShopAPI.Controllers
             var (accessToken, expiresAt) = await _tokenService.GenerateAccessTokenAsync(user, role);
             var refreshToken = await _tokenService.GenerateRefreshTokenAsync(user);
 
+            // New users start in Trial mode with 15 days
+            var accountStatus = new AccountStatusDto
+            {
+                Status = AccountStatus.Trial,
+                DaysRemaining = 15,
+                IsLicensed = false
+            };
+
             return Ok(new TokenResponseDto
             {
                 AccessToken = accessToken,
@@ -90,7 +98,8 @@ namespace MyShopAPI.Controllers
                     Email = user.Email ?? string.Empty,
                     ShopName = user.ShopName,
                     Role = role
-                }
+                },
+                AccountStatus = accountStatus
             });
         }
 
@@ -120,7 +129,19 @@ namespace MyShopAPI.Controllers
             var roles = await _userManager.GetRolesAsync(user);
             var role = roles.FirstOrDefault() ?? "Owner";
 
-            _logger.LogInformation("User {Email} logged in successfully", user.Email);
+            // Calculate trial status
+            var daysUsed = (DateTime.UtcNow - user.CreatedAt).TotalDays;
+            var accountStatus = CalculateAccountStatus(user, daysUsed);
+
+            // If expired and no license key exists, generate one
+            if (accountStatus.Status == AccountStatus.Expired && string.IsNullOrEmpty(user.CurrentLicenseKey))
+            {
+                user.CurrentLicenseKey = LicenseKeyGenerator.Generate();
+                await _userManager.UpdateAsync(user);
+                _logger.LogInformation("Generated license key for expired user {Email}", user.Email);
+            }
+
+            _logger.LogInformation("User {Email} logged in successfully with status {Status}", user.Email, accountStatus.Status);
 
             // Generate tokens
             var (accessToken, expiresAt) = await _tokenService.GenerateAccessTokenAsync(user, role);
@@ -137,7 +158,8 @@ namespace MyShopAPI.Controllers
                     Email = user.Email ?? string.Empty,
                     ShopName = user.ShopName,
                     Role = role
-                }
+                },
+                AccountStatus = accountStatus
             });
         }
 
@@ -238,6 +260,97 @@ namespace MyShopAPI.Controllers
                 ShopName = user.ShopName,
                 Role = role
             });
+        }
+
+        /// <summary>
+        /// Activate account with a license key.
+        /// </summary>
+        /// <param name="activateDto">Activation code.</param>
+        /// <returns>Success or error message.</returns>
+        [HttpPost("activate")]
+        [Authorize]
+        [ProducesResponseType(typeof(ActivateAccountResponseDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<ActionResult<ActivateAccountResponseDto>> Activate([FromBody] ActivateAccountDto activateDto)
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return Unauthorized();
+            }
+
+            // Validate activation code
+            if (string.IsNullOrEmpty(user.CurrentLicenseKey))
+            {
+                return BadRequest(new ActivateAccountResponseDto
+                {
+                    Success = false,
+                    Message = "No activation code is pending for this account."
+                });
+            }
+
+            if (user.CurrentLicenseKey != activateDto.Code)
+            {
+                _logger.LogWarning("Invalid activation code attempt for user {Email}", user.Email);
+                return BadRequest(new ActivateAccountResponseDto
+                {
+                    Success = false,
+                    Message = "Invalid Activation Code"
+                });
+            }
+
+            // Activate the account
+            user.IsLicensed = true;
+            user.CurrentLicenseKey = null;
+            await _userManager.UpdateAsync(user);
+
+            _logger.LogInformation("User {Email} activated successfully", user.Email);
+
+            return Ok(new ActivateAccountResponseDto
+            {
+                Success = true,
+                Message = "Account activated successfully!"
+            });
+        }
+
+        /// <summary>
+        /// Calculate account status based on trial period and license.
+        /// </summary>
+        private static AccountStatusDto CalculateAccountStatus(ApplicationUser user, double daysUsed)
+        {
+            if (user.IsLicensed)
+            {
+                return new AccountStatusDto
+                {
+                    Status = AccountStatus.Active,
+                    DaysRemaining = 0,
+                    IsLicensed = true
+                };
+            }
+
+            if (daysUsed <= 15)
+            {
+                return new AccountStatusDto
+                {
+                    Status = AccountStatus.Trial,
+                    DaysRemaining = Math.Max(0, (int)(15 - daysUsed)),
+                    IsLicensed = false
+                };
+            }
+
+            return new AccountStatusDto
+            {
+                Status = AccountStatus.Expired,
+                DaysRemaining = 0,
+                IsLicensed = false
+            };
         }
     }
 }
