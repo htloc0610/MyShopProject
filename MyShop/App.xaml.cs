@@ -174,6 +174,7 @@ public partial class App : Application
         // ViewModels
         // ====================================================
         services.AddTransient<LoginViewModel>();
+        services.AddTransient<ActivationViewModel>();
         services.AddTransient<DashboardViewModel>();
         services.AddTransient<ProductViewModel>();
         services.AddTransient<CategoryViewModel>();
@@ -226,7 +227,15 @@ public partial class App : Application
                     var result = await authService.RefreshTokenAsync();
                     if (result.Success)
                     {
-                        mainWindow.ShowMainContent();
+                        // Check account status
+                        if (result.AccountStatus?.Status == Models.Auth.AccountStatus.Expired)
+                        {
+                            mainWindow.ShowActivationPage();
+                        }
+                        else
+                        {
+                            mainWindow.ShowMainContent();
+                        }
                         return;
                     }
                     else

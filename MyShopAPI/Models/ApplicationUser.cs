@@ -19,6 +19,19 @@ namespace MyShopAPI.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         /// <summary>
+        /// Indicates whether the user has activated their account with a license key.
+        /// Default is false, meaning users start in trial mode.
+        /// </summary>
+        public bool IsLicensed { get; set; } = false;
+
+        /// <summary>
+        /// Stores the server-generated activation code waiting to be entered by the user.
+        /// This is set when an expired trial user logs in and needs activation.
+        /// Cleared after successful activation.
+        /// </summary>
+        public string? CurrentLicenseKey { get; set; }
+
+        /// <summary>
         /// Navigation property for user's categories.
         /// </summary>
         public ICollection<Category> Categories { get; set; } = new List<Category>();

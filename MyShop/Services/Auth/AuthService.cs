@@ -70,7 +70,8 @@ namespace MyShop.Services.Auth
                         return new AuthResult
                         {
                             Success = true,
-                            User = tokenResponse.User
+                            User = tokenResponse.User,
+                            AccountStatus = tokenResponse.AccountStatus
                         };
                     }
                 }
@@ -124,7 +125,8 @@ namespace MyShop.Services.Auth
                         return new AuthResult
                         {
                             Success = true,
-                            User = tokenResponse.User
+                            User = tokenResponse.User,
+                            AccountStatus = tokenResponse.AccountStatus
                         };
                     }
                 }
@@ -256,6 +258,57 @@ namespace MyShop.Services.Auth
             catch
             {
                 return null;
+            }
+        }
+
+        /// <inheritdoc />
+        public async Task<ActivationResult> ActivateAsync(string activationCode)
+        {
+            try
+            {
+                var accessToken = _sessionService.AccessToken;
+                if (string.IsNullOrEmpty(accessToken))
+                {
+                    return new ActivationResult
+                    {
+                        Success = false,
+                        ErrorMessage = "Not authenticated"
+                    };
+                }
+
+                var request = new ActivationRequest { Code = activationCode };
+
+                var httpRequest = new HttpRequestMessage(HttpMethod.Post, "api/auth/activate")
+                {
+                    Content = JsonContent.Create(request)
+                };
+                httpRequest.Headers.Authorization = 
+                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+
+                var response = await _httpClient.SendAsync(httpRequest);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return new ActivationResult
+                    {
+                        Success = true
+                    };
+                }
+
+                var errorContent = await response.Content.ReadAsStringAsync();
+                return new ActivationResult
+                {
+                    Success = false,
+                    ErrorMessage = ExtractErrorMessage(errorContent) ?? "Activation failed"
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ActivationResult
+                {
+                    Success = false,
+                    ErrorMessage = $"Connection error: {ex.Message}"
+                };
             }
         }
 

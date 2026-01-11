@@ -4,6 +4,7 @@ using Microsoft.UI.Xaml;
 using MyShop.ViewModels.Auth;
 using MyShop;
 using System;
+using MyShop.Models.Auth;
 
 namespace MyShop.Views.Auth;
 
@@ -21,11 +22,20 @@ public sealed partial class LoginView : Page
         ViewModel.LoginSuccessful += ViewModel_LoginSuccessful;
     }
 
-    private void ViewModel_LoginSuccessful(object? sender, EventArgs e)
+    private void ViewModel_LoginSuccessful(object? sender, AccountStatusInfo? accountStatus)
     {
         if (App.MainWindow is MainWindow mainWindow)
         {
-            mainWindow.OnLoginSuccess();
+            // Check account status and navigate accordingly
+            if (accountStatus?.Status == AccountStatus.Expired)
+            {
+                mainWindow.ShowActivationPage();
+            }
+            else
+            {
+                // Active or Trial - show main content
+                mainWindow.OnLoginSuccess();
+            }
         }
     }
 }
@@ -123,5 +133,18 @@ public class ModeToToggleActionConverter : IValueConverter
     public object ConvertBack(object value, Type targetType, object parameter, string language)
     {
         throw new NotImplementedException();
+    }
+}
+
+public class InverseBoolConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, string language)
+    {
+        return value is bool b ? !b : true;
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, string language)
+    {
+        return value is bool b ? !b : false;
     }
 }
