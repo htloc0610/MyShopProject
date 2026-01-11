@@ -74,6 +74,11 @@ public partial class CreateOrderViewModel : ObservableObject
     [ObservableProperty]
     private ObservableCollection<AvailableCoupon> _availableCoupons = new();
 
+    [ObservableProperty]
+    private string _couponSearchText = string.Empty;
+
+    public ObservableCollection<AvailableCoupon> FilteredCoupons { get; private set; } = new();
+
     /// <summary>
     /// Subtotal before discount.
     /// </summary>
@@ -539,10 +544,42 @@ public partial class CreateOrderViewModel : ObservableObject
             {
                 AvailableCoupons.Add(coupon);
             }
+            
+            // Initialize filtered list with all coupons
+            FilterCoupons();
         }
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"Error loading available coupons: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Filter coupons based on search text.
+    /// </summary>
+    public void FilterCoupons()
+    {
+        FilteredCoupons.Clear();
+
+        if (string.IsNullOrWhiteSpace(CouponSearchText))
+        {
+            // Show all coupons if search is empty
+            foreach (var coupon in AvailableCoupons)
+            {
+                FilteredCoupons.Add(coupon);
+            }
+        }
+        else
+        {
+            // Filter based on search text (case-insensitive)
+            var searchLower = CouponSearchText.ToLower();
+            foreach (var coupon in AvailableCoupons)
+            {
+                if (coupon.Code.ToLower().Contains(searchLower))
+                {
+                    FilteredCoupons.Add(coupon);
+                }
+            }
         }
     }
 

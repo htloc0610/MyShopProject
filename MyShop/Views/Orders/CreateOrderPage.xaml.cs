@@ -107,6 +107,12 @@ public sealed partial class CreateOrderPage : Page
         ViewModel.ClearCustomerCommand.Execute(null);
     }
 
+    // Coupon Search
+    private void CouponSearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        ViewModel.FilterCoupons();
+    }
+
     // Coupon RadioButton Selection
     private void CouponRadioButton_Click(object sender, RoutedEventArgs e)
     {

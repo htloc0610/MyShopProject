@@ -253,6 +253,7 @@
                         <Grid RowSpacing="12">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/> <!-- Title -->
+                                <RowDefinition Height="Auto"/> <!-- Search -->
                                 <RowDefinition Height="*"/>    <!-- List (Expands) -->
                                 <RowDefinition Height="Auto"/> <!-- Input -->
                                 <RowDefinition Height="Auto"/> <!-- Message -->
@@ -260,12 +261,19 @@
 
                             <TextBlock Grid.Row="0" Text="Mã Giảm Giá" FontWeight="SemiBold" FontSize="16"/>
 
+                            <!-- Search Coupon -->
+                            <TextBox Grid.Row="1"
+                                     x:Name="CouponSearchTextBox"
+                                     PlaceholderText="Tìm kiếm mã giảm giá..."
+                                     Text="{x:Bind ViewModel.CouponSearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                     TextChanged="CouponSearchTextBox_TextChanged"/>
+
                             <!-- Available Coupons with RadioButton -->
-                            <ScrollViewer Grid.Row="1" 
+                            <ScrollViewer Grid.Row="2" 
                                          VerticalScrollBarVisibility="Auto"
                                          MaxHeight="300">
-                                <ItemsRepeater ItemsSource="{x:Bind ViewModel.AvailableCoupons, Mode=OneWay}"
-                                              Visibility="{x:Bind ViewModel.AvailableCoupons.Count, Mode=OneWay, Converter={StaticResource IntToVisibilityConverter}}">
+                                <ItemsRepeater ItemsSource="{x:Bind ViewModel.FilteredCoupons, Mode=OneWay}"
+                                              Visibility="{x:Bind ViewModel.FilteredCoupons.Count, Mode=OneWay, Converter={StaticResource IntToVisibilityConverter}}">
                                     <ItemsRepeater.Layout>
                                         <StackLayout Spacing="8"/>
                                     </ItemsRepeater.Layout>
@@ -309,12 +317,12 @@
                             </ScrollViewer>
 
                             <!-- Empty State Message if no coupons in list -->
-                            <TextBlock Grid.Row="1"
+                            <TextBlock Grid.Row="2"
                                       Text="Không có mã giảm giá khả dụng"
                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                       HorizontalAlignment="Center"
                                       VerticalAlignment="Center"
-                                      Visibility="{x:Bind ViewModel.AvailableCoupons.Count, Mode=OneWay, Converter={StaticResource CountToVisibilityConverter}}"/>
+                                      Visibility="{x:Bind ViewModel.FilteredCoupons.Count, Mode=OneWay, Converter={StaticResource CountToVisibilityConverter}}"/>
                         </Grid>
                     </Border>
 
