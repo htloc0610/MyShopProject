@@ -1,5 +1,10 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using LiveChartsCore;
+using LiveChartsCore.Kernel.Sketches;
+using LiveChartsCore.SkiaSharpView;
+using LiveChartsCore.SkiaSharpView.Painting;
+using SkiaSharp;
 using MyShop.Models.Dashboard;
 using MyShop.Services.Dashboard;
 using System;
@@ -15,6 +20,10 @@ namespace MyShop.ViewModels.Dashboard;
 public partial class DashboardViewModel : ObservableObject
 {
     private readonly DashboardService _dashboardService;
+    private static readonly SolidColorPaint AxisTextPaint =
+        new(new SKColor(107, 114, 128));
+    private static readonly SolidColorPaint AxisSeparatorPaint =
+        new(new SKColor(229, 231, 235)) { StrokeThickness = 1 };
 
     [ObservableProperty]
     private bool isLoading;
@@ -42,6 +51,15 @@ public partial class DashboardViewModel : ObservableObject
 
     [ObservableProperty]
     private ObservableCollection<RevenueByDay> monthlyRevenue = new();
+
+    [ObservableProperty]
+    private ISeries[] monthlyRevenueSeries = Array.Empty<ISeries>();
+
+    [ObservableProperty]
+    private ICartesianAxis[] monthlyRevenueXAxes = Array.Empty<ICartesianAxis>();
+
+    [ObservableProperty]
+    private ICartesianAxis[] monthlyRevenueYAxes = Array.Empty<ICartesianAxis>();
 
     public DashboardViewModel(DashboardService dashboardService)
     {
@@ -97,6 +115,9 @@ public partial class DashboardViewModel : ObservableObject
                     MonthlyRevenue.Add(item);
                 }
             }
+
+            BuildMonthlyRevenueChart();
+
         }
         catch (Exception ex)
         {
@@ -106,5 +127,62 @@ public partial class DashboardViewModel : ObservableObject
         {
             IsLoading = false;
         }
+    }
+
+    private void BuildMonthlyRevenueChart()
+    {
+        if (MonthlyRevenue.Count == 0)
+        {
+            MonthlyRevenueSeries = Array.Empty<ISeries>();
+            MonthlyRevenueXAxes = Array.Empty<ICartesianAxis>();
+            MonthlyRevenueYAxes = Array.Empty<ICartesianAxis>();
+            return;
+        }
+
+        var primary = new SKColor(37, 99, 235);
+        var values = MonthlyRevenue
+            .Select(x => (double)x.Revenue)
+            .ToArray();
+        var labels = MonthlyRevenue
+            .Select(x => x.Day.ToString())
+            .ToArray();
+
+        MonthlyRevenueSeries = new ISeries[]
+        {
+            new ColumnSeries<double>
+            {
+                Name = "Doanh thu",
+                Values = values,
+                Fill = new LinearGradientPaint(
+                    new[] { primary.WithAlpha(220), primary.WithAlpha(120) },
+                    new SKPoint(0, 0),
+                    new SKPoint(0, 1)),
+                Stroke = new SolidColorPaint(primary.WithAlpha(220), 1)
+            }
+        };
+
+        MonthlyRevenueXAxes = new ICartesianAxis[]
+        {
+            new Axis
+            {
+                Labels = labels,
+                TextSize = 12,
+                LabelsPaint = AxisTextPaint,
+                SeparatorsPaint = AxisSeparatorPaint,
+                TicksPaint = AxisSeparatorPaint
+            }
+        };
+
+        MonthlyRevenueYAxes = new ICartesianAxis[]
+        {
+            new Axis
+            {
+                MinLimit = 0,
+                TextSize = 12,
+                LabelsPaint = AxisTextPaint,
+                SeparatorsPaint = AxisSeparatorPaint,
+                TicksPaint = AxisSeparatorPaint
+            }
+        };
     }
 }
