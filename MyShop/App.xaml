@@ -33,6 +33,7 @@
             <converters:RelativeToAbsoluteUrlConverter x:Key="RelativeToAbsoluteUrlConverter"/>
             <converters:BoolToStringConverter x:Key="BoolToStringConverter"/>
             <converters:BoolToGlyphConverter x:Key="BoolToGlyphConverter"/>
+            <converters:StringEqualsConverter x:Key="StringEqualsConverter"/>
 
             <converters:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibilityConverter"/>
             

@@ -325,7 +325,33 @@ public partial class ProductViewModel : ObservableObject
     #region Commands - Sorting
 
     /// <summary>
-    /// Changes sort column and direction.
+    /// Selects a sort column without changing direction.
+    /// </summary>
+    [RelayCommand]
+    private async Task SelectSortColumnAsync(string columnName)
+    {
+        if (!SortColumn.Equals(columnName, System.StringComparison.OrdinalIgnoreCase))
+        {
+            SortColumn = columnName;
+            // Keep existing direction or default to ascending
+            CurrentPage = 1;
+            await LoadProductsPagedAsync();
+        }
+    }
+
+    /// <summary>
+    /// Toggles sort direction (ASC/DESC) for the current column.
+    /// </summary>
+    [RelayCommand]
+    private async Task ToggleSortDirectionAsync()
+    {
+        IsDescending = !IsDescending;
+        CurrentPage = 1;
+        await LoadProductsPagedAsync();
+    }
+
+    /// <summary>
+    /// Changes sort column and direction (legacy method for compatibility).
     /// </summary>
     [RelayCommand]
     private async Task ChangeSortAsync(string columnName)

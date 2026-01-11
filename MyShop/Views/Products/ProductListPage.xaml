@@ -250,31 +250,43 @@
                               VerticalAlignment="Center"
                               Style="{StaticResource BodyTextBlockStyle}"/>
                     
-                    <Button Content="Mã SP" 
-                           Command="{x:Bind ViewModel.ChangeSortCommand}"
+                    
+                    <Button x:Name="SortByIdButton"
+                           Content="Mã SP" 
+                           Command="{x:Bind ViewModel.SelectSortColumnCommand}"
                            CommandParameter="id"
                            Style="{StaticResource AccentButtonStyle}"
                            Height="32"/>
                     
-                    <Button Content="Tên" 
-                           Command="{x:Bind ViewModel.ChangeSortCommand}"
+                    <Button x:Name="SortByNameButton"
+                           Content="Tên" 
+                           Command="{x:Bind ViewModel.SelectSortColumnCommand}"
                            CommandParameter="name"
                            Height="32"/>
                     
-                    <Button Content="Giá" 
-                           Command="{x:Bind ViewModel.ChangeSortCommand}"
+                    <Button x:Name="SortByPriceButton"
+                           Content="Giá" 
+                           Command="{x:Bind ViewModel.SelectSortColumnCommand}"
                            CommandParameter="price"
                            Height="32"/>
                     
-                    <Button Content="Tồn kho" 
-                           Command="{x:Bind ViewModel.ChangeSortCommand}"
+                    <Button x:Name="SortByStockButton"
+                           Content="Tồn kho" 
+                           Command="{x:Bind ViewModel.SelectSortColumnCommand}"
                            CommandParameter="stock"
                            Height="32"/>
                     
-                    <FontIcon Glyph="{x:Bind ViewModel.IsDescending, Mode=OneWay, Converter={StaticResource SortDirectionToGlyphConverter}}"
-                             FontSize="16"
-                             VerticalAlignment="Center"
-                             Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"/>
+                    <!-- Clickable Sort Direction Toggle -->
+                    <Button Command="{x:Bind ViewModel.ToggleSortDirectionCommand}"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            Padding="8"
+                            Height="32"
+                            ToolTipService.ToolTip="Đổi thứ tự sắp xếp">
+                        <FontIcon Glyph="{x:Bind ViewModel.IsDescending, Mode=OneWay, Converter={StaticResource SortDirectionToGlyphConverter}}"
+                                  FontSize="16"
+                                  Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"/>
+                    </Button>
                 </StackPanel>
             </Grid>
         </StackPanel>

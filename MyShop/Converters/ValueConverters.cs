@@ -317,4 +317,24 @@ namespace MyShop.Converters
             throw new NotImplementedException();
         }
     }
+
+    /// <summary>
+    /// Converts by comparing a value to a parameter (returns true if equal).
+    /// Used for highlighting the active sort button.
+    /// </summary>
+    public class StringEqualsConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, string language)
+        {
+            if (value == null || parameter == null)
+                return false;
+
+            return value.ToString().Equals(parameter.ToString(), StringComparison.OrdinalIgnoreCase);
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, string language)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }
