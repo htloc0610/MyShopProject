@@ -118,7 +118,18 @@ public sealed partial class CreateOrderPage : Page
     {
         if (sender is RadioButton radioButton && radioButton.Tag is AvailableCoupon coupon)
         {
-            ViewModel.SelectCouponCommand.Execute(coupon);
+            // Check if this coupon is already selected
+            if (ViewModel.CouponCode == coupon.Code)
+            {
+                // If clicking the already selected coupon -> Deselect it
+                ViewModel.ClearCouponCommand.Execute(null);
+                radioButton.IsChecked = false;
+            }
+            else
+            {
+                // If clicking a new coupon -> Select it
+                ViewModel.SelectCouponCommand.Execute(coupon);
+            }
         }
     }
 }
