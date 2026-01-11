@@ -169,6 +169,7 @@ public partial class App : Application
         // Other Services
         // ====================================================
         services.AddSingleton<ProductChangeNotifier>();
+        services.AddSingleton<IPrintService, PrintService>();
 
         // ====================================================
         // ViewModels

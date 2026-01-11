@@ -4,6 +4,9 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MyShop.Models.Orders;
 using MyShop.Services.Orders;
+using MyShop.Services.Shared;
+using MyShop.Services.Auth;
+using MyShop.Views.Orders;
 using Microsoft.UI.Xaml.Controls;
 
 namespace MyShop.ViewModels.Orders;
@@ -14,6 +17,8 @@ namespace MyShop.ViewModels.Orders;
 public partial class OrderDetailViewModel : ObservableObject
 {
     private readonly IOrderService _orderService;
+    private readonly IPrintService _printService;
+    private readonly ISessionService _sessionService;
     private readonly Frame? _navigationFrame;
 
     [ObservableProperty]
@@ -44,9 +49,11 @@ public partial class OrderDetailViewModel : ObservableObject
         "Cancelled"
     };
 
-    public OrderDetailViewModel(IOrderService orderService, Frame? navigationFrame = null)
+    public OrderDetailViewModel(IOrderService orderService, IPrintService printService, ISessionService sessionService, Frame? navigationFrame = null)
     {
         _orderService = orderService;
+        _printService = printService;
+        _sessionService = sessionService;
         _navigationFrame = navigationFrame;
     }
 
@@ -202,6 +209,38 @@ public partial class OrderDetailViewModel : ObservableObject
         finally
         {
             IsLoading = false;
+        }
+    }
+
+    /// <summary>
+    /// Print the current order as an invoice.
+    /// </summary>
+    [RelayCommand]
+    private async Task PrintInvoiceAsync()
+    {
+        if (CurrentOrder == null) return;
+
+        ErrorMessage = null;
+        SuccessMessage = null;
+
+        try
+        {
+            // Create the invoice view
+            var invoiceView = new InvoicePrintView();
+            var shopName = _sessionService.ShopName ?? "My Shop";
+            invoiceView.SetOrderData(CurrentOrder, shopName);
+
+            // Print the invoice
+            var success = await _printService.PrintAsync($"Order_{CurrentOrder.OrderId}", invoiceView);
+
+            if (success)
+            {
+                SuccessMessage = "Đã gửi hóa đơn đến máy in";
+            }
+        }
+        catch (System.Exception ex)
+        {
+            ErrorMessage = $"Lỗi khi in hóa đơn: {ex.Message}";
         }
     }
 

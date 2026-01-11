@@ -3,6 +3,8 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 using MyShop.ViewModels.Orders;
 using MyShop.Services.Orders;
+using MyShop.Services.Shared;
+using MyShop.Services.Auth;
 using System;
 using System.Threading.Tasks;
 using WinRT;
@@ -17,9 +19,11 @@ public sealed partial class OrderDetailPage : Page
     {
         this.InitializeComponent();
         
-        // Get service and initialize ViewModel (Frame will be set later)
+        // Get services and initialize ViewModel (Frame will be set later)
         var orderService = App.Current.Services.GetService(typeof(IOrderService)) as IOrderService;
-        ViewModel = new OrderDetailViewModel(orderService!, null);
+        var printService = App.Current.Services.GetService(typeof(IPrintService)) as IPrintService;
+        var sessionService = App.Current.Services.GetService(typeof(ISessionService)) as ISessionService;
+        ViewModel = new OrderDetailViewModel(orderService!, printService!, sessionService!, null);
     }
 
     protected override async void OnNavigatedTo(NavigationEventArgs e)
