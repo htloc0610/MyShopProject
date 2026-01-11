@@ -106,11 +106,13 @@ public class DatabaseSeeder
 
             await _context.SaveChangesAsync();
 
-            await SeedOrdersAsync(demoUserId);
+            // Seed customers FIRST so orders can reference them
+            await SeedCustomersAsync(demoUserId);
             
             await SeedDiscountsAsync(demoUserId);
 
-            await SeedCustomersAsync(demoUserId);
+            // Seed orders AFTER customers exist
+            await SeedOrdersAsync(demoUserId);
 
             await _context.SaveChangesAsync();
 
@@ -312,6 +314,18 @@ public class DatabaseSeeder
             return;
         }
 
+        // Lấy danh sách customers
+        var customers = await _context.Customers
+            .IgnoreQueryFilters()
+            .Where(c => c.UserId == userId)
+            .ToListAsync();
+
+        if (!customers.Any())
+        {
+            _logger.LogWarning("No customers found. Skipping order seeding.");
+            return;
+        }
+
         var orders = new List<Order>();
         var orderItems = new List<OrderItem>();
 
@@ -320,6 +334,13 @@ public class DatabaseSeeder
         var startDate = today.AddDays(-29);
 
         int orderIdCounter = 1;
+
+        // Array of possible statuses with weights (80% Created, 15% Paid, 5% Cancelled)
+        var statusWeights = new[] { 
+            (OrderStatus.Created, 80),
+            (OrderStatus.Paid, 15),
+            (OrderStatus.Cancelled, 5)
+        };
 
         for (int i = 0; i < 30; i++)
         {
@@ -330,10 +351,31 @@ public class DatabaseSeeder
 
             for (int j = 0; j < ordersPerDay; j++)
             {
+                // Chọn ngẫu nhiên customer (80% có customer, 20% guest)
+                Customer? selectedCustomer = random.Next(100) < 80 
+                    ? customers[random.Next(customers.Count)] 
+                    : null;
+
+                // Select order status based on weights
+                var roll = random.Next(100);
+                var cumulative = 0;
+                OrderStatus orderStatus = OrderStatus.Created;
+                foreach (var (status, weight) in statusWeights)
+                {
+                    cumulative += weight;
+                    if (roll < cumulative)
+                    {
+                        orderStatus = status;
+                        break;
+                    }
+                }
+
                 var order = new Order
                 {
                     OrderDate = orderDate.AddHours(random.Next(8, 21)),
-                    UserId = userId
+                    UserId = userId,
+                    CustomerId = selectedCustomer?.Id,
+                    Status = orderStatus
                 };
 
                 // mỗi order có 1–3 sản phẩm
@@ -348,7 +390,8 @@ public class DatabaseSeeder
                 foreach (var product in selectedProducts)
                 {
                     var quantity = random.Next(1, 4);
-                    var unitPrice = product.ImportPrice + random.Next(100000, 500000); // bán có lời
+                    // Dùng SellingPrice thay vì random markup
+                    var unitPrice = product.SellingPrice;
 
                     var itemTotal = quantity * unitPrice;
                     finalPrice += itemTotal;

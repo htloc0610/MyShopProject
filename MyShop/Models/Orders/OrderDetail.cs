@@ -25,7 +25,7 @@ public class OrderDetail
     public string? CouponCode { get; set; }
     
     // Order status
-    public string Status { get; set; } = "New";
+    public string Status { get; set; } = "Created";
     
     // Order items
     public List<OrderItemDetail> Items { get; set; } = new();

@@ -87,9 +87,8 @@ public partial class OrdersListViewModel : ObservableObject
     public ObservableCollection<string> AvailableStatuses { get; } = new()
     {
         "Tất cả",
-        "New",
-        "Processing",
-        "Completed",
+        "Created",
+        "Paid",
         "Cancelled"
     };
 

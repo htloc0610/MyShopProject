@@ -31,7 +31,7 @@ namespace MyShopAPI.Models
         /// Current status of the order.
         /// </summary>
         [Required]
-        public OrderStatus Status { get; set; } = OrderStatus.New;
+        public OrderStatus Status { get; set; } = OrderStatus.Created;
 
         /// <summary>
         /// Foreign key to Customer (nullable - order can be placed without customer record).

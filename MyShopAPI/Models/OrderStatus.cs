@@ -8,21 +8,16 @@ namespace MyShopAPI.Models
         /// <summary>
         /// New order that has been created.
         /// </summary>
-        New = 0,
+        Created = 0,
         
         /// <summary>
-        /// Order is being processed.
+        /// Order has been paid.
         /// </summary>
-        Processing = 1,
-        
-        /// <summary>
-        /// Order has been completed and delivered.
-        /// </summary>
-        Completed = 2,
+        Paid = 1,
         
         /// <summary>
         /// Order has been cancelled.
         /// </summary>
-        Cancelled = 3
+        Cancelled = 2
     }
 }

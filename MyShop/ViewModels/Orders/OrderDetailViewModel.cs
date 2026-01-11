@@ -39,13 +39,12 @@ public partial class OrderDetailViewModel : ObservableObject
     private bool _isEditMode = false;
 
     [ObservableProperty]
-    private string _selectedStatus = "New";
+    private string _selectedStatus = "Created";
 
     public ObservableCollection<string> AvailableStatuses { get; } = new()
     {
-        "New",
-        "Processing",
-        "Completed",
+        "Created",
+        "Paid",
         "Cancelled"
     };
 
@@ -245,9 +244,8 @@ public partial class OrderDetailViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Determines if the order can be edited (not Completed or Cancelled).
+    /// Determines if the order can be edited (not Cancelled).
     /// </summary>
     public bool CanEdit => CurrentOrder != null && 
-                           CurrentOrder.Status != "Completed" && 
                            CurrentOrder.Status != "Cancelled";
 }

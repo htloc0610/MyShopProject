@@ -16,7 +16,7 @@ public class OrderListItem
     public decimal FinalAmount { get; set; }
     public int ItemCount { get; set; }
     public string? CouponCode { get; set; }
-    public string Status { get; set; } = "New";
+    public string Status { get; set; } = "Created";
 
     // Computed properties for UI
     public string FormattedOrderDate { get { return OrderDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm"); } }

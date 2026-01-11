@@ -203,8 +203,8 @@ namespace MyShopAPI.Controllers
             if (order == null)
                 return NotFound(new { message = "Order not found" });
 
-            // Prevent editing completed or cancelled orders
-            if (order.Status == OrderStatus.Completed || order.Status == OrderStatus.Cancelled)
+            // Prevent editing cancelled orders
+            if (order.Status == OrderStatus.Cancelled)
             {
                 return BadRequest(new { message = $"Cannot update order with status '{order.Status}'. Order is already finalized." });
             }
@@ -500,7 +500,7 @@ namespace MyShopAPI.Controllers
                     OrderDate = DateTime.UtcNow,
                     TotalAmount = totalAmount,
                     FinalAmount = finalAmount,
-                    Status = Models.OrderStatus.New,
+                    Status = Models.OrderStatus.Created,
                     CustomerId = request.CustomerId,
                     CouponId = couponId,
                     UserId = userId
@@ -604,10 +604,10 @@ namespace MyShopAPI.Controllers
             if (order == null)
                 return NotFound(new { message = "Order not found" });
 
-            // Only allow deletion of New orders
-            if (order.Status != OrderStatus.New)
+            // Only allow deletion of Created orders
+            if (order.Status != OrderStatus.Created)
             {
-                return BadRequest(new { message = $"Cannot delete order with status '{order.Status}'. Only 'New' orders can be deleted." });
+                return BadRequest(new { message = $"Cannot delete order with status '{order.Status}'. Only 'Created' orders can be deleted." });
             }
 
             // Begin transaction to restore stock
