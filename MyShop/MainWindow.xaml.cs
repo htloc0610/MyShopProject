@@ -13,6 +13,7 @@ using MyShop.Views.Auth;
 using MyShop.Views.Reports;
 using MyShop.Views.Orders;
 using MyShop.Services.Auth;
+using MyShop.Services.Shared;
 
 namespace MyShop;
 
@@ -24,6 +25,7 @@ public sealed partial class MainWindow : Window
     public MainWindowViewModel ViewModel { get; private set; } = null!;
     private ISessionService? _sessionService;
     private IAuthService? _authService;
+    private INavigationStateService? _navigationStateService;
 
     public MainWindow()
     {
@@ -36,6 +38,7 @@ public sealed partial class MainWindow : Window
             ViewModel = App.Current.Services.GetRequiredService<MainWindowViewModel>();
             _sessionService = App.Current.Services.GetRequiredService<ISessionService>();
             _authService = App.Current.Services.GetRequiredService<IAuthService>();
+            _navigationStateService = App.Current.Services.GetRequiredService<INavigationStateService>();
 
             // Set window size
             this.AppWindow.Resize(new Windows.Graphics.SizeInt32(1400, 900));
@@ -85,7 +88,26 @@ public sealed partial class MainWindow : Window
         LoginContainer.Visibility = Visibility.Collapsed;
         NavView.Visibility = Visibility.Visible;
 
-        // Navigate to Dashboard
+        // Restore last visited page
+        var lastPageTag = _navigationStateService?.GetLastVisitedPage();
+        
+        if (!string.IsNullOrEmpty(lastPageTag))
+        {
+            Debug.WriteLine($"=== Restoring last visited page: {lastPageTag} ===");
+            var menuItem = FindMenuItemByTag(lastPageTag);
+            if (menuItem != null)
+            {
+                NavView.SelectedItem = menuItem;
+                // Navigation will be triggered by SelectionChanged event
+                _ = ViewModel.LoadProductCountAsync();
+                Debug.WriteLine("=== ShowMainContent: Done (restored) ===");
+                return;
+            }
+            Debug.WriteLine($"=== Menu item not found for tag: {lastPageTag}, falling back to Dashboard ===");
+        }
+        
+        // Fallback to Dashboard (first run or invalid page)
+        Debug.WriteLine("=== Navigating to Dashboard (default) ===");
         NavView.SelectedItem = NavView.MenuItems[0];
         ContentFrame.Navigate(typeof(Dashboard));
 
@@ -155,6 +177,28 @@ public sealed partial class MainWindow : Window
         if (pageType != null && ContentFrame.CurrentSourcePageType != pageType)
         {
             ContentFrame.Navigate(pageType);
+            
+            // Save navigation state after successful navigation
+            if (!string.IsNullOrEmpty(tag))
+            {
+                _navigationStateService?.SaveLastVisitedPage(tag);
+            }
         }
+    }
+
+    /// <summary>
+    /// Find a NavigationViewItem by its Tag property.
+    /// Searches through menu items recursively.
+    /// </summary>
+    private NavigationViewItem? FindMenuItemByTag(string tag)
+    {
+        foreach (var item in NavView.MenuItems)
+        {
+            if (item is NavigationViewItem navItem && navItem.Tag?.ToString() == tag)
+            {
+                return navItem;
+            }
+        }
+        return null;
     }
 }
