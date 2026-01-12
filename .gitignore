@@ -84,3 +84,4 @@ $RECYCLE.BIN/
 *.msp
 *.lnk
 build_*
+patch_*

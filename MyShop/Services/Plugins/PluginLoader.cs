@@ -20,6 +20,41 @@ public class PluginLoader
     private readonly Dictionary<string, object> _loadedPlugins = new();
 
     /// <summary>
+    /// Scans a directory for plugins of a specific type and loads them.
+    /// </summary>
+    /// <typeparam name="T">The plugin interface type</typeparam>
+    /// <param name="pluginsDir">Directory to scan</param>
+    /// <returns>List of loaded plugins</returns>
+    public IEnumerable<T> LoadPlugins<T>(string pluginsDir) where T : class
+    {
+        var plugins = new List<T>();
+        
+        System.Diagnostics.Debug.WriteLine($"Scanning for plugins in: {pluginsDir}");
+
+        if (!Directory.Exists(pluginsDir))
+        {
+            System.Diagnostics.Debug.WriteLine("Plugins directory not found.");
+            return plugins;
+        }
+
+        foreach (var file in Directory.GetFiles(pluginsDir, "*.dll"))
+        {
+            // Skip non-plugin DLLs if naming convention is used (optional)
+            // if (!Path.GetFileName(file).EndsWith("Plugin.dll")) continue;
+
+            // Use the existing single-load method
+            var plugin = LoadPlugin<T>(file);
+            if (plugin != null)
+            {
+                plugins.Add(plugin);
+            }
+        }
+
+        System.Diagnostics.Debug.WriteLine($"Found {plugins.Count} plugins of type {typeof(T).Name}");
+        return plugins;
+    }
+
+    /// <summary>
     /// Loads a plugin from the specified path using AssemblyLoadContext.
     /// </summary>
     /// <typeparam name="T">The interface type the plugin should implement</typeparam>
@@ -30,11 +65,11 @@ public class PluginLoader
     {
         try
         {
-            System.Diagnostics.Debug.WriteLine($"?? PluginLoader: Loading plugin from {pluginPath}");
+            System.Diagnostics.Debug.WriteLine($"PluginLoader: Loading plugin from {pluginPath}");
 
             if (!File.Exists(pluginPath))
             {
-                System.Diagnostics.Debug.WriteLine($"? Plugin file not found: {pluginPath}");
+                System.Diagnostics.Debug.WriteLine($"Plugin file not found: {pluginPath}");
                 return null;
             }
 
@@ -44,8 +79,16 @@ public class PluginLoader
             // Check if already loaded
             if (_loadedPlugins.TryGetValue(pluginKey, out var existingPlugin))
             {
-                System.Diagnostics.Debug.WriteLine($"? Plugin already loaded: {pluginKey}");
-                return existingPlugin as T;
+                if (existingPlugin is T typedPlugin)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Plugin already loaded: {pluginKey}");
+                    return typedPlugin;
+                }
+                else
+                {
+                    // Plugin loaded but doesn't implement T (weird case)
+                    return null;
+                }
             }
 
             // Create a new AssemblyLoadContext for this plugin
@@ -54,7 +97,7 @@ public class PluginLoader
 
             // Load the plugin assembly
             var assembly = loadContext.LoadFromAssemblyPath(pluginPath);
-            System.Diagnostics.Debug.WriteLine($"? Assembly loaded: {assembly.FullName}");
+            System.Diagnostics.Debug.WriteLine($"Assembly loaded: {assembly.FullName}");
 
             // Find the plugin type
             Type? pluginType = null;
@@ -76,31 +119,36 @@ public class PluginLoader
 
             if (pluginType == null)
             {
-                System.Diagnostics.Debug.WriteLine($"? No type implementing {typeof(T).Name} found in assembly");
-                System.Diagnostics.Debug.WriteLine($"   Available types: {string.Join(", ", assembly.GetTypes().Select(t => t.FullName))}");
+                System.Diagnostics.Debug.WriteLine($"No type implementing {typeof(T).Name} found in assembly");
+                // Don't clutter debug log with types unless debugging deeply
+                // System.Diagnostics.Debug.WriteLine($"   Available types: {string.Join(", ", assembly.GetTypes().Select(t => t.FullName))}");
+                
+                // Cleanup context if no valid plugin found
+                _loadContexts.Remove(pluginKey);
+                loadContext.Unload();
                 return null;
             }
 
-            System.Diagnostics.Debug.WriteLine($"? Found plugin type: {pluginType.FullName}");
+            System.Diagnostics.Debug.WriteLine($"Found plugin type: {pluginType.FullName}");
 
             // Create instance of the plugin
             var pluginInstance = Activator.CreateInstance(pluginType) as T;
 
             if (pluginInstance == null)
             {
-                System.Diagnostics.Debug.WriteLine($"? Failed to create instance or cast to {typeof(T).Name}");
+                System.Diagnostics.Debug.WriteLine($"Failed to create instance or cast to {typeof(T).Name}");
                 return null;
             }
 
             // Cache the plugin instance
             _loadedPlugins[pluginKey] = pluginInstance;
 
-            System.Diagnostics.Debug.WriteLine($"? Plugin loaded successfully: {pluginKey}");
+            System.Diagnostics.Debug.WriteLine($"Plugin loaded successfully: {pluginKey}");
             return pluginInstance;
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"? Error loading plugin: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"Error loading plugin: {ex.Message}");
             System.Diagnostics.Debug.WriteLine($"   Stack trace: {ex.StackTrace}");
             return null;
         }

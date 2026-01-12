@@ -41,6 +41,7 @@ public class OrderCheckoutRequest
     public List<OrderItemRequest> Items { get; set; } = new();
     public Guid? CustomerId { get; set; }
     public string? CouponCode { get; set; }
+    public int? Status { get; set; }
 }
 
 /// <summary>

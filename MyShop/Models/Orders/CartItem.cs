@@ -19,12 +19,18 @@ public partial class CartItem : ObservableObject
     /// </summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(Total))]
+    [NotifyPropertyChangedFor(nameof(FormattedTotal))]
     private int _quantity = 1;
 
     /// <summary>
     /// Total price for this cart item (Quantity * Product.SellingPrice).
     /// </summary>
     public decimal Total => Quantity * Product.SellingPrice;
+
+    /// <summary>
+    /// Formatted total with thousand separators (e.g. "1,234,000").
+    /// </summary>
+    public string FormattedTotal => Total.ToString("N0");
 
     /// <summary>
     /// Constructor for creating a cart item.
