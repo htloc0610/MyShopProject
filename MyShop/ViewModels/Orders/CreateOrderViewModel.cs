@@ -27,6 +27,20 @@ public partial class CreateOrderViewModel : ObservableObject
 
     #endregion
 
+    #region Events
+
+    /// <summary>
+    /// Event raised when an order is successfully created
+    /// </summary>
+    public event EventHandler<OrderCheckoutResponse>? OrderCreated;
+
+    /// <summary>
+    /// Partial method to handle FinalAmount changes (implemented in Payment.cs)
+    /// </summary>
+    partial void OnFinalAmountChanged(decimal value);
+
+    #endregion
+
     #region Observable Properties - Customer Selection
 
     [ObservableProperty]
@@ -107,6 +121,12 @@ public partial class CreateOrderViewModel : ObservableObject
     [ObservableProperty]
     private bool _hasError;
 
+    /// <summary>
+    /// The ID of the newly created order (for navigation after payment).
+    /// </summary>
+    [ObservableProperty]
+    private int? _createdOrderId;
+
     #endregion
 
     #region Constructor
@@ -170,6 +190,9 @@ public partial class CreateOrderViewModel : ObservableObject
     {
         // Load available coupons
         await LoadAvailableCouponsAsync();
+
+        // Load Payment Plugins (from Payment.cs)
+        await LoadPaymentPluginsAsync();
     }
 
     #endregion
@@ -182,7 +205,7 @@ public partial class CreateOrderViewModel : ObservableObject
     [RelayCommand]
     private async Task SearchCustomersAsync(string? searchText)
     {
-        if (string.IsNullOrWhiteSpace(searchText) || searchText.Length < 2)
+        if (string.IsNullOrWhiteSpace(searchText) || searchText.Length < 1)
         {
             CustomerSuggestions.Clear();
             return;
@@ -249,7 +272,7 @@ public partial class CreateOrderViewModel : ObservableObject
     [RelayCommand]
     private async Task SearchProductsAsync(string? searchText)
     {
-        if (string.IsNullOrWhiteSpace(searchText) || searchText.Length < 2)
+        if (string.IsNullOrWhiteSpace(searchText) || searchText.Length < 1)
         {
             ProductSuggestions.Clear();
             return;
@@ -494,13 +517,20 @@ public partial class CreateOrderViewModel : ObservableObject
                     Quantity = item.Quantity
                 }).ToList(),
                 CustomerId = SelectedCustomer?.Id,
-                CouponCode = IsCouponValid ? CouponCode : null
+                CouponCode = IsCouponValid ? CouponCode : null,
+                Status = IsPaymentCompleted ? 1 : 0 // 1 = Paid
             };
 
             var response = await _orderService.CheckoutOrderAsync(request);
             
             if (response != null)
             {
+                // Store the created order ID for navigation
+                CreatedOrderId = response.OrderId;
+                
+                // Raise event for payment plugin
+                OrderCreated?.Invoke(this, response);
+                
                 // Success! Clear form
                 CartItems.Clear();
                 SelectedCustomer = null;
@@ -602,7 +632,9 @@ public partial class CreateOrderViewModel : ObservableObject
     private void UpdateTotals()
     {
         OnPropertyChanged(nameof(SubTotal));
+        OnPropertyChanged(nameof(SubTotal));
         OnPropertyChanged(nameof(FinalAmount));
+        OnFinalAmountChanged(FinalAmount); // Notify partial method
         OnPropertyChanged(nameof(HasItems));
     }
 

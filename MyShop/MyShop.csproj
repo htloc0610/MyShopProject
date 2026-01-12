@@ -85,6 +85,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MyShop.Contracts\MyShop.Contracts.csproj" />
+    <!-- Reference MomoPayment plugin to ensure it builds first -->
+    <ProjectReference Include="..\Plugins\MomoPayment\MomoPayment.csproj">
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <Private>false</Private>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Views\Dashboard\" />
@@ -134,6 +139,25 @@
     <PublishTrimmed Condition="'$(Configuration)' == 'Debug'">False</PublishTrimmed>
     <PublishTrimmed Condition="'$(Configuration)' != 'Debug'">True</PublishTrimmed>
   </PropertyGroup>
+  
+  <!-- Auto-copy Payment Plugin after build -->
+  <Target Name="CopyPaymentPlugin" AfterTargets="Build">
+    <Message Text="Copying MomoPayment plugin..." Importance="high" />
+    <MakeDir Directories="$(OutputPath)Plugins" />
+    
+    <!-- Copy from correct source path with platform (x64) -->
+    <Copy SourceFiles="..\Plugins\MomoPayment\bin\x64\$(Configuration)\$(TargetFramework)\MomoPayment.dll" 
+          DestinationFolder="$(OutputPath)Plugins" 
+          SkipUnchangedFiles="true"
+          Condition="Exists('..\Plugins\MomoPayment\bin\x64\$(Configuration)\$(TargetFramework)\MomoPayment.dll')" />
+    
+    <Message Text="Payment plugin copied to: $(OutputPath)Plugins\" Importance="high" 
+             Condition="Exists('..\Plugins\MomoPayment\bin\x64\$(Configuration)\$(TargetFramework)\MomoPayment.dll')" />
+    
+    <Warning Text="MomoPayment.dll not found at: ..\Plugins\MomoPayment\bin\x64\$(Configuration)\$(TargetFramework)\MomoPayment.dll - build MomoPayment project first" 
+             Condition="!Exists('..\Plugins\MomoPayment\bin\x64\$(Configuration)\$(TargetFramework)\MomoPayment.dll')" />
+  </Target>
+
   <ItemGroup>
     <PRIResource Remove="MyShopAPI\**" />
   </ItemGroup>

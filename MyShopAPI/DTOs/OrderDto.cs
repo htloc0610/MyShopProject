@@ -1,3 +1,5 @@
+using MyShopAPI.Models;
+
 namespace MyShopAPI.DTOs
 {
     /// <summary>
@@ -69,7 +71,15 @@ namespace MyShopAPI.DTOs
         /// <summary>
         /// Optional coupon code to apply discount.
         /// </summary>
+        /// <summary>
+        /// Optional coupon code to apply discount.
+        /// </summary>
         public string? CouponCode { get; set; }
+
+        /// <summary>
+        /// Optional status (e.g. Paid) if payment was handled by plugin.
+        /// </summary>
+        public OrderStatus? Status { get; set; }
     }
 
     /// <summary>

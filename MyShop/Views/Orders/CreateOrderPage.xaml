@@ -26,6 +26,15 @@
                           Style="{StaticResource BodyTextBlockStyle}"
                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                           Margin="0,4,0,0"/>
+                
+                <!-- Plugin Status InfoBar -->
+                <InfoBar x:Name="PluginStatusInfoBar"
+                        IsOpen="False"
+                        Severity="Success"
+                        Title="Plugin Loaded"
+                        Message="QR Payment plugin is ready"
+                        IsClosable="True"
+                        Margin="0,12,0,0"/>
             </StackPanel>
 
             <!-- Main Content - 2 Columns -->
@@ -215,10 +224,13 @@
                                             </StackPanel>
 
                                             <TextBlock Grid.Column="2" 
-                                                      Text="{x:Bind Total, Mode=OneWay}"
+                                                      Text="{x:Bind FormattedTotal, Mode=OneWay}"
                                                       FontWeight="SemiBold"
                                                       Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
                                                       VerticalAlignment="Center"
+                                                      TextAlignment="Right"
+                                                      HorizontalAlignment="Right"
+                                                      MinWidth="100"
                                                       Margin="12,0"/>
 
                                             <Button Grid.Column="3"
@@ -239,18 +251,18 @@
                 <!-- RIGHT COLUMN: Totals, Coupon, Actions -->
                 <Grid Grid.Column="1" RowSpacing="16">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
                     
-                    <!-- Coupon Section (Fills available space) -->
+                    <!-- Coupon Section (Compact) -->
                     <Border Grid.Row="0"
                             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                             BorderThickness="1"
                             CornerRadius="8"
-                            Padding="16">
-                        <Grid RowSpacing="12">
+                            Padding="10">
+                        <Grid RowSpacing="8">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/> <!-- Title -->
                                 <RowDefinition Height="Auto"/> <!-- Search -->
@@ -271,7 +283,7 @@
                             <!-- Available Coupons with RadioButton -->
                             <ScrollViewer Grid.Row="2" 
                                          VerticalScrollBarVisibility="Auto"
-                                         MaxHeight="300">
+                                         MaxHeight="200">
                                 <ItemsRepeater ItemsSource="{x:Bind ViewModel.FilteredCoupons, Mode=OneWay}"
                                               Visibility="{x:Bind ViewModel.FilteredCoupons.Count, Mode=OneWay, Converter={StaticResource IntToVisibilityConverter}}">
                                     <ItemsRepeater.Layout>
@@ -396,11 +408,23 @@
                                    Style="{StaticResource AccentButtonStyle}"
                                    Command="{x:Bind ViewModel.CreateOrderCommand}">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <FontIcon Glyph="&#xE74E;" FontSize="16"/>
-                                    <TextBlock Text="Tạo Đơn Hàng"/>
+                                    <FontIcon Glyph="&#xE8A1;" FontSize="16"/>
+                                    <TextBlock Text="Tiền Mặt"/>
                                 </StackPanel>
                             </Button>
                         </Grid>
+
+                        <!-- QR Payment Button (Only show if plugin loaded) -->
+                        <Button HorizontalAlignment="Stretch"
+                               Style="{StaticResource AccentButtonStyle}"
+                               Click="PayWithQR_Click"
+                               x:Name="PayWithQRButton"
+                               Visibility="Collapsed">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon Glyph="&#xED14;" FontSize="16"/>
+                                <TextBlock Text="Thanh Toán QR (Momo)"/>
+                            </StackPanel>
+                        </Button>
 
                         <!-- Success/Error Message -->
                         <Border Background="{ThemeResource SystemFillColorSuccessBackgroundBrush}"

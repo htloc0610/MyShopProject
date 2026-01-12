@@ -500,7 +500,7 @@ namespace MyShopAPI.Controllers
                     OrderDate = DateTime.UtcNow,
                     TotalAmount = totalAmount,
                     FinalAmount = finalAmount,
-                    Status = Models.OrderStatus.Created,
+                    Status = request.Status ?? Models.OrderStatus.Created,
                     CustomerId = request.CustomerId,
                     CouponId = couponId,
                     UserId = userId
