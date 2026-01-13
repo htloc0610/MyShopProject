@@ -95,6 +95,15 @@
                                      Command="{x:Bind ViewModel.ToggleModeCommand}"/>
                 </StackPanel>
             </Grid>
+            
+            <!-- Version Info - Bottom Right Corner -->
+            <TextBlock x:Name="VersionText"
+                       Text="Version 1.0.0"
+                       HorizontalAlignment="Right"
+                       VerticalAlignment="Bottom"
+                       Margin="0,0,16,16"
+                       Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                       Style="{StaticResource CaptionTextBlockStyle}"/>
         </Grid>
         
         <!-- Loading Overlay -->
