@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MyShop.Models.Customers;
 using MyShop.Services.Customers;
+using MyShop.Services.Shared;
 
 namespace MyShop.ViewModels.Customers
 {
@@ -17,6 +18,7 @@ namespace MyShop.ViewModels.Customers
         #region Fields
 
         private readonly ICustomerService _customerService;
+        private readonly IToastService _toastService;
 
         #endregion
 
@@ -35,12 +37,6 @@ namespace MyShop.ViewModels.Customers
         [NotifyCanExecuteChangedFor(nameof(GoToPreviousPageCommand))]
         [NotifyCanExecuteChangedFor(nameof(GoToNextPageCommand))]
         private bool _isLoading;
-
-        [ObservableProperty]
-        private string _errorMessage = string.Empty;
-
-        [ObservableProperty]
-        private bool _hasError;
 
         [ObservableProperty]
         private int _customerCount;
@@ -100,9 +96,10 @@ namespace MyShop.ViewModels.Customers
 
         #region Constructor
 
-        public CustomerViewModel(ICustomerService customerService)
+        public CustomerViewModel(ICustomerService customerService, IToastService toastService)
         {
             _customerService = customerService;
+            _toastService = toastService;
         }
 
         #endregion
@@ -130,8 +127,6 @@ namespace MyShop.ViewModels.Customers
             try
             {
                 IsLoading = true;
-                HasError = false;
-                ErrorMessage = string.Empty;
 
                 var result = await _customerService.GetCustomersAsync(
                     CurrentPage,
@@ -159,14 +154,12 @@ namespace MyShop.ViewModels.Customers
 
                 if (CustomerCount == 0 && string.IsNullOrEmpty(SearchKeyword))
                 {
-                    HasError = true;
-                    ErrorMessage = "Chưa có khách hàng nào. Hãy thêm khách hàng mới!";
+                    _toastService.ShowInfo("Chưa có khách hàng nào. Hãy thêm khách hàng mới!");
                 }
             }
             catch (System.Exception ex)
             {
-                HasError = true;
-                ErrorMessage = $"Lỗi khi tải khách hàng: {ex.Message}";
+                _toastService.ShowError($"Lỗi khi tải khách hàng: {ex.Message}");
                 System.Diagnostics.Debug.WriteLine($"Error in LoadCustomersAsync: {ex}");
             }
             finally
@@ -273,19 +266,16 @@ namespace MyShop.ViewModels.Customers
             try
             {
                 IsLoading = true;
-                HasError = false;
 
                 if (string.IsNullOrWhiteSpace(FormName))
                 {
-                    HasError = true;
-                    ErrorMessage = "Vui lòng nhập tên khách hàng";
+                    _toastService.ShowWarning("Vui lòng nhập tên khách hàng");
                     return;
                 }
 
                 if (string.IsNullOrWhiteSpace(FormPhoneNumber))
                 {
-                    HasError = true;
-                    ErrorMessage = "Vui lòng nhập số điện thoại";
+                    _toastService.ShowWarning("Vui lòng nhập số điện thoại");
                     return;
                 }
 
@@ -306,14 +296,14 @@ namespace MyShop.ViewModels.Customers
                     var updated = await _customerService.UpdateCustomerAsync(EditingCustomerId, updateDto);
                     if (updated != null)
                     {
+                        _toastService.ShowSuccess("Cập nhật khách hàng thành công!");
                         await LoadCustomersAsync();
                         // Reselect the updated customer
                         SelectedCustomer = FilteredCustomers.FirstOrDefault(c => c.Id == EditingCustomerId);
                     }
                     else
                     {
-                        HasError = true;
-                        ErrorMessage = "Không thể cập nhật khách hàng. Vui lòng thử lại.";
+                        _toastService.ShowError("Không thể cập nhật khách hàng. Vui lòng thử lại.");
                     }
                 }
                 else
@@ -330,21 +320,20 @@ namespace MyShop.ViewModels.Customers
                     var created = await _customerService.CreateCustomerAsync(createDto);
                     if (created != null)
                     {
+                        _toastService.ShowSuccess("Thêm khách hàng thành công!");
                         CurrentPage = 1;
                         await LoadCustomersAsync();
                         SelectedCustomer = FilteredCustomers.FirstOrDefault(c => c.Id == created.Id);
                     }
                     else
                     {
-                        HasError = true;
-                        ErrorMessage = "Không thể thêm khách hàng. Số điện thoại có thể đã tồn tại.";
+                        _toastService.ShowError("Không thể thêm khách hàng. Số điện thoại có thể đã tồn tại.");
                     }
                 }
             }
             catch (System.Exception ex)
             {
-                HasError = true;
-                ErrorMessage = $"Lỗi: {ex.Message}";
+                _toastService.ShowError($"Lỗi: {ex.Message}");
                 System.Diagnostics.Debug.WriteLine($"Error saving customer: {ex}");
             }
             finally
@@ -366,6 +355,7 @@ namespace MyShop.ViewModels.Customers
 
                 if (success)
                 {
+                    _toastService.ShowSuccess("Xóa khách hàng thành công!");
                     Customers.Remove(customer);
                     FilteredCustomers.Remove(customer);
                     CustomerCount--;
@@ -385,14 +375,12 @@ namespace MyShop.ViewModels.Customers
                 }
                 else
                 {
-                    HasError = true;
-                    ErrorMessage = "Không thể xóa khách hàng. Vui lòng thử lại.";
+                    _toastService.ShowError("Không thể xóa khách hàng. Vui lòng thử lại.");
                 }
             }
             catch (System.Exception ex)
             {
-                HasError = true;
-                ErrorMessage = $"Lỗi khi xóa: {ex.Message}";
+                _toastService.ShowError($"Lỗi khi xóa: {ex.Message}");
                 System.Diagnostics.Debug.WriteLine($"Error deleting customer: {ex}");
             }
             finally

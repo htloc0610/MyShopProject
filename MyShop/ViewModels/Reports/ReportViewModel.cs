@@ -6,6 +6,7 @@ using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
 using MyShop.Models.Reports;
 using MyShop.Services.Reports;
+using MyShop.Services.Shared;
 using SkiaSharp;
 using System;
 using System.Collections.ObjectModel;
@@ -17,6 +18,7 @@ namespace MyShop.ViewModels.Reports
     public partial class ReportViewModel : ObservableObject
     {
         private readonly ReportService _reportService;
+        private readonly IToastService _toastService;
         private static readonly SolidColorPaint AxisTextPaint =
             new(new SKColor(107, 114, 128));
         private static readonly SolidColorPaint AxisSeparatorPaint =
@@ -24,7 +26,6 @@ namespace MyShop.ViewModels.Reports
         private bool _isReady;
 
         [ObservableProperty] private bool isLoading;
-        [ObservableProperty] private string errorMessage = string.Empty;
 
         [ObservableProperty] private DateOnly? fromDate = new(2000, 1, 1);
         [ObservableProperty] private DateOnly toDate = DateOnly.FromDateTime(DateTime.Today);
@@ -56,9 +57,10 @@ namespace MyShop.ViewModels.Reports
         [ObservableProperty] private double revenueProfitChartWidth = 700;
         [ObservableProperty] private ObservableCollection<ReportViewModel> revenueProfitChartHosts = new();
 
-        public ReportViewModel(ReportService reportService)
+        public ReportViewModel(ReportService reportService, IToastService toastService)
         {
             _reportService = reportService;
+            _toastService = toastService;
             SelectedGroupBy = GroupByOptions.First();
             _isReady = true;
         }
@@ -210,7 +212,6 @@ namespace MyShop.ViewModels.Reports
         private async Task LoadReportAsync()
         {
             IsLoading = true;
-            ErrorMessage = "";
 
             try
             {
@@ -239,7 +240,7 @@ namespace MyShop.ViewModels.Reports
             }
             catch (Exception ex)
             {
-                ErrorMessage = ex.Message;
+                _toastService.ShowError($"Lỗi tải báo cáo: {ex.Message}");
             }
             finally
             {

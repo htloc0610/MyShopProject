@@ -7,6 +7,7 @@ using LiveChartsCore.SkiaSharpView.Painting;
 using SkiaSharp;
 using MyShop.Models.Dashboard;
 using MyShop.Services.Dashboard;
+using MyShop.Services.Shared;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -20,6 +21,7 @@ namespace MyShop.ViewModels.Dashboard;
 public partial class DashboardViewModel : ObservableObject
 {
     private readonly DashboardService _dashboardService;
+    private readonly IToastService _toastService;
     private static readonly SolidColorPaint AxisTextPaint =
         new(new SKColor(107, 114, 128));
     private static readonly SolidColorPaint AxisSeparatorPaint =
@@ -27,9 +29,6 @@ public partial class DashboardViewModel : ObservableObject
 
     [ObservableProperty]
     private bool isLoading;
-
-    [ObservableProperty]
-    private string errorMessage = string.Empty;
 
     [ObservableProperty]
     private int totalProducts;
@@ -61,16 +60,16 @@ public partial class DashboardViewModel : ObservableObject
     [ObservableProperty]
     private ICartesianAxis[] monthlyRevenueYAxes = Array.Empty<ICartesianAxis>();
 
-    public DashboardViewModel(DashboardService dashboardService)
+    public DashboardViewModel(DashboardService dashboardService, IToastService toastService)
     {
         _dashboardService = dashboardService;
+        _toastService = toastService;
     }
 
     [RelayCommand]
     private async Task LoadDashboardAsync()
     {
         IsLoading = true;
-        ErrorMessage = string.Empty;
 
         try
         {
@@ -121,7 +120,7 @@ public partial class DashboardViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            ErrorMessage = ex.Message;
+            _toastService.ShowError($"Lỗi tải dashboard: {ex.Message}");
         }
         finally
         {

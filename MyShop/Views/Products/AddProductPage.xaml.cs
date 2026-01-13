@@ -38,6 +38,16 @@ public sealed partial class AddProductPage : Page
         _draftService = new ProductDraftService();
     }
 
+    /// <summary>
+    /// Handles image reordering when drag-drop completes
+    /// </summary>
+    private void ImageGridView_DragItemsCompleted(ListViewBase sender, DragItemsCompletedEventArgs args)
+    {
+        // Get the new order from GridView.Items (which reflects the visual order after reorder)
+        var newOrder = sender.Items.ToList();
+        ViewModel.ReorderImages(newOrder);
+    }
+
     protected override async void OnNavigatedTo(NavigationEventArgs e)
     {
         base.OnNavigatedTo(e);
