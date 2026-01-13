@@ -18,18 +18,15 @@ namespace MyShopAPI.Controllers
         private readonly AppDbContext _context;
         private readonly ILogger<ProductsController> _logger;
         private readonly IUserContextService _userContextService;
-        private readonly IImageDownloadService _imageDownloadService;
 
         public ProductsController(
             AppDbContext context,
             ILogger<ProductsController> logger,
-            IUserContextService userContextService,
-            IImageDownloadService imageDownloadService)
+            IUserContextService userContextService)
         {
             _context = context;
             _logger = logger;
             _userContextService = userContextService;
-            _imageDownloadService = imageDownloadService;
         }
 
         /// <summary>
@@ -423,27 +420,22 @@ namespace MyShopAPI.Controllers
                     await _context.Products.AddRangeAsync(productsToAdd);
                     await _context.SaveChangesAsync();
                     
-                    // PHASE 4: PROCESS IMAGES FOR EACH PRODUCT
+                    // PHASE 4: SAVE IMAGES FOR EACH PRODUCT
                     foreach (var (product, imageUrls) in validProductsWithImages)
                     {
                         bool isFirst = true;
                         foreach (var imageUrl in imageUrls)
                         {
-                            var processedUrl = await _imageDownloadService.ProcessImageUrlAsync(imageUrl);
-                            if (!string.IsNullOrEmpty(processedUrl))
+                            if (!string.IsNullOrWhiteSpace(imageUrl))
                             {
                                 var productImage = new ProductImage
                                 {
                                     ProductId = product.ProductId,
-                                    ImageUrl = processedUrl,
+                                    ImageUrl = imageUrl.Trim(),
                                     IsMain = isFirst
                                 };
                                 _context.ProductImages.Add(productImage);
                                 isFirst = false;
-                            }
-                            else
-                            {
-                                _logger.LogWarning("Failed to process image URL '{Url}' for product '{Name}'", imageUrl, product.Name);
                             }
                         }
                     }

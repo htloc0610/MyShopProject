@@ -5,6 +5,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:controls="using:CommunityToolkit.WinUI.UI.Controls"
+    xmlns:controlsprimitives="using:CommunityToolkit.WinUI.UI.Controls.Primitives"
     xmlns:models="using:MyShop.Models.Products"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
@@ -238,57 +239,9 @@
                 </Grid>
             </Border>
 
-            <!-- Sorting Controls -->
-            <Grid Margin="0,0,0,16">
-                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
 
-                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="12">
-                    <TextBlock Text="Sắp xếp theo:" 
-                              VerticalAlignment="Center"
-                              Style="{StaticResource BodyTextBlockStyle}"/>
-                    
-                    
-                    <Button x:Name="SortByIdButton"
-                           Content="Mã SP" 
-                           Command="{x:Bind ViewModel.SelectSortColumnCommand}"
-                           CommandParameter="id"
-                           Style="{StaticResource AccentButtonStyle}"
-                           Height="32"/>
-                    
-                    <Button x:Name="SortByNameButton"
-                           Content="Tên" 
-                           Command="{x:Bind ViewModel.SelectSortColumnCommand}"
-                           CommandParameter="name"
-                           Height="32"/>
-                    
-                    <Button x:Name="SortByPriceButton"
-                           Content="Giá" 
-                           Command="{x:Bind ViewModel.SelectSortColumnCommand}"
-                           CommandParameter="price"
-                           Height="32"/>
-                    
-                    <Button x:Name="SortByStockButton"
-                           Content="Tồn kho" 
-                           Command="{x:Bind ViewModel.SelectSortColumnCommand}"
-                           CommandParameter="stock"
-                           Height="32"/>
-                    
-                    <!-- Clickable Sort Direction Toggle -->
-                    <Button Command="{x:Bind ViewModel.ToggleSortDirectionCommand}"
-                            Background="Transparent"
-                            BorderThickness="0"
-                            Padding="8"
-                            Height="32"
-                            ToolTipService.ToolTip="Đổi thứ tự sắp xếp">
-                        <FontIcon Glyph="{x:Bind ViewModel.IsDescending, Mode=OneWay, Converter={StaticResource SortDirectionToGlyphConverter}}"
-                                  FontSize="16"
-                                  Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"/>
-                    </Button>
-                </StackPanel>
-            </Grid>
+
+            <!-- Sorting is now handled via DataGrid column headers -->
         </StackPanel>
 
         <!-- Error InfoBar -->
@@ -320,33 +273,34 @@
                               HeadersVisibility="Column"
                               AlternatingRowBackground="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
                               CanUserResizeColumns="True"
-                              CanUserSortColumns="False"
+                              CanUserSortColumns="True"
+                              Sorting="ProductDataGrid_Sorting"
                               SelectionMode="Single"
                               DoubleTapped="ProductDataGrid_DoubleTapped"
-                              Visibility="{x:Bind ViewModel.IsGridView, Mode=OneWay, Converter={StaticResource BoolToVisibilityInverseConverter}}">
+                              Visibility="{x:Bind ViewModel.IsGridView, Mode=OneWay, Converter={StaticResource BoolToVisibilityInverseConverter}}"
+                              ColumnHeaderHeight="44">
+                <controls:DataGrid.ColumnHeaderStyle>
+                    <Style TargetType="controlsprimitives:DataGridColumnHeader">
+                        <Setter Property="Background" Value="{ThemeResource AccentFillColorDefaultBrush}"/>
+                        <Setter Property="Foreground" Value="White"/>
+                        <Setter Property="FontWeight" Value="SemiBold"/>
+                        <Setter Property="FontSize" Value="14"/>
+                        <Setter Property="Padding" Value="12,8"/>
+                        <Setter Property="BorderThickness" Value="0,0,1,0"/>
+                        <Setter Property="BorderBrush" Value="{ThemeResource ControlStrokeColorSecondaryBrush}"/>
+                    </Style>
+                </controls:DataGrid.ColumnHeaderStyle>
                 <controls:DataGrid.Columns>
-                    <!-- Image Column -->
-                    <controls:DataGridTemplateColumn Header="Hình Ảnh" Width="80">
-                        <controls:DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate x:DataType="models:Product">
-                                <Grid Width="50" Height="50">
-                                    <Image Source="{x:Bind DisplayImage, Converter={StaticResource RelativeToAbsoluteUrlConverter}}"
-                                           Stretch="UniformToFill"
-                                           VerticalAlignment="Center"
-                                           HorizontalAlignment="Center"/>
-                                </Grid>
-                            </DataTemplate>
-                        </controls:DataGridTemplateColumn.CellTemplate>
-                    </controls:DataGridTemplateColumn>
-
                     <!-- ID Column -->
                     <controls:DataGridTextColumn Header="Mã SP"
                                                 Binding="{Binding Id}"
+                                                Tag="Id"
                                                 Width="80"/>
 
                     <!-- Product Name Column -->
                     <controls:DataGridTextColumn Header="Tên Sản Phẩm"
                                                 Binding="{Binding Name}"
+                                                Tag="Name"
                                                 Width="2*"/>
 
                     <!-- Category Column -->
@@ -356,6 +310,7 @@
 
                     <!-- Price Column -->
                     <controls:DataGridTemplateColumn Header="Giá (VNĐ)"
+                                                    Tag="SellingPrice"
                                                     Width="150">
                         <controls:DataGridTemplateColumn.CellTemplate>
                             <DataTemplate x:DataType="models:Product">
@@ -369,6 +324,7 @@
 
                     <!-- Stock Column -->
                     <controls:DataGridTemplateColumn Header="Tồn Kho"
+                                                    Tag="Stock"
                                                     Width="120">
                         <controls:DataGridTemplateColumn.CellTemplate>
                             <DataTemplate x:DataType="models:Product">

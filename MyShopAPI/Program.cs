@@ -118,7 +118,6 @@ namespace MyShopAPI
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddScoped<IUserContextService, UserContextService>();
             builder.Services.AddScoped<ITokenService, TokenService>();
-            builder.Services.AddScoped<IImageDownloadService, ImageDownloadService>();
             builder.Services.AddScoped<DatabaseSeeder>();
 
             builder.Services.AddControllers();

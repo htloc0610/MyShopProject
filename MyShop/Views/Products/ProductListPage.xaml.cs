@@ -60,55 +60,16 @@ public sealed partial class ProductListPage : Page
         // Try to load search plugin
         LoadSearchPlugin();
 
-        // Subscribe to SortColumn changes to update button styles
+        // Subscribe to property changes
         ViewModel.PropertyChanged += ViewModel_PropertyChanged;
-        
-        // Set initial button styles
-        UpdateSortButtonStyles();
     }
 
     /// <summary>
-    /// Handle property changes from ViewModel to update sort button styles.
+    /// Handle property changes from ViewModel.
     /// </summary>
     private void ViewModel_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(ViewModel.SortColumn))
-        {
-            UpdateSortButtonStyles();
-        }
-    }
-
-    /// <summary>
-    /// Update sort button styles based on current SortColumn.
-    /// </summary>
-    private void UpdateSortButtonStyles()
-    {
-        // Get the resource for accent button style
-        var accentStyle = (Style)Resources["AccentButtonStyle"];
-        var defaultStyle = (Style)Application.Current.Resources["DefaultButtonStyle"];
-
-        // Reset all buttons to default
-        SortByIdButton.Style = defaultStyle;
-        SortByNameButton.Style = defaultStyle;
-        SortByPriceButton.Style = defaultStyle;
-        SortByStockButton.Style = defaultStyle;
-
-        // Highlight the active button
-        switch (ViewModel.SortColumn.ToLower())
-        {
-            case "id":
-                SortByIdButton.Style = accentStyle;
-                break;
-            case "name":
-                SortByNameButton.Style = accentStyle;
-                break;
-            case "price":
-                SortByPriceButton.Style = accentStyle;
-                break;
-            case "stock":
-                SortByStockButton.Style = accentStyle;
-                break;
-        }
+        // Sorting buttons removed - now using DataGrid column header sorting
     }
 
     /// <summary>
@@ -364,6 +325,42 @@ public sealed partial class ProductListPage : Page
 
             await dialog.ShowAsync();
         }
+    }
+
+    /// <summary>
+    /// Handles DataGrid column header click for sorting.
+    /// </summary>
+    private async void ProductDataGrid_Sorting(object sender, CommunityToolkit.WinUI.UI.Controls.DataGridColumnEventArgs e)
+    {
+        // Get the tag (property name) from the column
+        var sortColumn = e.Column.Tag?.ToString();
+        if (string.IsNullOrEmpty(sortColumn))
+            return;
+
+        // Determine sort direction
+        bool isDescending = false;
+        if (e.Column.SortDirection == CommunityToolkit.WinUI.UI.Controls.DataGridSortDirection.Ascending)
+        {
+            e.Column.SortDirection = CommunityToolkit.WinUI.UI.Controls.DataGridSortDirection.Descending;
+            isDescending = true;
+        }
+        else
+        {
+            e.Column.SortDirection = CommunityToolkit.WinUI.UI.Controls.DataGridSortDirection.Ascending;
+            isDescending = false;
+        }
+
+        // Clear sort direction on other columns
+        foreach (var column in ProductDataGrid.Columns)
+        {
+            if (column != e.Column)
+                column.SortDirection = null;
+        }
+
+        // Update ViewModel and reload
+        ViewModel.SortColumn = sortColumn;
+        ViewModel.IsDescending = isDescending;
+        await ViewModel.LoadProductsPagedCommand.ExecuteAsync(null);
     }
 
     /// <summary>
