@@ -8,6 +8,7 @@ using MyShop.Models.Customers;
 using Microsoft.Extensions.DependencyInjection;
 using MyShop.Services.Plugins;
 using MyShop.Services.Orders;
+using MyShop.Services.Shared;
 using MyShop.Contracts;
 using System;
 using System.IO;
@@ -22,6 +23,7 @@ public sealed partial class CreateOrderPage : Page
     public CreateOrderViewModel ViewModel { get; }
     private readonly PluginLoader _pluginLoader;
     private readonly OrderDraftService _draftService;
+    private readonly IToastService _toastService;
     private IPaymentPlugin? _paymentPlugin;
     private bool _orderSavedSuccessfully = false;
 
@@ -31,6 +33,7 @@ public sealed partial class CreateOrderPage : Page
         ViewModel = App.Current.Services.GetRequiredService<CreateOrderViewModel>();
         _pluginLoader = new PluginLoader();
         _draftService = new OrderDraftService();
+        _toastService = App.Current.Services.GetRequiredService<IToastService>();
         
         LoadPaymentPlugin();
     }
@@ -96,13 +99,7 @@ public sealed partial class CreateOrderPage : Page
                 // Show QR payment button
                 PayWithQRButton.Visibility = Visibility.Visible;
                 
-                // Show success InfoBar
-                PluginStatusInfoBar.Title = "Plugin Sẵn Sàng";
-                PluginStatusInfoBar.Message = $"{_paymentPlugin.Name} - {_paymentPlugin.Description}";
-                PluginStatusInfoBar.Severity = InfoBarSeverity.Success;
-                PluginStatusInfoBar.IsOpen = true;
-                
-                System.Diagnostics.Debug.WriteLine("? QR Payment button is now visible");
+                System.Diagnostics.Debug.WriteLine($"✓ Payment plugin ready: {_paymentPlugin.Name}");
             }
             else
             {
@@ -226,8 +223,7 @@ public sealed partial class CreateOrderPage : Page
             else
             {
                 System.Diagnostics.Debug.WriteLine("QR Payment was cancelled or failed. Order NOT created.");
-                ViewModel.ErrorMessage = "Thanh toán chưa hoàn tất. Đơn hàng chưa được tạo.";
-                ViewModel.HasError = true;
+                _toastService.ShowWarning("Thanh toán chưa hoàn tất. Đơn hàng chưa được tạo.");
             }
         }
         catch (Exception ex)

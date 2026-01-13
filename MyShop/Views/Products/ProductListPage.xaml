@@ -244,15 +244,6 @@
             <!-- Sorting is now handled via DataGrid column headers -->
         </StackPanel>
 
-        <!-- Error InfoBar -->
-        <InfoBar Grid.Row="2"
-                 IsOpen="{x:Bind ViewModel.HasError, Mode=OneWay}"
-                 Severity="Error"
-                 Title="Lỗi"
-                 Message="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}"
-                 IsClosable="True"
-                 Margin="0,0,0,16"/>
-
         <!-- Product Display Area (DataGrid or GridView) -->
         <Grid Grid.Row="3">
             <!-- Progress Ring -->

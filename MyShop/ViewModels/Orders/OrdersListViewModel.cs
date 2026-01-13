@@ -276,7 +276,6 @@ public partial class OrdersListViewModel : ObservableObject
         if (order == null) return;
 
         IsLoading = true;
-        ErrorMessage = null;
 
         try
         {
@@ -287,18 +286,19 @@ public partial class OrdersListViewModel : ObservableObject
                 // Remove from list
                 Orders.Remove(order);
                 TotalCount--;
+                _toastService.ShowSuccess($"Xóa đơn hàng #{order.OrderId} thành công!");
                 
                 // Refresh to update pagination
                 await LoadOrdersAsync();
             }
             else
             {
-                ErrorMessage = "Không thể xóa đơn hàng";
+                _toastService.ShowError("Không thể xóa đơn hàng");
             }
         }
         catch (System.Exception ex)
         {
-            ErrorMessage = $"Lỗi: {ex.Message}";
+            _toastService.ShowError($"Lỗi: {ex.Message}");
         }
         finally
         {

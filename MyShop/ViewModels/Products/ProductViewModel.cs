@@ -26,6 +26,7 @@ public partial class ProductViewModel : ObservableObject
 
     private readonly IProductService _productService;
     private readonly ICategoryService _categoryService;
+    private readonly IToastService _toastService;
     private readonly ProductChangeNotifier _productChangeNotifier;
 
     #endregion
@@ -42,12 +43,6 @@ public partial class ProductViewModel : ObservableObject
     [NotifyCanExecuteChangedFor(nameof(GoToPreviousPageCommand))]
     [NotifyCanExecuteChangedFor(nameof(GoToNextPageCommand))]
     private bool _isLoading;
-
-    [ObservableProperty]
-    private string _errorMessage = string.Empty;
-
-    [ObservableProperty]
-    private bool _hasError;
 
     [ObservableProperty]
     private int _productCount;
@@ -135,10 +130,11 @@ public partial class ProductViewModel : ObservableObject
 
     #region Constructor
 
-    public ProductViewModel(IProductService productService, ICategoryService categoryService, ProductChangeNotifier productChangeNotifier)
+    public ProductViewModel(IProductService productService, ICategoryService categoryService, IToastService toastService, ProductChangeNotifier productChangeNotifier)
     {
         _productService = productService;
         _categoryService = categoryService;
+        _toastService = toastService;
         _productChangeNotifier = productChangeNotifier;
     }
 
@@ -197,8 +193,6 @@ public partial class ProductViewModel : ObservableObject
         try
         {
             IsLoading = true;
-            HasError = false;
-            ErrorMessage = string.Empty;
 
             // Convert 0 to null for optional price filters
             double? minPriceFilter = MinPrice > 0 ? MinPrice : null;
@@ -262,14 +256,12 @@ public partial class ProductViewModel : ObservableObject
 
             if (ProductCount == 0)
             {
-                HasError = true;
-                ErrorMessage = "Không tìm thấy sản phẩm nào.";
+                _toastService.ShowWarning("Không tìm thấy sản phẩm nào.");
             }
         }
         catch (System.Exception ex)
         {
-            HasError = true;
-            ErrorMessage = $"Lỗi khi tải sản phẩm: {ex.Message}";
+            _toastService.ShowError($"Lỗi khi tải sản phẩm: {ex.Message}");
             System.Diagnostics.Debug.WriteLine($"Error in LoadProductsPagedAsync: {ex}");
         }
         finally
@@ -433,8 +425,6 @@ public partial class ProductViewModel : ObservableObject
         try
         {
             IsLoading = true;
-            HasError = false;
-            ErrorMessage = string.Empty;
 
             var createdProduct = await _productService.CreateProductAsync(product);
 
@@ -449,14 +439,12 @@ public partial class ProductViewModel : ObservableObject
             }
             else
             {
-                HasError = true;
-                ErrorMessage = "Không thể tạo sản phẩm. Vui lòng thử lại.";
+                _toastService.ShowError("Không thể tạo sản phẩm. Vui lòng thử lại.");
             }
         }
         catch (System.Exception ex)
         {
-            HasError = true;
-            ErrorMessage = $"Lỗi khi tạo sản phẩm: {ex.Message}";
+            _toastService.ShowError($"Lỗi khi tạo sản phẩm: {ex.Message}");
             System.Diagnostics.Debug.WriteLine($"Error in CreateProductAsync: {ex}");
             throw; // Re-throw to let the UI handle it
         }
@@ -511,14 +499,12 @@ public partial class ProductViewModel : ObservableObject
             }
             else
             {
-                HasError = true;
-                ErrorMessage = "Không thể cập nhật sản phẩm. Vui lòng thử lại.";
+                _toastService.ShowError("Không thể cập nhật sản phẩm. Vui lòng thử lại.");
             }
         }
         catch (System.Exception ex)
         {
-            HasError = true;
-            ErrorMessage = $"Lỗi khi cập nhật sản phẩm: {ex.Message}";
+            _toastService.ShowError($"Lỗi khi cập nhật sản phẩm: {ex.Message}");
             System.Diagnostics.Debug.WriteLine($"Error in UpdateProductAsync: {ex}");
         }
         finally
@@ -560,14 +546,12 @@ public partial class ProductViewModel : ObservableObject
             }
             else
             {
-                HasError = true;
-                ErrorMessage = "Không thể xóa sản phẩm. Vui lòng thử lại.";
+                _toastService.ShowError("Không thể xóa sản phẩm. Vui lòng thử lại.");
             }
         }
         catch (System.Exception ex)
         {
-            HasError = true;
-            ErrorMessage = $"Lỗi khi xóa sản phẩm: {ex.Message}";
+            _toastService.ShowError($"Lỗi khi xóa sản phẩm: {ex.Message}");
             System.Diagnostics.Debug.WriteLine($"Error in DeleteProductAsync: {ex}");
         }
         finally
@@ -603,8 +587,7 @@ public partial class ProductViewModel : ObservableObject
                     // Limit to 3 images total
                     if (SelectedImageUrls.Count >= 3)
                     {
-                        ErrorMessage = "Chỉ được phép tải lên tối đa 3 ảnh.";
-                        HasError = true;
+                        _toastService.ShowWarning("Chỉ được phép tải lên tối đa 3 ảnh.");
                         break;
                     }
 
@@ -621,8 +604,7 @@ public partial class ProductViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            ErrorMessage = $"Lỗi chọn ảnh: {ex.Message}";
-            HasError = true;
+            _toastService.ShowError($"Lỗi chọn ảnh: {ex.Message}");
         }
     }
 
@@ -632,6 +614,54 @@ public partial class ProductViewModel : ObservableObject
         if (SelectedImageUrls.Contains(imageUrl))
         {
             SelectedImageUrls.Remove(imageUrl);
+        }
+    }
+
+    /// <summary>
+    /// Moves an image from one position to another in the list.
+    /// </summary>
+    public void MoveImage(int oldIndex, int newIndex)
+    {
+        if (oldIndex < 0 || oldIndex >= SelectedImageUrls.Count) return;
+        if (newIndex < 0 || newIndex >= SelectedImageUrls.Count) return;
+        if (oldIndex == newIndex) return;
+
+        var item = SelectedImageUrls[oldIndex];
+        SelectedImageUrls.RemoveAt(oldIndex);
+        SelectedImageUrls.Insert(newIndex, item);
+    }
+
+    /// <summary>
+    /// Reorders images based on a new list order using Move() for less UI flicker.
+    /// </summary>
+    public void ReorderImages(System.Collections.Generic.IList<object> newOrder)
+    {
+        var newList = newOrder.Cast<string>().ToList();
+        
+        // Only proceed if lengths match (sanity check)
+        if (newList.Count != SelectedImageUrls.Count) return;
+        
+        // Use Move() for each item to minimize UI updates
+        for (int targetIndex = 0; targetIndex < newList.Count; targetIndex++)
+        {
+            var url = newList[targetIndex];
+            int currentIndex = -1;
+            
+            // Find current index of this URL
+            for (int i = targetIndex; i < SelectedImageUrls.Count; i++)
+            {
+                if (SelectedImageUrls[i] == url)
+                {
+                    currentIndex = i;
+                    break;
+                }
+            }
+            
+            // Move if not already in correct position
+            if (currentIndex != -1 && currentIndex != targetIndex)
+            {
+                SelectedImageUrls.Move(currentIndex, targetIndex);
+            }
         }
     }
 
