@@ -51,8 +51,8 @@
                                 <Setter Target="LeftColumn.(Grid.Row)" Value="0"/>
                                 <Setter Target="RightColumn.(Grid.Column)" Value="1"/>
                                 <Setter Target="RightColumn.(Grid.Row)" Value="0"/>
-                                <Setter Target="RightColumn.MaxWidth" Value="420"/>
-                                <Setter Target="MainContentGrid.ColumnSpacing" Value="20"/>
+                                <Setter Target="RightColumn.MaxWidth" Value="480"/>
+                                <Setter Target="MainContentGrid.ColumnSpacing" Value="32"/>
                                 <Setter Target="MainContentGrid.RowSpacing" Value="0"/>
                             </VisualState.Setters>
                         </VisualState>
@@ -289,7 +289,7 @@
                 </StackPanel>
 
                 <!-- RIGHT COLUMN: Totals, Coupon, Actions -->
-                <Grid x:Name="RightColumn" Grid.Column="1" Grid.Row="0" RowSpacing="16" MaxWidth="420">
+                <Grid x:Name="RightColumn" Grid.Column="1" Grid.Row="0" RowSpacing="16" MinWidth="340" MaxWidth="480">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
