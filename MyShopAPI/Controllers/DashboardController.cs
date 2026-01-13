@@ -30,10 +30,10 @@ namespace MyShopAPI.Controllers
             var totalProducts = await _context.Products.CountAsync();
 
             var todayOrders = await _context.Orders
-                .CountAsync(o => o.OrderDate >= today);
+                .CountAsync(o => o.OrderDate >= today && o.Status == Models.OrderStatus.Paid);
 
             var todayRevenue = await _context.Orders
-                .Where(o => o.OrderDate >= today)
+                .Where(o => o.OrderDate >= today && o.Status == Models.OrderStatus.Paid)
                 .SumAsync(o => (decimal?)o.FinalAmount) ?? 0;
             return Ok(new DashboardSummaryDto
             {
@@ -125,7 +125,7 @@ namespace MyShopAPI.Controllers
                 var end = start.AddMonths(1);
 
                 var revenue = await _context.Orders
-                    .Where(o => o.OrderDate >= start && o.OrderDate < end)
+                    .Where(o => o.OrderDate >= start && o.OrderDate < end && o.Status == Models.OrderStatus.Paid)
                     .GroupBy(o => o.OrderDate.Day)
                     .Select(g => new RevenueByDayDto
                     {

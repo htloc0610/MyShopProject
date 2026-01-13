@@ -32,11 +32,11 @@ public class TopSellingProduct
 public class RecentOrder
 {
     public int OrderId { get; set; }
-    public DateTime CreatedTime { get; set; }
-    public decimal FinalPrice { get; set; }
+    public DateTime OrderDate { get; set; }
+    public decimal FinalAmount { get; set; }
 
     public string DisplayText =>
-        $"Order #{OrderId} - {FinalPrice:N0} ₫";
+        $"Order #{OrderId} - {FinalAmount:N0} ₫";
 }
 
 public class RevenueByDay

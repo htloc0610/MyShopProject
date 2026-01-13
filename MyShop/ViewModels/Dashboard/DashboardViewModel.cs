@@ -173,11 +173,13 @@ public partial class DashboardViewModel : ObservableObject
             }
         };
 
+        var maxValue = values.Length == 0 ? 1 : values.Max();
         MonthlyRevenueYAxes = new ICartesianAxis[]
         {
             new Axis
             {
                 MinLimit = 0,
+                MaxLimit = maxValue * 1.15, // Add 15% padding to prevent overflow
                 TextSize = 12,
                 LabelsPaint = AxisTextPaint,
                 SeparatorsPaint = AxisSeparatorPaint,
