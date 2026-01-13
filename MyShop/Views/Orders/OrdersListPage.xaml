@@ -5,6 +5,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:controls="using:CommunityToolkit.WinUI.UI.Controls"
+    xmlns:controlsprimitives="using:CommunityToolkit.WinUI.UI.Controls.Primitives"
     xmlns:orders="using:MyShop.Models.Orders"
     mc:Ignorable="d"
     x:Name="Root"
@@ -62,7 +63,6 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
                     <!-- Search Box -->
@@ -75,32 +75,8 @@
                         </TextBox.Header>
                     </TextBox>
 
-                    <!-- Sort Options (Now in Toolbar) -->
-                    <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Bottom">
-                        <TextBlock Text="Sắp xếp theo" FontWeight="SemiBold"/>
-                        <Grid ColumnSpacing="8">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="150"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            
-                            <ComboBox Grid.Column="0"
-                                      ItemsSource="{x:Bind ViewModel.SortByOptions}"
-                                      SelectedItem="{x:Bind ViewModel.SelectedSortOption, Mode=TwoWay}"
-                                      HorizontalAlignment="Stretch"/>
-                                      
-                            <Button Grid.Column="1"
-                                    Command="{x:Bind ViewModel.ToggleSortDirectionCommand}"
-                                    ToolTipService.ToolTip="Đổi chiều sắp xếp"
-                                    VerticalAlignment="Stretch"
-                                    Margin="0"> 
-                                <FontIcon Glyph="{x:Bind ViewModel.SortDirection, Mode=OneWay, Converter={StaticResource SortDirectionToGlyphConverter}}" FontSize="12"/>
-                            </Button>
-                        </Grid>
-                    </StackPanel>
-
                     <!-- Action Buttons -->
-                    <StackPanel Grid.Column="2" 
+                    <StackPanel Grid.Column="1" 
                                Orientation="Horizontal" 
                                Spacing="8" 
                                VerticalAlignment="Bottom">
@@ -237,24 +213,41 @@
                               HeadersVisibility="Column"
                               AlternatingRowBackground="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
                               CanUserResizeColumns="True"
-                              CanUserSortColumns="False"
+                              CanUserSortColumns="True"
+                              Sorting="OrdersDataGrid_Sorting"
                               SelectionMode="Single"
+                              ColumnHeaderHeight="44"
                               Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolToVisibilityInverseConverter}}">
+
+                <controls:DataGrid.ColumnHeaderStyle>
+                    <Style TargetType="controlsprimitives:DataGridColumnHeader">
+                        <Setter Property="Background" Value="{ThemeResource AccentFillColorDefaultBrush}"/>
+                        <Setter Property="Foreground" Value="White"/>
+                        <Setter Property="FontWeight" Value="SemiBold"/>
+                        <Setter Property="FontSize" Value="14"/>
+                        <Setter Property="Padding" Value="12,8"/>
+                        <Setter Property="BorderThickness" Value="0,0,1,0"/>
+                        <Setter Property="BorderBrush" Value="{ThemeResource ControlStrokeColorSecondaryBrush}"/>
+                    </Style>
+                </controls:DataGrid.ColumnHeaderStyle>
 
                 <controls:DataGrid.Columns>
                     <!-- Order ID Column -->
                     <controls:DataGridTextColumn Header="Mã ĐH"
                                                 Binding="{Binding OrderId}"
+                                                Tag="OrderId"
                                                 Width="80"/>
 
                     <!-- Customer Name Column -->
                     <controls:DataGridTextColumn Header="Khách Hàng"
                                                 Binding="{Binding CustomerName}"
+                                                Tag="CustomerName"
                                                 Width="2*"/>
 
                     <!-- Order Date Column -->
                     <controls:DataGridTextColumn Header="Ngày Đặt"
                                                 Binding="{Binding FormattedOrderDate}"
+                                                Tag="OrderDate"
                                                 Width="150"/>
 
                     <!-- Status Column -->
@@ -316,6 +309,7 @@
 
                     <!-- Final Amount Column -->
                     <controls:DataGridTemplateColumn Header="Thành Tiền"
+                                                    Tag="FinalAmount"
                                                     Width="150">
                         <controls:DataGridTemplateColumn.CellTemplate>
                             <DataTemplate x:DataType="orders:OrderListItem">

@@ -38,6 +38,50 @@ public sealed partial class OrdersListPage : Page
         }
     }
 
+    /// <summary>
+    /// Handles DataGrid column header click for sorting.
+    /// </summary>
+    private async void OrdersDataGrid_Sorting(object sender, CommunityToolkit.WinUI.UI.Controls.DataGridColumnEventArgs e)
+    {
+        // Get the tag (property name) from the column and map to API field name
+        var columnTag = e.Column.Tag?.ToString();
+        if (string.IsNullOrEmpty(columnTag))
+            return;
+
+        // Map column tag to API sort field
+        var sortField = columnTag switch
+        {
+            "OrderId" => "id",
+            "CustomerName" => "customer",
+            "OrderDate" => "date",
+            "FinalAmount" => "amount",
+            _ => "date"
+        };
+
+        // Determine sort direction
+        string sortDirection;
+        if (e.Column.SortDirection == CommunityToolkit.WinUI.UI.Controls.DataGridSortDirection.Ascending)
+        {
+            e.Column.SortDirection = CommunityToolkit.WinUI.UI.Controls.DataGridSortDirection.Descending;
+            sortDirection = "desc";
+        }
+        else
+        {
+            e.Column.SortDirection = CommunityToolkit.WinUI.UI.Controls.DataGridSortDirection.Ascending;
+            sortDirection = "asc";
+        }
+
+        // Clear sort direction on other columns
+        foreach (var column in OrdersDataGrid.Columns)
+        {
+            if (column != e.Column)
+                column.SortDirection = null;
+        }
+
+        // Update ViewModel and reload using ChangeSortCommand
+        await ViewModel.ChangeSortCommand.ExecuteAsync(sortField);
+    }
+
     private async void DeleteButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
         if (sender is Button button && button.Tag is OrderListItem order)
