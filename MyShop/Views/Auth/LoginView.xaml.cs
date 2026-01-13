@@ -18,7 +18,15 @@ public sealed partial class LoginView : Page
     public LoginView()
     {
         this.InitializeComponent();
-        ViewModel = App.Current.Services.GetRequiredService<LoginViewModel>();
+        
+        // Get required services from DI
+        var authService = App.Current.Services.GetRequiredService<Services.Auth.IAuthService>();
+        var credentialService = App.Current.Services.GetRequiredService<Services.Auth.ICredentialService>();
+        var sessionService = App.Current.Services.GetRequiredService<Services.Auth.ISessionService>();
+        var toastService = App.Current.Services.GetRequiredService<Services.Shared.IToastService>();
+        
+        // Create ViewModel with all dependencies
+        ViewModel = new LoginViewModel(authService, credentialService, sessionService, toastService);
         ViewModel.LoginSuccessful += ViewModel_LoginSuccessful;
     }
 
