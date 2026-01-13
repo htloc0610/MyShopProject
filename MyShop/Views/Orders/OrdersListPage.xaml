@@ -224,13 +224,7 @@
                          HorizontalAlignment="Center"
                          VerticalAlignment="Center"/>
 
-            <!-- Error InfoBar -->
-            <InfoBar IsOpen="{x:Bind ViewModel.ErrorMessage, Mode=OneWay, Converter={StaticResource StringToBoolConverter}}"
-                     Severity="Error"
-                     Message="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}"
-                     Visibility="{x:Bind ViewModel.ErrorMessage, Mode=OneWay, Converter={StaticResource StringToVisibilityConverter}}"
-                     VerticalAlignment="Top"
-                     Margin="0,0,0,16"/>
+
 
             <!-- DataGrid -->
             <controls:DataGrid x:Name="OrdersDataGrid"

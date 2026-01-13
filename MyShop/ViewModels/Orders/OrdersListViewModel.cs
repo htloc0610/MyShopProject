@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MyShop.Models.Orders;
 using MyShop.Services.Orders;
+using MyShop.Services.Shared;
 using Microsoft.UI.Xaml.Controls;
 
 namespace MyShop.ViewModels.Orders;
@@ -15,6 +16,7 @@ namespace MyShop.ViewModels.Orders;
 public partial class OrdersListViewModel : ObservableObject
 {
     private readonly IOrderService _orderService;
+    private readonly IToastService _toastService;
     private readonly Frame? _navigationFrame;
 
     [ObservableProperty]
@@ -55,9 +57,6 @@ public partial class OrdersListViewModel : ObservableObject
 
     [ObservableProperty]
     private bool _isLoading = false;
-
-    [ObservableProperty]
-    private string? _errorMessage;
 
     // Filter properties
     [ObservableProperty]
@@ -115,9 +114,10 @@ public partial class OrdersListViewModel : ObservableObject
         };
     }
 
-    public OrdersListViewModel(IOrderService orderService, Frame? navigationFrame = null)
+    public OrdersListViewModel(IOrderService orderService, IToastService toastService, Frame? navigationFrame = null)
     {
         _orderService = orderService;
+        _toastService = toastService;
         _navigationFrame = navigationFrame;
     }
 
@@ -146,7 +146,6 @@ public partial class OrdersListViewModel : ObservableObject
     private async Task LoadOrdersAsync()
     {
         IsLoading = true;
-        ErrorMessage = null;
 
         try
         {
@@ -195,12 +194,12 @@ public partial class OrdersListViewModel : ObservableObject
             }
             else
             {
-                ErrorMessage = "Không thể tải danh sách đơn hàng";
+                _toastService.ShowError("Không thể tải danh sách đơn hàng");
             }
         }
         catch (System.Exception ex)
         {
-            ErrorMessage = $"Lỗi: {ex.Message}";
+            _toastService.ShowError($"Lỗi: {ex.Message}");
         }
         finally
         {
