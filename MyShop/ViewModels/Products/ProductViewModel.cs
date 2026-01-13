@@ -118,10 +118,10 @@ public partial class ProductViewModel : ObservableObject
     private int _fuzzyThreshold = 70;
 
     [ObservableProperty]
-    private bool _isFilterVisible = true;
+    private bool _isFilterVisible = false;
 
     [ObservableProperty]
-    private bool _isGridView = false;
+    private bool _isGridView = true;
 
 
 

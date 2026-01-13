@@ -386,6 +386,17 @@ public sealed partial class ProductListPage : Page
     }
 
     /// <summary>
+    /// Handles AdaptiveGridView item click.
+    /// </summary>
+    private void GridViewItem_Click(object sender, ItemClickEventArgs e)
+    {
+        if (e.ClickedItem is Product product)
+        {
+            NavigateToProductDetail(product);
+        }
+    }
+
+    /// <summary>
     /// Handles View Detail button click.
     /// </summary>
     private void ViewDetailButton_Click(object sender, RoutedEventArgs e)

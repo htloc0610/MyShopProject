@@ -110,11 +110,11 @@
 
         <!-- Content Area -->
         <ScrollViewer Grid.Row="1" Padding="20">
-            <Grid MaxWidth="1400">
+            <Grid MaxWidth="1400" HorizontalAlignment="Left">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="380"/>
+                    <ColumnDefinition Width="Auto" MinWidth="300" MaxWidth="400"/>
                     <ColumnDefinition Width="20"/>
-                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*" MinWidth="400"/>
                 </Grid.ColumnDefinitions>
 
                 <!-- Left Column: Image Upload -->

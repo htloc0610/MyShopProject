@@ -339,33 +339,31 @@
                     <!-- Description Column -->
                     <controls:DataGridTextColumn Header="Mô Tả"
                                                 Binding="{Binding Description}"
-                                                Width="2*"/>
+                                                Width="*"/>
 
                     <!-- Actions Column -->
                     <controls:DataGridTemplateColumn Header="Thao Tác"
-                                                    Width="200">
+                                                    Width="Auto">
                         <controls:DataGridTemplateColumn.CellTemplate>
                             <DataTemplate x:DataType="models:Product">
-                                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
                                     <Button Click="ViewDetailButton_Click"
                                            Tag="{x:Bind}"
                                            Style="{StaticResource AccentButtonStyle}"
-                                           Height="32">
-                                        <StackPanel Orientation="Horizontal" Spacing="6">
-                                            <FontIcon Glyph="&#xE8A3;" FontSize="14"/>
-                                            <TextBlock Text="Chi tiết"/>
-                                        </StackPanel>
+                                           ToolTipService.ToolTip="Chi tiết"
+                                           Padding="8,6"
+                                           MinWidth="0">
+                                        <FontIcon Glyph="&#xE8A3;" FontSize="14"/>
                                     </Button>
                                     
                                     <Button Click="DeleteButton_Click"
                                            Tag="{x:Bind}"
-                                           Height="32"
+                                           ToolTipService.ToolTip="Xóa"
+                                           Padding="8,6"
+                                           MinWidth="0"
                                            Background="#C42B1C"
                                            Foreground="White">
-                                        <StackPanel Orientation="Horizontal" Spacing="6">
-                                            <FontIcon Glyph="&#xE74D;" FontSize="14"/>
-                                            <TextBlock Text="Xóa"/>
-                                        </StackPanel>
+                                        <FontIcon Glyph="&#xE74D;" FontSize="14"/>
                                     </Button>
                                 </StackPanel>
                             </DataTemplate>
@@ -374,69 +372,87 @@
                 </controls:DataGrid.Columns>
             </controls:DataGrid>
 
-            <!-- Grid View (Manual Implementation) -->
-            <ScrollViewer Grid.Row="3" 
+            <!-- Grid View (Adaptive Implementation) -->
+            <controls:AdaptiveGridView Grid.Row="3" 
+                          ItemsSource="{x:Bind ViewModel.Products, Mode=OneWay}"
                           Visibility="{x:Bind ViewModel.IsGridView, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
-                          Padding="0,0,16,0">
-                <ItemsControl ItemsSource="{x:Bind ViewModel.Products, Mode=OneWay}">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <controls:WrapPanel Orientation="Horizontal" HorizontalSpacing="12" VerticalSpacing="12" />
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate x:DataType="models:Product">
-                            <Button Style="{StaticResource SubtleButtonStyle}"
-                                    Padding="0"
-                                    Margin="0"
-                                    BorderThickness="0"
-                                    Click="ProductItem_Click"
-                                    HorizontalAlignment="Left"
-                                    VerticalAlignment="Top">
-                                <Border Width="220"
-                                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                        BorderThickness="1"
-                                        CornerRadius="8"
-                                        Padding="12">
-                                    <StackPanel Spacing="8">
-                                        <!-- Image -->
-                                        <Border CornerRadius="6" Height="160" Background="#F3F3F3">
-                                            <Image Source="{Binding DisplayImage, Converter={StaticResource RelativeToAbsoluteUrlConverter}}"
-                                                   Stretch="UniformToFill"
-                                                   HorizontalAlignment="Center"
-                                                   VerticalAlignment="Center"/>
-                                        </Border>
-
-                                        <!-- Details -->
-                                        <TextBlock Text="{x:Bind Name}" 
-                                                  FontWeight="SemiBold" 
-                                                  FontSize="14"
-                                                  TextTrimming="CharacterEllipsis"
-                                                  MaxLines="2"
-                                                  Height="40"/>
-                                        
-                                        <TextBlock Text="{x:Bind FormattedPrice}" 
-                                                  Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
-                                                  FontWeight="Bold"
-                                                  FontSize="16"/>
-
-                                        <Grid>
-                                            <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-                                                <Ellipse Width="8" Height="8" Fill="{x:Bind StockColor}"/>
-                                                <TextBlock Text="{x:Bind StockStatus}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
-                                            </StackPanel>
-                                            
-                                            <!-- Icon -->
-                                            <FontIcon Glyph="&#xE70F;" FontSize="16" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                                        </Grid>
-                                    </StackPanel>
+                          DesiredWidth="240"
+                          ItemHeight="320"
+                          StretchContentForSingleRow="False"
+                          SelectionMode="None"
+                          IsItemClickEnabled="True"
+                          ItemClick="GridViewItem_Click"
+                          Padding="0,0,16,16">
+                <controls:AdaptiveGridView.ItemContainerStyle>
+                    <Style TargetType="GridViewItem">
+                        <Setter Property="Margin" Value="0,0,12,12"/>
+                        <Setter Property="Padding" Value="0"/>
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                        <Setter Property="VerticalContentAlignment" Value="Stretch"/>
+                    </Style>
+                </controls:AdaptiveGridView.ItemContainerStyle>
+                <controls:AdaptiveGridView.ItemTemplate>
+                    <DataTemplate x:DataType="models:Product">
+                        <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                BorderThickness="1"
+                                CornerRadius="12"
+                                Padding="0">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="160"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                
+                                <!-- Image Section -->
+                                <Border Grid.Row="0" 
+                                        CornerRadius="12,12,0,0" 
+                                        Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}">
+                                    <Image Source="{Binding DisplayImage, Converter={StaticResource RelativeToAbsoluteUrlConverter}}"
+                                           Stretch="UniformToFill"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"/>
                                 </Border>
-                            </Button>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </ScrollViewer>
+                                
+                                <!-- Details Section -->
+                                <StackPanel Grid.Row="1" Padding="12" Spacing="6">
+                                    <TextBlock Text="{x:Bind Name}" 
+                                              FontWeight="SemiBold" 
+                                              FontSize="14"
+                                              TextTrimming="CharacterEllipsis"
+                                              MaxLines="2"
+                                              Height="40"/>
+                                    
+                                    <TextBlock Text="{x:Bind FormattedPrice}" 
+                                              Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                              FontWeight="Bold"
+                                              FontSize="16"/>
+
+                                    <Grid Margin="0,4,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        
+                                        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                            <Ellipse Width="8" Height="8" Fill="{x:Bind StockColor}"/>
+                                            <TextBlock Text="{x:Bind StockStatus}" 
+                                                      FontSize="12" 
+                                                      Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                        </StackPanel>
+                                        
+                                        <!-- Edit Icon -->
+                                        <FontIcon Grid.Column="1" 
+                                                 Glyph="&#xE70F;" 
+                                                 FontSize="14" 
+                                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                    </Grid>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </controls:AdaptiveGridView.ItemTemplate>
+            </controls:AdaptiveGridView>
         </Grid>
 
         <!-- Pagination Controls -->
