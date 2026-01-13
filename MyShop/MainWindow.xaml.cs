@@ -40,6 +40,10 @@ public sealed partial class MainWindow : Window
             _authService = App.Current.Services.GetRequiredService<IAuthService>();
             _navigationStateService = App.Current.Services.GetRequiredService<INavigationStateService>();
 
+            // Initialize Toast Notification Service
+            var toastService = App.Current.Services.GetRequiredService<IToastService>();
+            toastService.Initialize(GlobalToast, DispatcherQueue);
+
             // Set window size
             this.AppWindow.Resize(new Windows.Graphics.SizeInt32(1400, 900));
 

@@ -5,6 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:MyShop"
     xmlns:models="using:MyShop.Models.Reports"
+    xmlns:controls="using:CommunityToolkit.WinUI.UI.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
@@ -119,5 +120,19 @@
             <Frame x:Name="ContentFrame" Padding="0"/>
             
         </NavigationView>
+        
+        <!-- Global Toast Notification - Bottom Right Corner -->
+        <controls:InAppNotification x:Name="GlobalToast"
+                                    VerticalAlignment="Bottom"
+                                    HorizontalAlignment="Right"
+                                    Margin="0,0,10,10"
+                                    MaxWidth="400"
+                                    Canvas.ZIndex="9999">
+            <controls:InAppNotification.Shadow>
+                <ThemeShadow />
+            </controls:InAppNotification.Shadow>
+        </controls:InAppNotification>
     </Grid>
 </Window>
+
+

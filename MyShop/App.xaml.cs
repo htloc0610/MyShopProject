@@ -171,6 +171,7 @@ public partial class App : Application
         services.AddSingleton<ProductChangeNotifier>();
         services.AddSingleton<IPrintService, PrintService>();
         services.AddSingleton<INavigationStateService, NavigationStateService>();
+        services.AddSingleton<IToastService, ToastService>();
         services.AddSingleton<Services.Plugins.PluginLoader>();
 
         // ====================================================

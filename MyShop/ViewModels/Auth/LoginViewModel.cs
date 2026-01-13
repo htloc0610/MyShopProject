@@ -2,6 +2,7 @@ using System;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MyShop.Services.Auth;
+using MyShop.Services.Shared;
 using MyShop.Models.Auth;
 using System.Threading.Tasks;
 
@@ -12,6 +13,7 @@ public partial class LoginViewModel : ObservableObject
     private readonly IAuthService _authService;
     private readonly ICredentialService _credentialService;
     private readonly ISessionService _sessionService;
+    private readonly IToastService _toastService;
 
     [ObservableProperty]
     private string _email = string.Empty;
@@ -36,11 +38,16 @@ public partial class LoginViewModel : ObservableObject
 
     public event EventHandler<AccountStatusInfo?>? LoginSuccessful;
 
-    public LoginViewModel(IAuthService authService, ICredentialService credentialService, ISessionService sessionService)
+    public LoginViewModel(
+        IAuthService authService, 
+        ICredentialService credentialService, 
+        ISessionService sessionService,
+        IToastService toastService)
     {
         _authService = authService;
         _credentialService = credentialService;
         _sessionService = sessionService;
+        _toastService = toastService;
     }
 
     [RelayCommand]
@@ -55,7 +62,28 @@ public partial class LoginViewModel : ObservableObject
     {
         if (IsLoading) return;
 
+        // Clear previous error
         ErrorMessage = string.Empty;
+        
+        // Validation
+        if (string.IsNullOrWhiteSpace(Email))
+        {
+            _toastService.ShowError("Email không được để trống!");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(Password))
+        {
+            _toastService.ShowError("Mật khẩu không được để trống!");
+            return;
+        }
+
+        if (!IsLoginMode && string.IsNullOrWhiteSpace(ShopName))
+        {
+            _toastService.ShowError("Tên cửa hàng không được để trống!");
+            return;
+        }
+
         IsLoading = true;
 
         try
@@ -73,6 +101,16 @@ public partial class LoginViewModel : ObservableObject
 
             if (result.Success)
             {
+                // Show success message
+                if (IsLoginMode)
+                {
+                    _toastService.ShowSuccess($"Chào mừng trở lại, {result.User?.Email}!");
+                }
+                else
+                {
+                    _toastService.ShowSuccess("Đăng ký thành công! Chào mừng bạn đến với dịch vụ của chúng tôi!");
+                }
+
                 if (result.User != null)
                 {
                     if (RememberMe)
@@ -86,7 +124,6 @@ public partial class LoginViewModel : ObservableObject
                     else
                     {
                         // Explicitly clear credentials if Remember Me is not checked
-                        // This prevents auto-login next time if user previously had it on but now logs in without it.
                         _credentialService.ClearCredentials();
                     }
                 }
@@ -96,8 +133,19 @@ public partial class LoginViewModel : ObservableObject
             }
             else
             {
-                ErrorMessage = result.ErrorMessage ?? "Authentication failed";
+                // Show error toast instead of setting ErrorMessage
+                var errorMsg = result.ErrorMessage ?? (IsLoginMode ? "Đăng nhập thất bại" : "Đăng ký thất bại");
+                _toastService.ShowError(errorMsg);
+                
+                // Still set ErrorMessage for InfoBar fallback
+                ErrorMessage = errorMsg;
             }
+        }
+        catch (Exception ex)
+        {
+            // Show exception as error toast
+            _toastService.ShowError($"Lỗi: {ex.Message}");
+            ErrorMessage = ex.Message;
         }
         finally
         {
