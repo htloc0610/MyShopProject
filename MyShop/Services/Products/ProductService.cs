@@ -150,12 +150,28 @@ public class ProductService : IProductService
     {
         try
         {
-            var response = await _httpClient.PostAsJsonAsync(ProductsEndpoint, product);
+            // Map client Product to API-compatible DTO
+            var createDto = new ProductCreateDto
+            {
+                Sku = product.Sku,
+                Name = product.Name,
+                ImportPrice = (int)product.ImportPrice,
+                SellingPrice = (int)product.SellingPrice,
+                Count = product.Stock,
+                Description = product.Description,
+                CategoryId = product.CategoryId
+            };
+
+            var response = await _httpClient.PostAsJsonAsync(ProductsEndpoint, createDto);
             
             if (response.IsSuccessStatusCode)
             {
                 return await response.Content.ReadFromJsonAsync<Product>();
             }
+            
+            // Log the error response for debugging
+            var errorContent = await response.Content.ReadAsStringAsync();
+            System.Diagnostics.Debug.WriteLine($"Create product failed: {response.StatusCode} - {errorContent}");
             
             return null;
         }
@@ -214,8 +230,22 @@ public class ProductService : IProductService
             }
             else
             {
-                var errorContent = await response.Content.ReadAsStringAsync();
-                errors.Add($"L?i t? server: {errorContent}");
+                // Try to parse BulkImportResult even for error status codes
+                try
+                {
+                    var result = await response.Content.ReadFromJsonAsync<BulkImportResult>();
+                    if (result != null && result.Errors != null && result.Errors.Count > 0)
+                    {
+                        // Return the error list directly
+                        return (false, result.ImportedCount, result.Errors);
+                    }
+                }
+                catch
+                {
+                    // If parsing fails, read as plain text
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    errors.Add($"Lỗi từ server: {errorContent}");
+                }
             }
 
             return (false, importedCount, errors);
@@ -223,7 +253,7 @@ public class ProductService : IProductService
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"Error importing products: {ex.Message}");
-            errors.Add($"L?i k?t n?i: {ex.Message}");
+            errors.Add($"Lỗi khi nhập: {ex.Message}");
             return (false, 0, errors);
         }
     }

@@ -144,10 +144,10 @@ namespace MyShopAPI.Controllers
         /// Create new product.
         /// </summary>
         [HttpPost]
-        public async Task<ActionResult<ProductResponseDto>> Create(Product product)
+        public async Task<ActionResult<ProductResponseDto>> Create([FromBody] ProductCreateDto createDto)
         {
             var categoryExists = await _context.Categories
-                .AnyAsync(c => c.CategoryId == product.CategoryId);
+                .AnyAsync(c => c.CategoryId == createDto.CategoryId);
 
             if (!categoryExists)
                 return BadRequest(new { message = "Invalid category id" });
@@ -156,8 +156,19 @@ namespace MyShopAPI.Controllers
             var userId = _userContextService.GetUserId();
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized(new { message = "User not authenticated" });
-            
-            product.UserId = userId;
+
+            // Map DTO to Product entity
+            var product = new Product
+            {
+                Sku = createDto.Sku,
+                Name = createDto.Name,
+                ImportPrice = createDto.ImportPrice,
+                SellingPrice = createDto.SellingPrice,
+                Count = createDto.Count,
+                Description = createDto.Description,
+                CategoryId = createDto.CategoryId,
+                UserId = userId
+            };
 
             _context.Products.Add(product);
             await _context.SaveChangesAsync();
@@ -333,10 +344,16 @@ namespace MyShopAPI.Controllers
                             validationErrors.Add($"Sản phẩm {i + 1} (Dòng {rowNumber}, '{dto.Name}'): CategoryId {dto.CategoryId} không hợp lệ");
                             continue;                       }
 
-                        // Validate price
-                        if (dto.Price <= 0)
+                        // Validate import price
+                        if (dto.ImportPrice <= 0)
                         {
-                            validationErrors.Add($"Sản phẩm {i + 1} (Dòng {rowNumber}, '{dto.Name}'): Giá ({dto.Price}) phải lớn hơn 0");
+                            validationErrors.Add($"Sản phẩm {i + 1} (Dòng {rowNumber}, '{dto.Name}'): Giá nhập ({dto.ImportPrice}) phải lớn hơn 0");
+                            continue;                       }
+
+                        // Validate selling price
+                        if (dto.SellingPrice <= 0)
+                        {
+                            validationErrors.Add($"Sản phẩm {i + 1} (Dòng {rowNumber}, '{dto.Name}'): Giá bán ({dto.SellingPrice}) phải lớn hơn 0");
                             continue;                       }
 
                         // Validate stock
@@ -360,7 +377,8 @@ namespace MyShopAPI.Controllers
                         {
                             Sku = dto.Sku,
                             Name = dto.Name,
-                            ImportPrice = (int)Math.Round(dto.Price),
+                            ImportPrice = (int)Math.Round(dto.ImportPrice),
+                            SellingPrice = (int)Math.Round(dto.SellingPrice),
                             Count = dto.Stock,
                             Description = dto.Description ?? string.Empty,
                             CategoryId = dto.CategoryId,

@@ -28,7 +28,8 @@ public static class ExcelHelper
         var headers = new[]
         {
             "ProductName",
-            "Price",
+            "ImportPrice",
+            "SellingPrice",
             "CategoryName",
             "SKU",
             "Stock",
@@ -50,14 +51,15 @@ public static class ExcelHelper
 
         // Add sample data row
         worksheet.Cell(2, 1).Value = "Sản phẩm mẫu";
-        worksheet.Cell(2, 2).Value = 100000;
-        worksheet.Cell(2, 3).Value = "Electronics";
-        worksheet.Cell(2, 4).Value = "SP001";
-        worksheet.Cell(2, 5).Value = 10;
-        worksheet.Cell(2, 6).Value = "Mô tả sản phẩm mẫu";
-        worksheet.Cell(2, 7).Value = "https://via.placeholder.com/400";
+        worksheet.Cell(2, 2).Value = 80000;   // Import Price
+        worksheet.Cell(2, 3).Value = 100000;  // Selling Price
+        worksheet.Cell(2, 4).Value = "Electronics";
+        worksheet.Cell(2, 5).Value = "SP001";
+        worksheet.Cell(2, 6).Value = 10;
+        worksheet.Cell(2, 7).Value = "Mô tả sản phẩm mẫu";
         worksheet.Cell(2, 8).Value = "https://via.placeholder.com/400";
         worksheet.Cell(2, 9).Value = "https://via.placeholder.com/400";
+        worksheet.Cell(2, 10).Value = "https://via.placeholder.com/400";
 
         // Auto-fit columns
         worksheet.Columns().AdjustToContents();
@@ -95,10 +97,10 @@ public static class ExcelHelper
             }
 
             // Validate headers
-            var expectedHeaders = new[] { "ProductName", "Price", "CategoryName", "SKU", "Stock", "Description" };
+            var expectedHeaders = new[] { "ProductName", "ImportPrice", "SellingPrice", "CategoryName", "SKU", "Stock", "Description" };
             var actualHeaders = new List<string>();
 
-            for (int col = 1; col <= 6; col++)
+            for (int col = 1; col <= 7; col++)
             {
                 var headerValue = worksheet.Cell(1, col).GetString();
                 actualHeaders.Add(headerValue);
@@ -130,15 +132,17 @@ public static class ExcelHelper
                 try
                 {
                     var productName = worksheet.Cell(row, 1).GetString().Trim();
-                    var priceText = worksheet.Cell(row, 2).GetString().Trim();
-                    var categoryName = worksheet.Cell(row, 3).GetString().Trim();
-                    var sku = worksheet.Cell(row, 4).GetString().Trim();
-                    var stockText = worksheet.Cell(row, 5).GetString().Trim();
-                    var description = worksheet.Cell(row, 6).GetString().Trim();
+                    var importPriceText = worksheet.Cell(row, 2).GetString().Trim();
+                    var sellingPriceText = worksheet.Cell(row, 3).GetString().Trim();
+                    var categoryName = worksheet.Cell(row, 4).GetString().Trim();
+                    var sku = worksheet.Cell(row, 5).GetString().Trim();
+                    var stockText = worksheet.Cell(row, 6).GetString().Trim();
+                    var description = worksheet.Cell(row, 7).GetString().Trim();
 
                     // Skip completely empty rows
                     if (string.IsNullOrWhiteSpace(productName) && 
-                        string.IsNullOrWhiteSpace(priceText) && 
+                        string.IsNullOrWhiteSpace(importPriceText) && 
+                        string.IsNullOrWhiteSpace(sellingPriceText) &&
                         string.IsNullOrWhiteSpace(categoryName) &&
                         string.IsNullOrWhiteSpace(sku))
                         continue;
@@ -162,10 +166,17 @@ public static class ExcelHelper
                         continue;
                     }
 
-                    // Parse price
-                    if (!decimal.TryParse(priceText, out var price) || price <= 0)
+                    // Parse import price
+                    if (!decimal.TryParse(importPriceText, out var importPrice) || importPrice <= 0)
                     {
-                        validationErrors.Add($"Dòng {row} ({productName}): Giá không hợp lệ ('{priceText}'). Giá phải là số dương.");
+                        validationErrors.Add($"Dòng {row} ({productName}): Giá nhập không hợp lệ ('{importPriceText}'). Giá phải là số dương.");
+                        continue;
+                    }
+
+                    // Parse selling price
+                    if (!decimal.TryParse(sellingPriceText, out var sellingPrice) || sellingPrice <= 0)
+                    {
+                        validationErrors.Add($"Dòng {row} ({productName}): Giá bán không hợp lệ ('{sellingPriceText}'). Giá phải là số dương.");
                         continue;
                     }
 
@@ -188,9 +199,9 @@ public static class ExcelHelper
                         continue;
                     }
 
-                    // Read image URLs (optional columns)
+                    // Read image URLs (optional columns - now starting from column 8)
                     var imageUrls = new List<string>();
-                    for (int col = 7; col <= 9; col++)
+                    for (int col = 8; col <= 10; col++)
                     {
                         var imageUrl = worksheet.Cell(row, col).GetString().Trim();
                         if (!string.IsNullOrWhiteSpace(imageUrl))
@@ -204,7 +215,8 @@ public static class ExcelHelper
                     {
                         Sku = sku,
                         Name = productName,
-                        Price = price,
+                        ImportPrice = importPrice,
+                        SellingPrice = sellingPrice,
                         Stock = stock,
                         Description = description,
                         CategoryId = category.CategoryId,

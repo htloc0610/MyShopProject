@@ -74,7 +74,7 @@ public partial class CategoryViewModel : ObservableObject
         catch (Exception ex)
         {
             HasError = true;
-            ErrorMessage = $"L?i khi t?i danh m?c: {ex.Message}";
+            ErrorMessage = $"Lỗi khi tải danh mục: {ex.Message}";
             System.Diagnostics.Debug.WriteLine($"Error loading categories: {ex}");
         }
         finally
@@ -113,13 +113,13 @@ public partial class CategoryViewModel : ObservableObject
             }
             
             HasError = true;
-            ErrorMessage = "Kh�ng th? t?o danh m?c. T�n c� th? ?� t?n t?i.";
+            ErrorMessage = "Không thể tạo danh mục. Tên đã tồn tại.";
             return false;
         }
         catch (Exception ex)
         {
             HasError = true;
-            ErrorMessage = $"L?i khi t?o danh m?c: {ex.Message}";
+            ErrorMessage = $"Lỗi khi tạo danh mục: {ex.Message}";
             System.Diagnostics.Debug.WriteLine($"Error creating category: {ex}");
             return false;
         }
@@ -154,13 +154,13 @@ public partial class CategoryViewModel : ObservableObject
             }
             
             HasError = true;
-            ErrorMessage = "Kh�ng th? c?p nh?t danh m?c. T�n c� th? ?� t?n t?i.";
+            ErrorMessage = "Không thể cập nhật danh mục. Tên đã tồn tại.";
             return false;
         }
         catch (Exception ex)
         {
             HasError = true;
-            ErrorMessage = $"L?i khi c?p nh?t danh m?c: {ex.Message}";
+            ErrorMessage = $"Lỗi khi cập nhật danh mục: {ex.Message}";
             System.Diagnostics.Debug.WriteLine($"Error updating category: {ex}");
             return false;
         }
@@ -196,13 +196,13 @@ public partial class CategoryViewModel : ObservableObject
             }
             
             HasError = true;
-            ErrorMessage = errorMessage ?? "Kh�ng th? x�a danh m?c";
+            ErrorMessage = errorMessage ?? "Không thể xóa danh mục";
             return (false, errorMessage);
         }
         catch (Exception ex)
         {
             HasError = true;
-            ErrorMessage = $"L?i khi x�a danh m?c: {ex.Message}";
+            ErrorMessage = $"Lỗi khi xóa danh mục: {ex.Message}";
             System.Diagnostics.Debug.WriteLine($"Error deleting category: {ex}");
             return (false, ex.Message);
         }
