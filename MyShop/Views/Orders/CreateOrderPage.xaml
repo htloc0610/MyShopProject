@@ -37,15 +37,55 @@
                         Margin="0,12,0,0"/>
             </StackPanel>
 
-            <!-- Main Content - 2 Columns -->
-            <Grid Grid.Row="1" ColumnSpacing="16">
+            <!-- Main Content - Responsive Layout -->
+            <Grid Grid.Row="1" x:Name="MainContentGrid">
+                <VisualStateManager.VisualStateGroups>
+                    <VisualStateGroup>
+                        <!-- Wide Screen: 2 Columns -->
+                        <VisualState x:Name="WideState">
+                            <VisualState.StateTriggers>
+                                <AdaptiveTrigger MinWindowWidth="900"/>
+                            </VisualState.StateTriggers>
+                            <VisualState.Setters>
+                                <Setter Target="LeftColumn.(Grid.Column)" Value="0"/>
+                                <Setter Target="LeftColumn.(Grid.Row)" Value="0"/>
+                                <Setter Target="RightColumn.(Grid.Column)" Value="1"/>
+                                <Setter Target="RightColumn.(Grid.Row)" Value="0"/>
+                                <Setter Target="RightColumn.MaxWidth" Value="420"/>
+                                <Setter Target="MainContentGrid.ColumnSpacing" Value="20"/>
+                                <Setter Target="MainContentGrid.RowSpacing" Value="0"/>
+                            </VisualState.Setters>
+                        </VisualState>
+                        
+                        <!-- Narrow Screen: 1 Column (Stacked) -->
+                        <VisualState x:Name="NarrowState">
+                            <VisualState.StateTriggers>
+                                <AdaptiveTrigger MinWindowWidth="0"/>
+                            </VisualState.StateTriggers>
+                            <VisualState.Setters>
+                                <Setter Target="LeftColumn.(Grid.Column)" Value="0"/>
+                                <Setter Target="LeftColumn.(Grid.Row)" Value="0"/>
+                                <Setter Target="RightColumn.(Grid.Column)" Value="0"/>
+                                <Setter Target="RightColumn.(Grid.Row)" Value="1"/>
+                                <Setter Target="RightColumn.MaxWidth" Value="10000"/>
+                                <Setter Target="MainContentGrid.ColumnSpacing" Value="0"/>
+                                <Setter Target="MainContentGrid.RowSpacing" Value="16"/>
+                            </VisualState.Setters>
+                        </VisualState>
+                    </VisualStateGroup>
+                </VisualStateManager.VisualStateGroups>
+                
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="2*"/>
-                    <ColumnDefinition Width="1*" MinWidth="350"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
 
                 <!-- LEFT COLUMN: Customer, Products, Cart -->
-                <StackPanel Grid.Column="0" Spacing="16">
+                <StackPanel x:Name="LeftColumn" Grid.Column="0" Grid.Row="0" Spacing="16">
                     
                     <!-- Customer Selection -->
                     <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
@@ -249,7 +289,7 @@
                 </StackPanel>
 
                 <!-- RIGHT COLUMN: Totals, Coupon, Actions -->
-                <Grid Grid.Column="1" RowSpacing="16">
+                <Grid x:Name="RightColumn" Grid.Column="1" Grid.Row="0" RowSpacing="16" MaxWidth="420">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
