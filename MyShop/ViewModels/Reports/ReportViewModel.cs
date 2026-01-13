@@ -119,7 +119,7 @@ namespace MyShop.ViewModels.Reports
                 new Axis
                 {
                     MinLimit = 0,
-                    MaxLimit = values.Length == 0 ? 1 : values.Max(),
+                    MaxLimit = values.Length == 0 ? 1 : values.Max() * 1.15, // Add 15% padding to prevent overflow
                     TextSize = 12,
                     LabelsPaint = AxisTextPaint,
                     SeparatorsPaint = AxisSeparatorPaint,
@@ -195,8 +195,8 @@ namespace MyShop.ViewModels.Reports
             {
                 new Axis
                 {
-                    MinLimit = -max,
-                    MaxLimit = max,
+                    MinLimit = -max * 1.15, // Add 15% padding to prevent overflow
+                    MaxLimit = max * 1.15,  // Add 15% padding to prevent overflow
                     TextSize = 12,
                     LabelsPaint = AxisTextPaint,
                     SeparatorsPaint = AxisSeparatorPaint,
