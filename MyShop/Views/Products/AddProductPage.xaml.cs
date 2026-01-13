@@ -26,6 +26,8 @@ public sealed partial class AddProductPage : Page
     public ProductViewModel ViewModel { get; }
     private readonly IProductService _productService;
     private readonly ICategoryService _categoryService;
+    private readonly ProductDraftService _draftService;
+    private bool _savedSuccessfully = false;
 
     public AddProductPage()
     {
@@ -33,17 +35,30 @@ public sealed partial class AddProductPage : Page
         ViewModel = App.Current.Services.GetRequiredService<ProductViewModel>();
         _productService = App.Current.Services.GetRequiredService<IProductService>();
         _categoryService = App.Current.Services.GetRequiredService<ICategoryService>();
+        _draftService = new ProductDraftService();
     }
 
     protected override async void OnNavigatedTo(NavigationEventArgs e)
     {
         base.OnNavigatedTo(e);
+        _savedSuccessfully = false;
         
         // Load categories when page is navigated to
         await ViewModel.LoadCategoriesCommand.ExecuteAsync(null);
         
-        // Clear form
-        ClearForm();
+        // Check for saved draft and restore if exists
+        await TryRestoreDraftAsync();
+    }
+
+    protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
+    {
+        base.OnNavigatingFrom(e);
+        
+        // Auto-save draft if not saved successfully
+        if (!_savedSuccessfully)
+        {
+            SaveDraftFromForm();
+        }
     }
 
     private void BackButton_Click(object sender, RoutedEventArgs e)
@@ -79,6 +94,10 @@ public sealed partial class AddProductPage : Page
 
             // Call ViewModel to create product
             await ViewModel.CreateProductCommand.ExecuteAsync(newProduct);
+
+            // Mark as saved successfully and clear draft
+            _savedSuccessfully = true;
+            _draftService.ClearDraft();
 
             // Show success message
             await ShowDialogAsync("Thành công", "Đã thêm sản phẩm mới thành công!");
@@ -375,4 +394,188 @@ public sealed partial class AddProductPage : Page
 
         await dialog.ShowAsync();
     }
+
+    #region Draft Management
+
+    /// <summary>
+    /// Tries to restore a saved draft and prompts user to confirm.
+    /// </summary>
+    private async Task TryRestoreDraftAsync()
+    {
+        var draft = _draftService.LoadDraft();
+        
+        if (draft != null && _draftService.HasMeaningfulData(draft))
+        {
+            // Build draft summary for display
+            var draftSummary = BuildDraftSummary(draft);
+            
+            // Show dialog asking if user wants to restore draft
+            var dialog = new ContentDialog
+            {
+                Title = "Khôi phục bản nháp",
+                Content = new StackPanel
+                {
+                    Spacing = 8,
+                    Children =
+                    {
+                        new TextBlock 
+                        { 
+                            Text = $"Bản nháp được lưu lúc {draft.SavedAt:HH:mm dd/MM/yyyy}",
+                            FontWeight = Microsoft.UI.Text.FontWeights.SemiBold
+                        },
+                        new TextBlock 
+                        { 
+                            Text = "Nội dung bản nháp:",
+                            Margin = new Thickness(0, 8, 0, 0)
+                        },
+                        new Border
+                        {
+                            Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+                                Microsoft.UI.Colors.Gray) { Opacity = 0.2 },
+                            CornerRadius = new CornerRadius(4),
+                            Padding = new Thickness(12),
+                            Child = new TextBlock 
+                            { 
+                                Text = draftSummary,
+                                TextWrapping = TextWrapping.Wrap,
+                                FontFamily = new Microsoft.UI.Xaml.Media.FontFamily("Consolas")
+                            }
+                        },
+                        new TextBlock
+                        {
+                            Text = "Bạn có muốn khôi phục không?",
+                            Margin = new Thickness(0, 8, 0, 0)
+                        }
+                    }
+                },
+                PrimaryButtonText = "Khôi phục",
+                SecondaryButtonText = "Xóa bản nháp",
+                CloseButtonText = "Bỏ qua",
+                DefaultButton = ContentDialogButton.Primary,
+                XamlRoot = XamlRoot
+            };
+
+            var result = await dialog.ShowAsync();
+
+            if (result == ContentDialogResult.Primary)
+            {
+                // Restore draft to form
+                RestoreDraftToForm(draft);
+            }
+            else if (result == ContentDialogResult.Secondary)
+            {
+                // Clear draft and form
+                _draftService.ClearDraft();
+                ClearForm();
+            }
+            else
+            {
+                // Just clear form, keep draft for later
+                ClearForm();
+            }
+        }
+        else
+        {
+            ClearForm();
+        }
+    }
+
+    /// <summary>
+    /// Restores draft data to form fields.
+    /// </summary>
+    private void RestoreDraftToForm(ProductDraftService.ProductDraft draft)
+    {
+        NameTextBox.Text = draft.Name ?? string.Empty;
+        SkuTextBox.Text = draft.Sku ?? string.Empty;
+        ImportPriceNumberBox.Value = (double)draft.ImportPrice;
+        SellingPriceNumberBox.Value = (double)draft.SellingPrice;
+        StockNumberBox.Value = draft.Stock;
+        DescriptionTextBox.Text = draft.Description ?? string.Empty;
+        
+        // Set category if exists
+        if (draft.CategoryId.HasValue && ViewModel.Categories != null)
+        {
+            var category = ViewModel.Categories.FirstOrDefault(c => c.CategoryId == draft.CategoryId.Value);
+            if (category != null)
+            {
+                CategoryComboBox.SelectedItem = category;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Saves current form data as draft.
+    /// </summary>
+    private void SaveDraftFromForm()
+    {
+        var draft = new ProductDraftService.ProductDraft
+        {
+            Name = NameTextBox.Text?.Trim(),
+            Sku = SkuTextBox.Text?.Trim(),
+            ImportPrice = (decimal)ImportPriceNumberBox.Value,
+            SellingPrice = (decimal)SellingPriceNumberBox.Value,
+            Stock = (int)StockNumberBox.Value,
+            Description = DescriptionTextBox.Text?.Trim(),
+            CategoryId = CategoryComboBox.SelectedValue as int?
+        };
+
+        // Only save if there's meaningful data
+        if (_draftService.HasMeaningfulData(draft))
+        {
+            _draftService.SaveDraft(draft);
+        }
+    }
+
+    /// <summary>
+    /// Clears both the draft and the form.
+    /// </summary>
+    private void ClearDraftAndForm()
+    {
+        _draftService.ClearDraft();
+        ClearForm();
+    }
+
+    /// <summary>
+    /// Builds a human-readable summary of draft data for display.
+    /// </summary>
+    private string BuildDraftSummary(ProductDraftService.ProductDraft draft)
+    {
+        var lines = new System.Collections.Generic.List<string>();
+        
+        if (!string.IsNullOrWhiteSpace(draft.Name))
+            lines.Add($"• Tên: {draft.Name}");
+        
+        if (!string.IsNullOrWhiteSpace(draft.Sku))
+            lines.Add($"• Mã SKU: {draft.Sku}");
+        
+        if (draft.ImportPrice > 0)
+            lines.Add($"• Giá nhập: {draft.ImportPrice:N0} VNĐ");
+        
+        if (draft.SellingPrice > 0)
+            lines.Add($"• Giá bán: {draft.SellingPrice:N0} VNĐ");
+        
+        if (draft.Stock > 0)
+            lines.Add($"• Số lượng: {draft.Stock}");
+        
+        if (draft.CategoryId.HasValue && ViewModel.Categories != null)
+        {
+            var category = ViewModel.Categories.FirstOrDefault(c => c.CategoryId == draft.CategoryId.Value);
+            if (category != null)
+                lines.Add($"• Danh mục: {category.Name}");
+        }
+        
+        if (!string.IsNullOrWhiteSpace(draft.Description))
+        {
+            var desc = draft.Description.Length > 50 
+                ? draft.Description.Substring(0, 50) + "..." 
+                : draft.Description;
+            lines.Add($"• Mô tả: {desc}");
+        }
+        
+        return lines.Count > 0 
+            ? string.Join("\n", lines) 
+            : "(Không có dữ liệu)";
+    }
+
+    #endregion
 }
