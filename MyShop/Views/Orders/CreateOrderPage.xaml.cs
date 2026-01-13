@@ -1,13 +1,19 @@
 ﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Navigation;
 using MyShop.ViewModels.Orders;
 using MyShop.Models.Orders;
+using MyShop.Models.Products;
+using MyShop.Models.Customers;
 using Microsoft.Extensions.DependencyInjection;
 using MyShop.Services.Plugins;
+using MyShop.Services.Orders;
 using MyShop.Contracts;
 using System;
 using System.IO;
 using System.Linq;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace MyShop.Views.Orders;
 
@@ -15,18 +21,40 @@ public sealed partial class CreateOrderPage : Page
 {
     public CreateOrderViewModel ViewModel { get; }
     private readonly PluginLoader _pluginLoader;
+    private readonly OrderDraftService _draftService;
     private IPaymentPlugin? _paymentPlugin;
+    private bool _orderSavedSuccessfully = false;
 
     public CreateOrderPage()
     {
         this.InitializeComponent();
         ViewModel = App.Current.Services.GetRequiredService<CreateOrderViewModel>();
         _pluginLoader = new PluginLoader();
+        _draftService = new OrderDraftService();
         
-        // ViewModel.OrderCreated += OnOrderCreated; // No longer needed
-        
-        _ = ViewModel.InitializeAsync();
         LoadPaymentPlugin();
+    }
+
+    protected override async void OnNavigatedTo(NavigationEventArgs e)
+    {
+        base.OnNavigatedTo(e);
+        _orderSavedSuccessfully = false;
+        
+        await ViewModel.InitializeAsync();
+        
+        // Check for saved draft and restore if exists
+        await TryRestoreDraftAsync();
+    }
+
+    protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
+    {
+        base.OnNavigatingFrom(e);
+        
+        // Auto-save draft if order not completed successfully
+        if (!_orderSavedSuccessfully)
+        {
+            SaveDraftFromViewModel();
+        }
     }
 
     /// <summary>
@@ -246,8 +274,9 @@ public sealed partial class CreateOrderPage : Page
 
             if (result.IsSuccess)
             {
-                System.Diagnostics.Debug.WriteLine($"? Payment successful: {result.TransactionId}");
+                System.Diagnostics.Debug.WriteLine($"✅ Payment successful: {result.TransactionId}");
                 ViewModel.IsPaymentCompleted = true; // Sync with ViewModel
+                MarkOrderSaved(); // Clear draft after successful order
             }
             else
             {
@@ -349,6 +378,21 @@ public sealed partial class CreateOrderPage : Page
         ViewModel.ClearCustomerCommand.Execute(null);
     }
 
+    /// <summary>
+    /// Handle cash payment button click - mark order as saved after command executes.
+    /// </summary>
+    private async void CashPayment_Click(object sender, RoutedEventArgs e)
+    {
+        // Wait a bit for the command to execute
+        await Task.Delay(500);
+        
+        // Check if order was created successfully (ViewModel should have OrderId or success state)
+        if (ViewModel.CreatedOrderId > 0)
+        {
+            MarkOrderSaved();
+        }
+    }
+
     // Coupon Search
     private void CouponSearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
     {
@@ -374,5 +418,196 @@ public sealed partial class CreateOrderPage : Page
             }
         }
     }
+
+    #region Draft Management
+
+    /// <summary>
+    /// Tries to restore a saved draft and prompts user to confirm.
+    /// </summary>
+    private async Task TryRestoreDraftAsync()
+    {
+        var draft = _draftService.LoadDraft();
+        
+        if (draft != null && _draftService.HasMeaningfulData(draft))
+        {
+            // Build draft summary for display
+            var draftSummary = BuildDraftSummary(draft);
+            
+            // Show dialog asking if user wants to restore draft
+            var dialog = new ContentDialog
+            {
+                Title = "Khôi phục đơn hàng nháp",
+                Content = new StackPanel
+                {
+                    Spacing = 8,
+                    Children =
+                    {
+                        new TextBlock 
+                        { 
+                            Text = $"Đơn hàng nháp được lưu lúc {draft.SavedAt:HH:mm dd/MM/yyyy}",
+                            FontWeight = Microsoft.UI.Text.FontWeights.SemiBold
+                        },
+                        new TextBlock 
+                        { 
+                            Text = "Nội dung:",
+                            Margin = new Thickness(0, 8, 0, 0)
+                        },
+                        new Border
+                        {
+                            Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+                                Microsoft.UI.Colors.Gray) { Opacity = 0.2 },
+                            CornerRadius = new CornerRadius(4),
+                            Padding = new Thickness(12),
+                            Child = new TextBlock 
+                            { 
+                                Text = draftSummary,
+                                TextWrapping = TextWrapping.Wrap,
+                                FontFamily = new Microsoft.UI.Xaml.Media.FontFamily("Consolas")
+                            }
+                        },
+                        new TextBlock
+                        {
+                            Text = "Bạn có muốn khôi phục không?",
+                            Margin = new Thickness(0, 8, 0, 0)
+                        }
+                    }
+                },
+                PrimaryButtonText = "Khôi phục",
+                SecondaryButtonText = "Xóa bản nháp",
+                CloseButtonText = "Bỏ qua",
+                DefaultButton = ContentDialogButton.Primary,
+                XamlRoot = XamlRoot
+            };
+
+            var result = await dialog.ShowAsync();
+
+            if (result == ContentDialogResult.Primary)
+            {
+                // Restore draft to ViewModel
+                await RestoreDraftToViewModelAsync(draft);
+            }
+            else if (result == ContentDialogResult.Secondary)
+            {
+                // Clear draft
+                _draftService.ClearDraft();
+            }
+            // "Bỏ qua" - do nothing, keep draft for later
+        }
+    }
+
+    /// <summary>
+    /// Restores draft data to ViewModel.
+    /// </summary>
+    private async Task RestoreDraftToViewModelAsync(OrderDraftService.OrderDraft draft)
+    {
+        // Restore customer
+        if (draft.CustomerId.HasValue)
+        {
+            var customer = new Customer
+            {
+                Id = draft.CustomerId.Value,
+                Name = draft.CustomerName ?? "",
+                PhoneNumber = draft.CustomerPhone ?? ""
+            };
+            ViewModel.SelectedCustomer = customer;
+        }
+
+        // Restore cart items - need to fetch products from service
+        foreach (var cartItemDraft in draft.CartItems)
+        {
+            var product = new Product
+            {
+                Id = cartItemDraft.ProductId,
+                Name = cartItemDraft.ProductName ?? "",
+                SellingPrice = cartItemDraft.ProductPrice
+            };
+            
+            // Add to cart
+            for (int i = 0; i < cartItemDraft.Quantity; i++)
+            {
+                ViewModel.AddToCartCommand.Execute(product);
+            }
+        }
+
+        // Restore coupon code - just set the search text, user can manually search
+        if (!string.IsNullOrWhiteSpace(draft.CouponCode))
+        {
+            ViewModel.CouponSearchText = draft.CouponCode;
+            // Note: User needs to manually search and apply coupon
+        }
+    }
+
+    /// <summary>
+    /// Saves current ViewModel data as draft.
+    /// </summary>
+    private void SaveDraftFromViewModel()
+    {
+        var draft = new OrderDraftService.OrderDraft
+        {
+            CustomerId = ViewModel.SelectedCustomer?.Id,
+            CustomerName = ViewModel.SelectedCustomer?.Name,
+            CustomerPhone = ViewModel.SelectedCustomer?.PhoneNumber,
+            CouponCode = ViewModel.CouponCode,
+            CartItems = ViewModel.CartItems?.Select(ci => new OrderDraftService.CartItemDraft
+            {
+                ProductId = ci.Product.Id,
+                ProductName = ci.Product.Name,
+                ProductPrice = ci.Product.SellingPrice,
+                Quantity = ci.Quantity
+            }).ToList() ?? new List<OrderDraftService.CartItemDraft>()
+        };
+
+        // Only save if there's meaningful data
+        if (_draftService.HasMeaningfulData(draft))
+        {
+            _draftService.SaveDraft(draft);
+        }
+    }
+
+    /// <summary>
+    /// Builds a human-readable summary of draft data for display.
+    /// </summary>
+    private string BuildDraftSummary(OrderDraftService.OrderDraft draft)
+    {
+        var lines = new List<string>();
+        
+        if (draft.CustomerId.HasValue && !string.IsNullOrWhiteSpace(draft.CustomerName))
+        {
+            lines.Add($"• Khách hàng: {draft.CustomerName}");
+            if (!string.IsNullOrWhiteSpace(draft.CustomerPhone))
+                lines.Add($"  SĐT: {draft.CustomerPhone}");
+        }
+        
+        if (draft.CartItems.Count > 0)
+        {
+            lines.Add($"• Giỏ hàng: {draft.CartItems.Count} sản phẩm");
+            foreach (var item in draft.CartItems.Take(3))
+            {
+                lines.Add($"  - {item.ProductName} x{item.Quantity}");
+            }
+            if (draft.CartItems.Count > 3)
+            {
+                lines.Add($"  ... và {draft.CartItems.Count - 3} sản phẩm khác");
+            }
+        }
+        
+        if (!string.IsNullOrWhiteSpace(draft.CouponCode))
+            lines.Add($"• Mã giảm giá: {draft.CouponCode}");
+        
+        return lines.Count > 0 
+            ? string.Join("\n", lines) 
+            : "(Không có dữ liệu)";
+    }
+
+    /// <summary>
+    /// Marks order as saved and clears draft. Call after successful order creation.
+    /// </summary>
+    public void MarkOrderSaved()
+    {
+        _orderSavedSuccessfully = true;
+        _draftService.ClearDraft();
+    }
+
+    #endregion
 }
 
