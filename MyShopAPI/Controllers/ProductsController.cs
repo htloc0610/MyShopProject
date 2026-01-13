@@ -18,15 +18,18 @@ namespace MyShopAPI.Controllers
         private readonly AppDbContext _context;
         private readonly ILogger<ProductsController> _logger;
         private readonly IUserContextService _userContextService;
+        private readonly IImageDownloadService _imageDownloadService;
 
         public ProductsController(
             AppDbContext context,
             ILogger<ProductsController> logger,
-            IUserContextService userContextService)
+            IUserContextService userContextService,
+            IImageDownloadService imageDownloadService)
         {
             _context = context;
             _logger = logger;
             _userContextService = userContextService;
+            _imageDownloadService = imageDownloadService;
         }
 
         /// <summary>
@@ -301,7 +304,7 @@ namespace MyShopAPI.Controllers
 
                 // PHASE 1: VALIDATE ALL PRODUCTS FIRST
                 // We will NOT insert any product if even one has an error
-                var validProducts = new List<Product>();
+                var validProductsWithImages = new List<(Product Product, List<string> ImageUrls)>();
                 var skuSet = new HashSet<string>(); // Track SKUs in this batch
 
                 for (int i = 0; i < products.Count; i++)
@@ -385,7 +388,7 @@ namespace MyShopAPI.Controllers
                             UserId = userId
                         };
 
-                        validProducts.Add(product);
+                        validProductsWithImages.Add((product, dto.ImageUrls ?? new List<string>()));
                     }
                     catch (Exception ex)
                     {
@@ -401,7 +404,7 @@ namespace MyShopAPI.Controllers
                     result.Errors.Add("BATCH BỊ TỪ CHỐI - Dữ liệu chứa lỗi");
                     result.Errors.Add($"Tổng số sản phẩm: {products.Count}");
                     result.Errors.Add($"Số lỗi phát hiện: {validationErrors.Count}");
-                    result.Errors.Add($"Số sản phẩm hợp lệ: {validProducts.Count}");
+                    result.Errors.Add($"Số sản phẩm hợp lệ: {validProductsWithImages.Count}");
                     result.Errors.Add("");
                     result.Errors.Add("CHI TIẾT LỖI:");
                     result.Errors.AddRange(validationErrors);
@@ -414,13 +417,41 @@ namespace MyShopAPI.Controllers
                 }
 
                 // PHASE 3: ALL VALID - INSERT ALL PRODUCTS
-                if (validProducts.Any())
+                if (validProductsWithImages.Any())
                 {
-                    await _context.Products.AddRangeAsync(validProducts);
+                    var productsToAdd = validProductsWithImages.Select(x => x.Product).ToList();
+                    await _context.Products.AddRangeAsync(productsToAdd);
                     await _context.SaveChangesAsync();
-                    result.ImportedCount = validProducts.Count;
                     
-                    _logger.LogInformation("Successfully imported {Count} products", validProducts.Count);
+                    // PHASE 4: PROCESS IMAGES FOR EACH PRODUCT
+                    foreach (var (product, imageUrls) in validProductsWithImages)
+                    {
+                        bool isFirst = true;
+                        foreach (var imageUrl in imageUrls)
+                        {
+                            var processedUrl = await _imageDownloadService.ProcessImageUrlAsync(imageUrl);
+                            if (!string.IsNullOrEmpty(processedUrl))
+                            {
+                                var productImage = new ProductImage
+                                {
+                                    ProductId = product.ProductId,
+                                    ImageUrl = processedUrl,
+                                    IsMain = isFirst
+                                };
+                                _context.ProductImages.Add(productImage);
+                                isFirst = false;
+                            }
+                            else
+                            {
+                                _logger.LogWarning("Failed to process image URL '{Url}' for product '{Name}'", imageUrl, product.Name);
+                            }
+                        }
+                    }
+                    
+                    await _context.SaveChangesAsync();
+                    result.ImportedCount = validProductsWithImages.Count;
+                    
+                    _logger.LogInformation("Successfully imported {Count} products with images", validProductsWithImages.Count);
                     
                     return Ok(result);
                 }

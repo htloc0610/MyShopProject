@@ -106,6 +106,9 @@ public class DatabaseSeeder
 
             await _context.SaveChangesAsync();
 
+            // Seed product images (3 images per product)
+            await SeedProductImagesAsync(demoUserId);
+
             // Seed customers FIRST so orders can reference them
             await SeedCustomersAsync(demoUserId);
             
@@ -623,5 +626,49 @@ public class DatabaseSeeder
         await _context.Customers.AddRangeAsync(customers);
         await _context.SaveChangesAsync();
         _logger.LogInformation("Seeded {Count} customers for user {UserId}", customers.Length, userId);
+    }
+
+    private async Task SeedProductImagesAsync(string userId)
+    {
+        // Check if images already exist
+        var hasImages = await _context.ProductImages.AnyAsync();
+        if (hasImages)
+        {
+            _logger.LogInformation("Product images already exist. Skipping image seeding.");
+            return;
+        }
+
+        var products = await _context.Products
+            .IgnoreQueryFilters()
+            .Where(p => p.UserId == userId)
+            .Include(p => p.Category)
+            .ToListAsync();
+
+        var productImages = new List<ProductImage>();
+
+        foreach (var product in products)
+        {
+            // Get 3 unique image IDs for this product (using product ID as seed for consistency)
+            var baseId = product.ProductId * 10;
+            
+            // Use picsum.photos for random product-like images
+            for (int i = 0; i < 3; i++)
+            {
+                var imageId = baseId + i;
+                var imageUrl = $"https://picsum.photos/seed/{imageId}/800/800";
+                
+                productImages.Add(new ProductImage
+                {
+                    ProductId = product.ProductId,
+                    ImageUrl = imageUrl,
+                    IsMain = i == 0 // First image is main
+                });
+            }
+        }
+
+        await _context.ProductImages.AddRangeAsync(productImages);
+        await _context.SaveChangesAsync();
+        _logger.LogInformation("Seeded {Count} product images ({Products} products x 3 images)", 
+            productImages.Count, products.Count);
     }
 }
