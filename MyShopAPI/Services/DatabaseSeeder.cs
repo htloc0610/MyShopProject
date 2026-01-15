@@ -76,20 +76,20 @@ public class DatabaseSeeder
             {
                 new Category
                 {
-                    Name = "Electronics",
-                    Description = "Latest electronic devices, gadgets, and tech accessories",
+                    Name = "Điện tử",
+                    Description = "Thiết bị điện tử, đồ công nghệ và phụ kiện",
                     UserId = demoUserId
                 },
                 new Category
                 {
-                    Name = "Fashion",
-                    Description = "Trendy clothing, footwear, and fashion accessories",
+                    Name = "Thời trang",
+                    Description = "Quần áo, giày dép và phụ kiện thời trang",
                     UserId = demoUserId
                 },
                 new Category
                 {
-                    Name = "Home & Living",
-                    Description = "Furniture, home decoration, and kitchen appliances",
+                    Name = "Nhà cửa & Đời sống",
+                    Description = "Nội thất, trang trí nhà cửa và đồ gia dụng",
                     UserId = demoUserId
                 }
             };
@@ -197,28 +197,28 @@ public class DatabaseSeeder
     {
         var products = new[]
         {
-            new Product { Sku = "ELEC-001", Name = "iPhone 15 Pro Max 256GB", ImportPrice = 28990000, SellingPrice = 37687000, Count = 45, Description = "Latest flagship iPhone with titanium design and advanced camera system", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "ELEC-002", Name = "Samsung Galaxy S24 Ultra 512GB", ImportPrice = 32990000, SellingPrice = 42887000, Count = 38, Description = "Premium Android phone with AI features and S Pen support", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "ELEC-003", Name = "MacBook Pro 14\" M3 Pro 18GB/512GB", ImportPrice = 52990000, SellingPrice = 68887000, Count = 22, Description = "Powerful laptop for creative professionals with stunning Liquid Retina XDR display", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "ELEC-004", Name = "Dell XPS 15 9530 i7/16GB/1TB", ImportPrice = 42990000, SellingPrice = 55887000, Count = 18, Description = "High-performance Windows laptop with InfinityEdge display", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "ELEC-005", Name = "iPad Air 5th Gen M1 256GB WiFi", ImportPrice = 16990000, SellingPrice = 22087000, Count = 56, Description = "Versatile tablet with M1 chip and Apple Pencil support", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "ELEC-006", Name = "Sony WH-1000XM5 Headphones", ImportPrice = 8490000, SellingPrice = 11037000, Count = 67, Description = "Industry-leading noise cancellation with premium sound quality", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "ELEC-007", Name = "Apple AirPods Pro 2nd Gen", ImportPrice = 5990000, SellingPrice = 7787000, Count = 89, Description = "Wireless earbuds with active noise cancellation and spatial audio", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "ELEC-008", Name = "Samsung Galaxy Watch 6 Classic", ImportPrice = 7990000, SellingPrice = 10387000, Count = 41, Description = "Advanced smartwatch with comprehensive health tracking", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "ELEC-009", Name = "LG OLED C3 65-inch TV", ImportPrice = 42990000, SellingPrice = 55887000, Count = 12, Description = "Premium OLED TV with stunning picture quality and smart features", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "ELEC-010", Name = "Sony PlayStation 5 Console", ImportPrice = 12490000, SellingPrice = 16237000, Count = 28, Description = "Next-gen gaming console with ray tracing and fast SSD", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "ELEC-011", Name = "Xbox Series X 1TB", ImportPrice = 12490000, SellingPrice = 16237000, Count = 24, Description = "Powerful gaming console with Game Pass subscription benefits", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "ELEC-012", Name = "Nintendo Switch OLED Model", ImportPrice = 8490000, SellingPrice = 11037000, Count = 55, Description = "Hybrid gaming console with vibrant OLED screen", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "ELEC-013", Name = "Canon EOS R6 Mark II Camera", ImportPrice = 59990000, SellingPrice = 77987000, Count = 8, Description = "Professional mirrorless camera with advanced autofocus", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "ELEC-014", Name = "DJI Mini 3 Pro Drone", ImportPrice = 18990000, SellingPrice = 24687000, Count = 15, Description = "Compact drone with 4K camera and obstacle avoidance", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "ELEC-015", Name = "GoPro Hero 12 Black", ImportPrice = 9990000, SellingPrice = 12987000, Count = 33, Description = "Action camera for extreme sports with 5.3K video", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "ELEC-016", Name = "Bose QuietComfort 45", ImportPrice = 7490000, SellingPrice = 9737000, Count = 44, Description = "Comfortable noise-cancelling headphones with long battery life", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "ELEC-017", Name = "Logitech MX Master 3S Mouse", ImportPrice = 2490000, SellingPrice = 3237000, Count = 78, Description = "Premium wireless mouse for productivity with precise scrolling", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "ELEC-018", Name = "Keychron K8 Pro Keyboard", ImportPrice = 2990000, SellingPrice = 3887000, Count = 62, Description = "Wireless mechanical keyboard with hot-swappable switches", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "ELEC-019", Name = "Samsung T7 Shield 2TB SSD", ImportPrice = 4990000, SellingPrice = 6487000, Count = 51, Description = "Rugged portable SSD with fast transfer speeds", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "ELEC-020", Name = "Anker PowerCore 26800mAh", ImportPrice = 1490000, SellingPrice = 1937000, Count = 94, Description = "High-capacity portable charger for multiple devices", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "ELEC-021", Name = "Ring Video Doorbell Pro 2", ImportPrice = 5990000, SellingPrice = 7787000, Count = 37, Description = "Smart doorbell with HD video and motion detection", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "ELEC-022", Name = "Amazon Echo Show 10", ImportPrice = 6490000, SellingPrice = 8437000, Count = 29, Description = "Smart display with motion tracking and Alexa integration", CategoryId = categoryId, UserId = userId }
+            new Product { Sku = "ELEC-001", Name = "Điện thoại iPhone 15 Pro Max 256GB", ImportPrice = 28990000, SellingPrice = 37687000, Count = 45, Description = "Điện thoại cao cấp với thiết kế titanium và hệ thống camera tiên tiến", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "ELEC-002", Name = "Điện thoại Samsung Galaxy S24 Ultra 512GB", ImportPrice = 32990000, SellingPrice = 42887000, Count = 38, Description = "Điện thoại Android cao cấp với tính năng AI và hỗ trợ S Pen", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "ELEC-003", Name = "Laptop MacBook Pro 14\" M3 Pro 18GB/512GB", ImportPrice = 52990000, SellingPrice = 68887000, Count = 22, Description = "Laptop mạnh mẽ cho dân chuyên nghiệp với màn hình Liquid Retina XDR", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "ELEC-004", Name = "Laptop Dell XPS 15 9530 i7/16GB/1TB", ImportPrice = 42990000, SellingPrice = 55887000, Count = 18, Description = "Laptop Windows hiệu suất cao với màn hình InfinityEdge", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "ELEC-005", Name = "Máy tính bảng iPad Air 5 M1 256GB WiFi", ImportPrice = 16990000, SellingPrice = 22087000, Count = 56, Description = "Máy tính bảng đa năng với chip M1 và hỗ trợ Apple Pencil", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "ELEC-006", Name = "Tai nghe Sony WH-1000XM5", ImportPrice = 8490000, SellingPrice = 11037000, Count = 67, Description = "Tai nghe chống ồn hàng đầu với chất lượng âm thanh cao cấp", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "ELEC-007", Name = "Tai nghe Apple AirPods Pro 2", ImportPrice = 5990000, SellingPrice = 7787000, Count = 89, Description = "Tai nghe không dây với chống ồn chủ động và âm thanh không gian", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "ELEC-008", Name = "Đồng hồ thông minh Samsung Galaxy Watch 6 Classic", ImportPrice = 7990000, SellingPrice = 10387000, Count = 41, Description = "Đồng hồ thông minh cao cấp với theo dõi sức khỏe toàn diện", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "ELEC-009", Name = "TV LG OLED C3 65 inch", ImportPrice = 42990000, SellingPrice = 55887000, Count = 12, Description = "TV OLED cao cấp với chất lượng hình ảnh tuyệt vời", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "ELEC-010", Name = "Máy chơi game Sony PlayStation 5", ImportPrice = 12490000, SellingPrice = 16237000, Count = 28, Description = "Máy chơi game thế hệ mới với ray tracing và SSD nhanh", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "ELEC-011", Name = "Máy chơi game Xbox Series X 1TB", ImportPrice = 12490000, SellingPrice = 16237000, Count = 24, Description = "Máy chơi game mạnh mẽ với Game Pass", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "ELEC-012", Name = "Máy chơi game Nintendo Switch OLED", ImportPrice = 8490000, SellingPrice = 11037000, Count = 55, Description = "Máy chơi game lai với màn hình OLED sống động", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "ELEC-013", Name = "Máy ảnh Canon EOS R6 Mark II", ImportPrice = 59990000, SellingPrice = 77987000, Count = 8, Description = "Máy ảnh không gương lật chuyên nghiệp với lấy nét tự động tiên tiến", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "ELEC-014", Name = "Drone DJI Mini 3 Pro", ImportPrice = 18990000, SellingPrice = 24687000, Count = 15, Description = "Drone nhỏ gọn với camera 4K và tránh chướng ngại vật", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "ELEC-015", Name = "Camera hành động GoPro Hero 12 Black", ImportPrice = 9990000, SellingPrice = 12987000, Count = 33, Description = "Camera hành động cho thể thao mạo hiểm với video 5.3K", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "ELEC-016", Name = "Tai nghe Bose QuietComfort 45", ImportPrice = 7490000, SellingPrice = 9737000, Count = 44, Description = "Tai nghe chống ồn thoải mái với pin lâu", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "ELEC-017", Name = "Chuột không dây Logitech MX Master 3S", ImportPrice = 2490000, SellingPrice = 3237000, Count = 78, Description = "Chuột không dây cao cấp cho năng suất làm việc", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "ELEC-018", Name = "Bàn phím cơ Keychron K8 Pro", ImportPrice = 2990000, SellingPrice = 3887000, Count = 62, Description = "Bàn phím cơ không dây với switch có thể thay thế", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "ELEC-019", Name = "Ổ cứng SSD Samsung T7 Shield 2TB", ImportPrice = 4990000, SellingPrice = 6487000, Count = 51, Description = "Ổ cứng SSD di động chống va đập với tốc độ truyền nhanh", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "ELEC-020", Name = "Sạc dự phòng Anker PowerCore 26800mAh", ImportPrice = 1490000, SellingPrice = 1937000, Count = 94, Description = "Sạc dự phòng dung lượng cao cho nhiều thiết bị", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "ELEC-021", Name = "Chuông cửa thông minh Ring Video Doorbell Pro 2", ImportPrice = 5990000, SellingPrice = 7787000, Count = 37, Description = "Chuông cửa thông minh với video HD và phát hiện chuyển động", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "ELEC-022", Name = "Màn hình thông minh Amazon Echo Show 10", ImportPrice = 6490000, SellingPrice = 8437000, Count = 29, Description = "Màn hình thông minh với theo dõi chuyển động và tích hợp Alexa", CategoryId = categoryId, UserId = userId }
         };
 
         await _context.Products.AddRangeAsync(products);
@@ -229,28 +229,28 @@ public class DatabaseSeeder
     {
         var products = new[]
         {
-            new Product { Sku = "FASH-001", Name = "Nike Air Max 2024 Sneakers", ImportPrice = 3490000, SellingPrice = 4189000, Count = 72, Description = "Iconic sneakers with Air cushioning technology and modern design", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "FASH-002", Name = "Adidas Ultraboost 23 Running Shoes", ImportPrice = 4290000, SellingPrice = 5148000, Count = 65, Description = "Premium running shoes with responsive Boost cushioning", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "FASH-003", Name = "Levi's 501 Original Fit Jeans", ImportPrice = 1890000, SellingPrice = 2173000, Count = 118, Description = "Classic straight-leg denim jeans with iconic styling", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "FASH-004", Name = "Zara Wool Blend Overcoat", ImportPrice = 3290000, SellingPrice = 3948000, Count = 34, Description = "Elegant winter coat perfect for formal occasions", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "FASH-005", Name = "H&M Premium Cotton T-Shirt Pack", ImportPrice = 599000, SellingPrice = 689000, Count = 205, Description = "5-pack of essential cotton t-shirts in various colors", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "FASH-006", Name = "Ralph Lauren Classic Polo Shirt", ImportPrice = 2190000, SellingPrice = 2628000, Count = 87, Description = "Timeless polo shirt with signature pony logo", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "FASH-007", Name = "The North Face Waterproof Jacket", ImportPrice = 5490000, SellingPrice = 6588000, Count = 43, Description = "Durable outdoor jacket with advanced waterproof technology", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "FASH-008", Name = "Ray-Ban Aviator Classic Sunglasses", ImportPrice = 3890000, SellingPrice = 4668000, Count = 91, Description = "Iconic aviator-style sunglasses with UV protection", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "FASH-009", Name = "Michael Kors Jet Set Handbag", ImportPrice = 6990000, SellingPrice = 8388000, Count = 25, Description = "Luxury leather handbag with signature MK logo", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "FASH-010", Name = "Fossil Gen 6 Hybrid Smartwatch", ImportPrice = 4890000, SellingPrice = 5868000, Count = 38, Description = "Elegant analog watch with smart features and leather strap", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "FASH-011", Name = "Columbia Newton Ridge Hiking Boots", ImportPrice = 2990000, SellingPrice = 3588000, Count = 56, Description = "Durable waterproof hiking boots for outdoor adventures", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "FASH-012", Name = "Patagonia Better Sweater Fleece", ImportPrice = 3990000, SellingPrice = 4788000, Count = 47, Description = "Warm recycled fleece jacket with sustainable materials", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "FASH-013", Name = "Tommy Hilfiger Dress Shirt", ImportPrice = 1490000, SellingPrice = 1714000, Count = 93, Description = "Formal cotton dress shirt in classic fit", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "FASH-014", Name = "Calvin Klein Underwear 3-Pack", ImportPrice = 990000, SellingPrice = 1139000, Count = 156, Description = "Premium cotton underwear set with elastic waistband", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "FASH-015", Name = "Vans Old Skool Canvas Sneakers", ImportPrice = 1590000, SellingPrice = 1829000, Count = 124, Description = "Classic skate shoes with signature side stripe", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "FASH-016", Name = "Champion Reverse Weave Hoodie", ImportPrice = 1290000, SellingPrice = 1484000, Count = 142, Description = "Comfortable fleece hoodie with iconic logo", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "FASH-017", Name = "Timberland 6-Inch Premium Boots", ImportPrice = 4290000, SellingPrice = 5148000, Count = 52, Description = "Iconic leather work boots with waterproof construction", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "FASH-018", Name = "Converse Chuck Taylor All Star", ImportPrice = 1390000, SellingPrice = 1599000, Count = 168, Description = "Timeless canvas sneakers in high-top design", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "FASH-019", Name = "Under Armour Sports Bra", ImportPrice = 890000, SellingPrice = 1024000, Count = 97, Description = "High-support sports bra for intense workouts", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "FASH-020", Name = "Lululemon Align Yoga Pants", ImportPrice = 2490000, SellingPrice = 2988000, Count = 76, Description = "Premium athletic leggings with buttery-soft fabric", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "FASH-021", Name = "Carhartt Rugged Work Pants", ImportPrice = 1590000, SellingPrice = 1829000, Count = 85, Description = "Durable work trousers with reinforced knees", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "FASH-022", Name = "Guess Classic Denim Jacket", ImportPrice = 2590000, SellingPrice = 3108000, Count = 41, Description = "Stylish denim jacket with vintage wash finish", CategoryId = categoryId, UserId = userId }
+            new Product { Sku = "FASH-001", Name = "Giày thể thao Nike Air Max 2024", ImportPrice = 3490000, SellingPrice = 4189000, Count = 72, Description = "Giày sneaker biểu tượng với công nghệ đệm Air và thiết kế hiện đại", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "FASH-002", Name = "Giày chạy bộ Adidas Ultraboost 23", ImportPrice = 4290000, SellingPrice = 5148000, Count = 65, Description = "Giày chạy bộ cao cấp với đế Boost đàn hồi", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "FASH-003", Name = "Quần jeans Levi's 501 Original", ImportPrice = 1890000, SellingPrice = 2173000, Count = 118, Description = "Quần jeans thẳng cổ điển với kiểu dáng biểu tượng", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "FASH-004", Name = "Áo khoác dạ Zara Wool Blend", ImportPrice = 3290000, SellingPrice = 3948000, Count = 34, Description = "Áo khoác dạ sang trọng cho mùa đông", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "FASH-005", Name = "Áo thun H&M Cotton (5 chiếc)", ImportPrice = 599000, SellingPrice = 689000, Count = 205, Description = "Bộ 5 áo thun cotton thiết yếu nhiều màu sắc", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "FASH-006", Name = "Áo polo Ralph Lauren Classic", ImportPrice = 2190000, SellingPrice = 2628000, Count = 87, Description = "Áo polo cổ điển với logo ngựa đặc trưng", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "FASH-007", Name = "Áo khoác The North Face Waterproof", ImportPrice = 5490000, SellingPrice = 6588000, Count = 43, Description = "Áo khoác ngoài trời bền chống nước cao cấp", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "FASH-008", Name = "Kính râm Ray-Ban Aviator Classic", ImportPrice = 3890000, SellingPrice = 4668000, Count = 91, Description = "Kính râm phi công biểu tượng chống tia UV", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "FASH-009", Name = "Túi xách Michael Kors Jet Set", ImportPrice = 6990000, SellingPrice = 8388000, Count = 25, Description = "Túi xách da cao cấp với logo MK đặc trưng", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "FASH-010", Name = "Đồng hồ thông minh Fossil Gen 6 Hybrid", ImportPrice = 4890000, SellingPrice = 5868000, Count = 38, Description = "Đồng hồ analog sang trọng tích hợp tính năng thông minh", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "FASH-011", Name = "Giày leo núi Columbia Newton Ridge", ImportPrice = 2990000, SellingPrice = 3588000, Count = 56, Description = "Giày leo núi chống nước bền bỉ", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "FASH-012", Name = "Áo lông cừm Patagonia Better Sweater", ImportPrice = 3990000, SellingPrice = 4788000, Count = 47, Description = "Áo khoác lông cừm ấm từ vật liệu tái chế", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "FASH-013", Name = "Áo sơ mi Tommy Hilfiger Dress", ImportPrice = 1490000, SellingPrice = 1714000, Count = 93, Description = "Áo sơ mi công sở cotton form chuẩn", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "FASH-014", Name = "Quần lót Calvin Klein 3-Pack", ImportPrice = 990000, SellingPrice = 1139000, Count = 156, Description = "Bộ 3 quần lót cotton cao cấp", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "FASH-015", Name = "Giày Vans Old Skool Canvas", ImportPrice = 1590000, SellingPrice = 1829000, Count = 124, Description = "Giày skate cổ điển với sọc hông đặc trưng", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "FASH-016", Name = "Áo hoodie Champion Reverse Weave", ImportPrice = 1290000, SellingPrice = 1484000, Count = 142, Description = "Áo hoodie nỉ thoải mái với logo biểu tượng", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "FASH-017", Name = "Giày boot Timberland 6-Inch Premium", ImportPrice = 4290000, SellingPrice = 5148000, Count = 52, Description = "Giày boot da biểu tượng chống nước", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "FASH-018", Name = "Giày Converse Chuck Taylor All Star", ImportPrice = 1390000, SellingPrice = 1599000, Count = 168, Description = "Giày canvas cổ điển kiểu cổ cao", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "FASH-019", Name = "Áo ngực thể thao Under Armour", ImportPrice = 890000, SellingPrice = 1024000, Count = 97, Description = "Áo ngực thể thao hỗ trợ cao cho tập luyện", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "FASH-020", Name = "Quần tập yoga Lululemon Align", ImportPrice = 2490000, SellingPrice = 2988000, Count = 76, Description = "Quần legging cao cấp với chất vải mềm mịn", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "FASH-021", Name = "Quần làm việc Carhartt Rugged", ImportPrice = 1590000, SellingPrice = 1829000, Count = 85, Description = "Quần làm việc bền với đầu gối gia cường", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "FASH-022", Name = "Áo khoác jeans Guess Classic", ImportPrice = 2590000, SellingPrice = 3108000, Count = 41, Description = "Áo khoác jeans phong cách vintage", CategoryId = categoryId, UserId = userId }
         };
 
         await _context.Products.AddRangeAsync(products);
@@ -261,28 +261,28 @@ public class DatabaseSeeder
     {
         var products = new[]
         {
-            new Product { Sku = "HOME-001", Name = "IKEA MALM Bed Frame Queen", ImportPrice = 6490000, SellingPrice = 7139000, Count = 18, Description = "Modern bed frame with integrated storage drawers", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "HOME-002", Name = "Ashley 3-Piece Leather Sofa Set", ImportPrice = 28990000, SellingPrice = 34788000, Count = 8, Description = "Premium leather sofa set for living room", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "HOME-003", Name = "Wayfair Solid Wood Dining Table", ImportPrice = 12490000, SellingPrice = 14988000, Count = 12, Description = "Elegant dining table seats up to 6 people", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "HOME-004", Name = "CB2 Glass Coffee Table", ImportPrice = 8990000, SellingPrice = 10788000, Count = 22, Description = "Contemporary tempered glass coffee table", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "HOME-005", Name = "West Elm Mid-Century Bookshelf", ImportPrice = 10490000, SellingPrice = 12588000, Count = 15, Description = "Stylish bookshelf with adjustable shelves", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "HOME-006", Name = "Pottery Barn Wool Area Rug 8x10", ImportPrice = 15990000, SellingPrice = 19188000, Count = 9, Description = "Hand-tufted wool area rug with geometric pattern", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "HOME-007", Name = "Crate & Barrel LED Table Lamp", ImportPrice = 3290000, SellingPrice = 3618000, Count = 34, Description = "Modern table lamp with adjustable brightness", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "HOME-008", Name = "Dyson V15 Detect Cordless Vacuum", ImportPrice = 15990000, SellingPrice = 19188000, Count = 26, Description = "Powerful cordless vacuum with laser dust detection", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "HOME-009", Name = "Instant Pot Duo Plus 8-Quart", ImportPrice = 2990000, SellingPrice = 3289000, Count = 67, Description = "9-in-1 multi-cooker pressure cooker", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "HOME-010", Name = "KitchenAid Artisan Stand Mixer", ImportPrice = 9990000, SellingPrice = 11988000, Count = 31, Description = "Professional 5-quart stand mixer in multiple colors", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "HOME-011", Name = "Ninja Professional Blender 1000W", ImportPrice = 2490000, SellingPrice = 2739000, Count = 58, Description = "High-power blender for smoothies and food prep", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "HOME-012", Name = "Nespresso VertuoPlus Coffee Maker", ImportPrice = 4490000, SellingPrice = 4939000, Count = 43, Description = "Coffee and espresso maker with frother", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "HOME-013", Name = "Cuisinart Air Fryer Toaster Oven", ImportPrice = 3290000, SellingPrice = 3619000, Count = 52, Description = "Large capacity air fryer oven with multiple functions", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "HOME-014", Name = "Brooklinen Luxe Sheet Set Queen", ImportPrice = 3490000, SellingPrice = 4188000, Count = 71, Description = "Premium percale sheet set with deep pockets", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "HOME-015", Name = "Casper Memory Foam Pillow 2-Pack", ImportPrice = 2490000, SellingPrice = 2988000, Count = 84, Description = "Supportive pillows with adjustable loft", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "HOME-016", Name = "Ruggable Washable Rug 8x10", ImportPrice = 6490000, SellingPrice = 7139000, Count = 37, Description = "Machine-washable area rug with non-slip pad", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "HOME-017", Name = "Umbra Gallery Wall Frame Set", ImportPrice = 1290000, SellingPrice = 1419000, Count = 96, Description = "9-piece modern picture frame set", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "HOME-018", Name = "Philips Hue Smart Bulb Starter Kit", ImportPrice = 4690000, SellingPrice = 5159000, Count = 45, Description = "Smart LED lighting system with app control", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "HOME-019", Name = "Shark IQ Robot Vacuum", ImportPrice = 7990000, SellingPrice = 8789000, Count = 28, Description = "Self-emptying robot vacuum with mapping", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "HOME-020", Name = "Ninja Foodi Indoor Grill", ImportPrice = 5490000, SellingPrice = 6039000, Count = 21, Description = "Indoor smokeless grill with air crisp technology", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "HOME-021", Name = "OXO Good Grips Kitchen Tool Set", ImportPrice = 1890000, SellingPrice = 2079000, Count = 63, Description = "15-piece essential kitchen utensil set", CategoryId = categoryId, UserId = userId },
-            new Product { Sku = "HOME-022", Name = "Calphalon Nonstick Cookware 10-Piece", ImportPrice = 6990000, SellingPrice = 7689000, Count = 19, Description = "Complete nonstick cookware set with glass lids", CategoryId = categoryId, UserId = userId }
+            new Product { Sku = "HOME-001", Name = "IKEA MALM Giường Queen", ImportPrice = 6490000, SellingPrice = 7139000, Count = 18, Description = "Khung giường hiện đại với ngăn kéo lưu trữ tích hợp", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "HOME-002", Name = "Ashley Sofa Da 3 Món", ImportPrice = 28990000, SellingPrice = 34788000, Count = 8, Description = "Bộ sofa da cao cấp cho phòng khách", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "HOME-003", Name = "Wayfair Bàn Ăn Gỗ", ImportPrice = 12490000, SellingPrice = 14988000, Count = 12, Description = "Bàn ăn gỗ sang trọng cho 6 người", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "HOME-004", Name = "CB2 Bàn Trà Kính", ImportPrice = 8990000, SellingPrice = 10788000, Count = 22, Description = "Bàn trà kính cường lực phong cách hiện đại", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "HOME-005", Name = "West Elm Kệ Sách Mid-Century", ImportPrice = 10490000, SellingPrice = 12588000, Count = 15, Description = "Kệ sách đẹp với các kệ có thể điều chỉnh", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "HOME-006", Name = "Pottery Barn Thảm Len 8x10", ImportPrice = 15990000, SellingPrice = 19188000, Count = 9, Description = "Thảm len dệt tay với hoa văn hình học", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "HOME-007", Name = "Crate & Barrel Đèn Bàn LED", ImportPrice = 3290000, SellingPrice = 3618000, Count = 34, Description = "Đèn bàn hiện đại điều chỉnh độ sáng", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "HOME-008", Name = "Dyson V15 Detect Máy Hút Bụi", ImportPrice = 15990000, SellingPrice = 19188000, Count = 26, Description = "Máy hút bụi không dây với laser phát hiện bụi", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "HOME-009", Name = "Instant Pot Duo Plus 8L", ImportPrice = 2990000, SellingPrice = 3289000, Count = 67, Description = "Nồi áp suất đa năng 9-trong-1", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "HOME-010", Name = "KitchenAid Artisan Stand Mixer", ImportPrice = 9990000, SellingPrice = 11988000, Count = 31, Description = "Máy trộn chuyên nghiệp 5 lít nhiều màu sắc", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "HOME-011", Name = "Ninja Blender 1000W", ImportPrice = 2490000, SellingPrice = 2739000, Count = 58, Description = "Máy xay sinh tố công suất cao", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "HOME-012", Name = "Nespresso VertuoPlus", ImportPrice = 4490000, SellingPrice = 4939000, Count = 43, Description = "Máy pha cà phê và espresso kèm đánh sữa", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "HOME-013", Name = "Cuisinart Lò Nướng Chiên Không Dầu", ImportPrice = 3290000, SellingPrice = 3619000, Count = 52, Description = "Lò nướng chiên không dầu dung tích lớn đa chức năng", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "HOME-014", Name = "Brooklinen Bộ Chăn Ga Queen", ImportPrice = 3490000, SellingPrice = 4188000, Count = 71, Description = "Bộ chăn ga cao cấp với túi sâu", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "HOME-015", Name = "Casper Gối Memory Foam 2 Chiếc", ImportPrice = 2490000, SellingPrice = 2988000, Count = 84, Description = "Gối hỗ trợ điều chỉnh được độ cao", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "HOME-016", Name = "Ruggable Thảm Giặt Được 8x10", ImportPrice = 6490000, SellingPrice = 7139000, Count = 37, Description = "Thảm trải sàn giặt máy được kèm đế chống trượt", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "HOME-017", Name = "Umbra Bộ Khung Ảnh Treo Tường", ImportPrice = 1290000, SellingPrice = 1419000, Count = 96, Description = "Bộ 9 khung ảnh hiện đại", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "HOME-018", Name = "Philips Hue Smart Bulb Starter Kit", ImportPrice = 4690000, SellingPrice = 5159000, Count = 45, Description = "Hệ thống đèn LED thông minh điều khiển qua app", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "HOME-019", Name = "Shark IQ Robot Hút Bụi", ImportPrice = 7990000, SellingPrice = 8789000, Count = 28, Description = "Robot hút bụi tự đổ rác với bản đồ", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "HOME-020", Name = "Ninja Foodi Bếp Nướng Trong Nhà", ImportPrice = 5490000, SellingPrice = 6039000, Count = 21, Description = "Bếp nướng trong nhà không khói kèm chiên không dầu", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "HOME-021", Name = "OXO Bộ Dụng Cụ Bếp 15 Món", ImportPrice = 1890000, SellingPrice = 2079000, Count = 63, Description = "Bộ dụng cụ nhà bếp thiết yếu 15 món", CategoryId = categoryId, UserId = userId },
+            new Product { Sku = "HOME-022", Name = "Calphalon Bộ Nồi Chảo 10 Món", ImportPrice = 6990000, SellingPrice = 7689000, Count = 19, Description = "Bộ nồi chảo chống dính kèm nắp kính", CategoryId = categoryId, UserId = userId }
         };
 
         await _context.Products.AddRangeAsync(products);
@@ -483,7 +483,7 @@ public class DatabaseSeeder
             new Discount
             {
                 Code = "WELCOME10",
-                Description = "Welcome discount for new customers",
+                Description = "Giảm giá chào mừng khách hàng mới",
                 Amount = 10000,
                 StartDate = DateTime.UtcNow.AddDays(-1),
                 EndDate = DateTime.UtcNow.AddMonths(1),
@@ -495,7 +495,7 @@ public class DatabaseSeeder
             new Discount
             {
                 Code = "SUMMERSALE",
-                Description = "Special summer sale event",
+                Description = "Sự kiện sale mùa hè đặc biệt",
                 Amount = 50000,
                 StartDate = DateTime.UtcNow,
                 EndDate = DateTime.UtcNow.AddDays(7),
@@ -507,7 +507,7 @@ public class DatabaseSeeder
             new Discount
             {
                 Code = "LIMITED50",
-                Description = "Limited time offer - only 50 available",
+                Description = "Ưu đãi có hạn - chỉ còn 50 lượt",
                 Amount = 20000,
                 StartDate = DateTime.UtcNow,
                 EndDate = DateTime.UtcNow.AddMonths(3),
@@ -519,7 +519,7 @@ public class DatabaseSeeder
             new Discount
             {
                 Code = "EXPIREDCODE",
-                Description = "This code has expired",
+                Description = "Mã này đã hết hạn",
                 Amount = 15000,
                 StartDate = DateTime.UtcNow.AddMonths(-2),
                 EndDate = DateTime.UtcNow.AddMonths(-1),

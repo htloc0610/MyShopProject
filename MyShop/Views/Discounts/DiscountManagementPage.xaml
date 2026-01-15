@@ -24,16 +24,16 @@
             </Grid.ColumnDefinitions>
 
             <StackPanel Grid.Column="0">
-                <TextBlock Text="Discount Management" 
+                <TextBlock Text="Quản lý mã giảm giá" 
                           Style="{StaticResource TitleTextBlockStyle}"
                           Margin="0,0,0,8"/>
-                <TextBlock Text="Manage your discount codes and promotions" 
+                <TextBlock Text="Quản lý các mã giảm giá và khuyến mãi" 
                           Style="{StaticResource BodyTextBlockStyle}"
                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
             </StackPanel>
 
             <Button Grid.Column="1" 
-                   Content="Add Discount"
+                   Content="Thêm mã giảm giá"
                    Style="{StaticResource AccentButtonStyle}"
                    Command="{x:Bind ViewModel.PrepareAddCommand}"
                    Click="AddButton_Click">
@@ -121,7 +121,7 @@
 
                                         <!-- Amount -->
                                         <StackPanel Grid.Column="0" Margin="0,0,24,0">
-                                            <TextBlock Text="Amount" 
+                                            <TextBlock Text="Số tiền" 
                                                       FontSize="11"
                                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                                       Margin="0,0,0,4"/>
@@ -133,7 +133,7 @@
 
                                         <!-- Usage -->
                                         <StackPanel Grid.Column="1" Margin="0,0,24,0">
-                                            <TextBlock Text="Usage" 
+                                            <TextBlock Text="Đã dùng" 
                                                       FontSize="11"
                                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                                       Margin="0,0,0,4"/>
@@ -144,7 +144,7 @@
 
                                         <!-- Valid Period -->
                                         <StackPanel Grid.Column="2" Margin="0,0,24,0">
-                                            <TextBlock Text="Valid Period" 
+                                            <TextBlock Text="Hiệu lực" 
                                                       FontSize="11"
                                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                                       Margin="0,0,0,4"/>
@@ -163,12 +163,12 @@
                                                    Orientation="Horizontal" 
                                                    Spacing="8">
 
-                                            <Button Content="Edit"
+                                            <Button Content="Sửa"
                                                    Style="{StaticResource SubtleButtonStyle}"
                                                    Click="EditButton_Click"
                                                    Tag="{x:Bind}"
                                                    Height="36"/>
-                                            <Button Content="Delete"
+                                            <Button Content="Xóa"
                                                    Style="{StaticResource SubtleButtonStyle}"
                                                    Click="DeleteButton_Click"
                                                    Tag="{x:Bind}"
@@ -187,10 +187,10 @@
                        VerticalAlignment="Center"
                        Visibility="{x:Bind ViewModel.Discounts.Count, Mode=OneWay, Converter={StaticResource CountToVisibilityConverter}}">
                 <FontIcon Glyph="&#xE8F1;" FontSize="64" Foreground="{ThemeResource TextFillColorTertiaryBrush}"/>
-                <TextBlock Text="No discount codes yet" 
+                <TextBlock Text="Chưa có mã giảm giá nào" 
                           FontSize="16" 
                           Margin="0,16,0,8"/>
-                <TextBlock Text="Click 'Add Discount' to create your first code" 
+                <TextBlock Text="Nhấn 'Thêm mã giảm giá' để tạo mã đầu tiên" 
                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
             </StackPanel>
         </Grid>
@@ -253,56 +253,56 @@
 
         <!-- Add/Edit Dialog -->
         <ContentDialog x:Name="DiscountDialog"
-                      Title="Discount Details"
-                      PrimaryButtonText="Save"
-                      SecondaryButtonText="Cancel"
+                      Title="Chi tiết mã giảm giá"
+                      PrimaryButtonText="Lưu"
+                      SecondaryButtonText="Hủy"
                       PrimaryButtonClick="DiscountDialog_PrimaryButtonClick"
                       SecondaryButtonClick="DiscountDialog_SecondaryButtonClick">
             <ScrollViewer>
                 <StackPanel Spacing="16" MinWidth="400">
                     <!-- Code -->
-                    <TextBox Header="Code *" 
-                            PlaceholderText="e.g., SAVE50K, WELCOME10"
+                    <TextBox Header="Mã *" 
+                            PlaceholderText="VD: GIAM50K, CHAOKHACH10"
                             Text="{x:Bind ViewModel.EditCode, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                             MaxLength="50"/>
 
                     <!-- Description -->
-                    <TextBox Header="Description" 
-                            PlaceholderText="Optional description"
+                    <TextBox Header="Mô tả" 
+                            PlaceholderText="Mô tả (không bắt buộc)"
                             Text="{x:Bind ViewModel.EditDescription, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                             TextWrapping="Wrap"
                             AcceptsReturn="True"
                             Height="80"/>
 
                     <!-- Amount -->
-                    <NumberBox Header="Discount Amount *" 
-                              PlaceholderText="Enter amount"
+                    <NumberBox Header="Số tiền giảm *" 
+                              PlaceholderText="Nhập số tiền"
                               Value="{x:Bind ViewModel.EditAmount, Mode=TwoWay}"
                               Minimum="1"
                               SpinButtonPlacementMode="Inline"/>
 
                     <!-- Start Date -->
-                    <CalendarDatePicker Header="Start Date *"
+                    <CalendarDatePicker Header="Ngày bắt đầu *"
                                        Date="{x:Bind ViewModel.EditStartDate, Mode=TwoWay}"/>
 
                     <!-- End Date -->
-                    <CalendarDatePicker Header="End Date *"
+                    <CalendarDatePicker Header="Ngày kết thúc *"
                                        Date="{x:Bind ViewModel.EditEndDate, Mode=TwoWay}"/>
 
                     <!-- Usage Limit -->
-                    <NumberBox Header="Usage Limit" 
-                              PlaceholderText="Leave empty for unlimited"
+                    <NumberBox Header="Giới hạn sử dụng" 
+                              PlaceholderText="Để trống nếu không giới hạn"
                               Value="{x:Bind ViewModel.EditUsageLimit, Mode=TwoWay}"
                               Minimum="1"
                               SpinButtonPlacementMode="Inline"/>
 
                     <!-- Active Status -->
-                    <ToggleSwitch Header="Active Status" 
+                    <ToggleSwitch Header="Trạng thái" 
                                  IsOn="{x:Bind ViewModel.EditIsActive, Mode=TwoWay}"
-                                 OnContent="Active - Can be used"
-                                 OffContent="Inactive - Disabled"/>
+                                 OnContent="Đang hoạt động"
+                                 OffContent="Đã tắt"/>
 
-                    <TextBlock Text="* Required fields" 
+                    <TextBlock Text="* Bắt buộc" 
                               FontSize="12" 
                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
                 </StackPanel>

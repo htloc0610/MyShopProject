@@ -29,12 +29,12 @@
                 <TextBlock Text="⏱️" 
                            FontSize="72" 
                            HorizontalAlignment="Center"/>
-                <TextBlock Text="Trial Period Expired" 
+                <TextBlock Text="Hết thời gian dùng thử" 
                            Foreground="White"
                            FontSize="48" 
                            FontWeight="Bold"
                            HorizontalAlignment="Center"/>
-                <TextBlock Text="Activate your account to continue" 
+                <TextBlock Text="Kích hoạt tài khoản để tiếp tục sử dụng" 
                            Foreground="#E5E5E5"
                            FontSize="20"
                            HorizontalAlignment="Center"/>
@@ -47,9 +47,9 @@
                 <StackPanel Spacing="24">
                     <!-- Header -->
                     <StackPanel Spacing="8">
-                        <TextBlock Text="Enter Activation Code" 
+                        <TextBlock Text="Nhập mã kích hoạt" 
                                    Style="{StaticResource TitleTextBlockStyle}"/>
-                        <TextBlock Text="Please contact the administrator to receive your 6-character activation code."
+                        <TextBlock Text="Vui lòng liên hệ quản trị viên để nhận mã kích hoạt 6 ký tự."
                                    TextWrapping="Wrap"
                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
                     </StackPanel>
@@ -62,7 +62,7 @@
 
                     <!-- Activation Code Input -->
                     <StackPanel Spacing="8">
-                        <TextBlock Text="Activation Code" FontWeight="SemiBold"/>
+                        <TextBlock Text="Mã kích hoạt" FontWeight="SemiBold"/>
                         <TextBox Text="{x:Bind ViewModel.ActivationCode, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                  PlaceholderText="XXXXXX"
                                  MaxLength="6"
@@ -72,13 +72,13 @@
                                  HorizontalAlignment="Stretch"
                                  TextAlignment="Center"
                                  IsEnabled="{x:Bind ViewModel.IsActivating, Mode=OneWay, Converter={StaticResource InverseBoolConverter}}"/>
-                        <TextBlock Text="Enter the 6-character code (letters and numbers)"
+                        <TextBlock Text="Nhập mã 6 ký tự (chữ và số)"
                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                    FontSize="12"/>
                     </StackPanel>
 
                     <!-- Activate Button -->
-                    <Button Content="Activate Account" 
+                    <Button Content="Kích hoạt tài khoản" 
                             HorizontalAlignment="Stretch"
                             Command="{x:Bind ViewModel.ActivateCommand}"
                             Style="{StaticResource AccentButtonStyle}"
@@ -87,12 +87,12 @@
 
                     <!-- Help Text -->
                     <StackPanel Spacing="8" Margin="0,16,0,0">
-                        <TextBlock Text="Need help?" 
+                        <TextBlock Text="Cần hỗ trợ?" 
                                    FontWeight="SemiBold"
                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
                         <TextBlock TextWrapping="Wrap"
                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}">
-                            <Run Text="If you haven't received your activation code, please contact your administrator or complete the payment process to obtain your license key."/>
+                            <Run Text="Nếu bạn chưa nhận được mã kích hoạt, vui lòng liên hệ quản trị viên hoặc hoàn tất thanh toán để nhận giấy phép sử dụng."/>
                         </TextBlock>
                     </StackPanel>
                 </StackPanel>

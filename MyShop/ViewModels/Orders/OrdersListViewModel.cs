@@ -86,9 +86,18 @@ public partial class OrdersListViewModel : ObservableObject
     public ObservableCollection<string> AvailableStatuses { get; } = new()
     {
         "Tất cả",
-        "Created",
-        "Paid",
-        "Cancelled"
+        "Mới tạo",
+        "Đã thanh toán",
+        "Đã hủy"
+    };
+
+    // Helper to convert Vietnamese status to API value
+    private static string? StatusToApiValue(string? status) => status switch
+    {
+        "Mới tạo" => "Created",
+        "Đã thanh toán" => "Paid",
+        "Đã hủy" => "Cancelled",
+        _ => null
     };
 
     public ObservableCollection<string> SortByOptions { get; } = new()
@@ -163,10 +172,8 @@ public partial class OrdersListViewModel : ObservableObject
                 maxAmount = max;
             }
 
-            // Get status filter (convert "Tất cả" to null)
-            var statusFilter = SelectedStatus == "Tất cả" || string.IsNullOrWhiteSpace(SelectedStatus) 
-                ? null 
-                : SelectedStatus;
+            // Get status filter (convert Vietnamese display to API value)
+            var statusFilter = StatusToApiValue(SelectedStatus);
 
             var result = await _orderService.GetOrdersAsync(
                 page: CurrentPage,

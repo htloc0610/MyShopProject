@@ -31,8 +31,8 @@
                 <InfoBar x:Name="PluginStatusInfoBar"
                         IsOpen="False"
                         Severity="Success"
-                        Title="Plugin Loaded"
-                        Message="QR Payment plugin is ready"
+                        Title="Đã tải plugin"
+                        Message="Plugin thanh toán QR đã sẵn sàng"
                         IsClosable="True"
                         Margin="0,12,0,0"/>
             </StackPanel>

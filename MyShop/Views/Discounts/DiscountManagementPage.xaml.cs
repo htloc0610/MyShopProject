@@ -50,10 +50,10 @@ public sealed partial class DiscountManagementPage : Page
         {
             var dialog = new ContentDialog
             {
-                Title = "Delete Discount",
-                Content = $"Are you sure you want to delete the discount code '{discount.Code}'?",
-                PrimaryButtonText = "Delete",
-                SecondaryButtonText = "Cancel",
+                Title = "Xác nhận xóa",
+                Content = $"Bạn có chắc chắn muốn xóa mã giảm giá '{discount.Code}' không?\n\nHành động này không thể hoàn tác.",
+                PrimaryButtonText = "Xóa",
+                SecondaryButtonText = "Hủy",
                 DefaultButton = ContentDialogButton.Secondary,
                 XamlRoot = this.XamlRoot
             };
@@ -76,7 +76,7 @@ public sealed partial class DiscountManagementPage : Page
         await ViewModel.SaveDiscountCommand.ExecuteAsync(null);
 
         // Close dialog if save was successful (check for success via status message)
-        if (!ViewModel.StatusMessage.StartsWith("Failed") && !ViewModel.StatusMessage.StartsWith("Error"))
+        if (!ViewModel.StatusMessage.StartsWith("Không thể") && !ViewModel.StatusMessage.StartsWith("Lỗi"))
         {
             sender.Hide();
         }
