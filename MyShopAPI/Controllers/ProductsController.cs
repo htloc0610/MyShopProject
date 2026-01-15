@@ -173,6 +173,20 @@ namespace MyShopAPI.Controllers
             _context.Products.Add(product);
             await _context.SaveChangesAsync();
 
+            // Save images if provided
+            if (createDto.Images != null && createDto.Images.Any())
+            {
+                var productImages = createDto.Images.Select((url, index) => new ProductImage
+                {
+                    ProductId = product.ProductId,
+                    ImageUrl = url,
+                    IsMain = index == 0
+                }).ToList();
+                
+                await _context.ProductImages.AddRangeAsync(productImages);
+                await _context.SaveChangesAsync();
+            }
+
             await _context.Entry(product)
                 .Reference(p => p.Category)
                 .LoadAsync();

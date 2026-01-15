@@ -636,32 +636,51 @@ public partial class ProductViewModel : ObservableObject
     /// </summary>
     public void ReorderImages(System.Collections.Generic.IList<object> newOrder)
     {
-        var newList = newOrder.Cast<string>().ToList();
-        
-        // Only proceed if lengths match (sanity check)
-        if (newList.Count != SelectedImageUrls.Count) return;
-        
-        // Use Move() for each item to minimize UI updates
-        for (int targetIndex = 0; targetIndex < newList.Count; targetIndex++)
+        try
         {
-            var url = newList[targetIndex];
-            int currentIndex = -1;
-            
-            // Find current index of this URL
-            for (int i = targetIndex; i < SelectedImageUrls.Count; i++)
+            // Try to convert items to strings safely
+            var newList = new System.Collections.Generic.List<string>();
+            foreach (var item in newOrder)
             {
-                if (SelectedImageUrls[i] == url)
+                if (item is string s)
                 {
-                    currentIndex = i;
-                    break;
+                    newList.Add(s);
+                }
+                else
+                {
+                    newList.Add(item?.ToString() ?? string.Empty);
                 }
             }
             
-            // Move if not already in correct position
-            if (currentIndex != -1 && currentIndex != targetIndex)
+            // Only proceed if lengths match (sanity check)
+            if (newList.Count != SelectedImageUrls.Count) return;
+            
+            // Use Move() for each item to minimize UI updates
+            for (int targetIndex = 0; targetIndex < newList.Count; targetIndex++)
             {
-                SelectedImageUrls.Move(currentIndex, targetIndex);
+                var url = newList[targetIndex];
+                int currentIndex = -1;
+                
+                // Find current index of this URL
+                for (int i = targetIndex; i < SelectedImageUrls.Count; i++)
+                {
+                    if (SelectedImageUrls[i] == url)
+                    {
+                        currentIndex = i;
+                        break;
+                    }
+                }
+                
+                // Move if not already in correct position
+                if (currentIndex != -1 && currentIndex != targetIndex)
+                {
+                    SelectedImageUrls.Move(currentIndex, targetIndex);
+                }
             }
+        }
+        catch (System.Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error reordering images: {ex.Message}");
         }
     }
 

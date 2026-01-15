@@ -159,7 +159,8 @@ public class ProductService : IProductService
                 SellingPrice = (int)product.SellingPrice,
                 Count = product.Stock,
                 Description = product.Description,
-                CategoryId = product.CategoryId
+                CategoryId = product.CategoryId,
+                Images = product.Images ?? new List<string>()
             };
 
             var response = await _httpClient.PostAsJsonAsync(ProductsEndpoint, createDto);
