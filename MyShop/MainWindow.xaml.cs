@@ -173,6 +173,7 @@ public sealed partial class MainWindow : Window
             "Categories" => typeof(CategoryListPage),
             "Customers" => typeof(CustomerListPage),
             "OrdersList" => typeof(OrdersListPage),
+            "CreateOrder" => typeof(CreateOrderPage),
             "Reports" => typeof(ReportPage),
             "Discounts" => typeof(DiscountManagementPage),
             _ => null

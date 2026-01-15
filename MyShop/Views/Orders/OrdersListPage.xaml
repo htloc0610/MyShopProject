@@ -114,28 +114,56 @@
                     </Grid.RowDefinitions>
 
                     <!-- Row 1: Status and Date Range -->
-                    <Grid Grid.Row="0" ColumnSpacing="12">
+                    <Grid x:Name="FilterRow1" Grid.Row="0" ColumnSpacing="12">
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup>
+                                <VisualState x:Name="WideFilters">
+                                    <VisualState.StateTriggers>
+                                        <AdaptiveTrigger MinWindowWidth="800"/>
+                                    </VisualState.StateTriggers>
+                                </VisualState>
+                                <VisualState x:Name="NarrowFilters">
+                                    <VisualState.StateTriggers>
+                                        <AdaptiveTrigger MinWindowWidth="0"/>
+                                    </VisualState.StateTriggers>
+                                    <VisualState.Setters>
+                                        <Setter Target="StatusFilter.(Grid.ColumnSpan)" Value="3"/>
+                                        <Setter Target="StartDateFilter.(Grid.Column)" Value="0"/>
+                                        <Setter Target="StartDateFilter.(Grid.Row)" Value="1"/>
+                                        <Setter Target="StartDateFilter.(Grid.ColumnSpan)" Value="3"/>
+                                        <Setter Target="EndDateFilter.(Grid.Column)" Value="0"/>
+                                        <Setter Target="EndDateFilter.(Grid.Row)" Value="2"/>
+                                        <Setter Target="EndDateFilter.(Grid.ColumnSpan)" Value="3"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
 
                         <!-- Status Filter -->
-                        <ComboBox Grid.Column="0"
+                        <ComboBox x:Name="StatusFilter" Grid.Column="0"
                                   Header="Trạng thái"
                                   ItemsSource="{x:Bind ViewModel.AvailableStatuses}"
                                   SelectedItem="{x:Bind ViewModel.SelectedStatus, Mode=TwoWay}"
                                   HorizontalAlignment="Stretch"/>
 
                         <!-- Start Date -->
-                        <CalendarDatePicker Grid.Column="1"
+                        <CalendarDatePicker x:Name="StartDateFilter" Grid.Column="1"
                                            Header="Từ ngày"
                                            Date="{x:Bind ViewModel.StartDate, Mode=TwoWay}"
                                            HorizontalAlignment="Stretch"/>
 
                         <!-- End Date -->
-                        <CalendarDatePicker Grid.Column="2"
+                        <CalendarDatePicker x:Name="EndDateFilter" Grid.Column="2"
                                            Header="Đến ngày"
                                            Date="{x:Bind ViewModel.EndDate, Mode=TwoWay}"
                                            HorizontalAlignment="Stretch"/>
@@ -196,13 +224,7 @@
                          HorizontalAlignment="Center"
                          VerticalAlignment="Center"/>
 
-            <!-- Error InfoBar -->
-            <InfoBar IsOpen="{x:Bind ViewModel.ErrorMessage, Mode=OneWay, Converter={StaticResource StringToBoolConverter}}"
-                     Severity="Error"
-                     Message="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}"
-                     Visibility="{x:Bind ViewModel.ErrorMessage, Mode=OneWay, Converter={StaticResource StringToVisibilityConverter}}"
-                     VerticalAlignment="Top"
-                     Margin="0,0,0,16"/>
+
 
             <!-- DataGrid -->
             <controls:DataGrid x:Name="OrdersDataGrid"

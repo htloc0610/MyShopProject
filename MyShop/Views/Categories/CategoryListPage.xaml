@@ -65,14 +65,7 @@
                          HorizontalAlignment="Center"
                          VerticalAlignment="Center"/>
 
-            <!-- Error InfoBar -->
-            <InfoBar IsOpen="{x:Bind ViewModel.HasError, Mode=OneWay}"
-                     Severity="Error"
-                     Title="Lỗi"
-                     Message="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}"
-                     IsClosable="True"
-                     VerticalAlignment="Top"
-                     Margin="0,0,0,16"/>
+
 
             <!-- DataGrid -->
             <controls:DataGrid x:Name="CategoryDataGrid"

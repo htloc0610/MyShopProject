@@ -104,10 +104,10 @@
         
         <!-- Content Area -->
         <ScrollViewer Grid.Row="1" Padding="20" Visibility="{x:Bind Product, Mode=OneWay, Converter={StaticResource NullToVisibilityConverter}}">
-            <Grid MaxWidth="1400">
+            <Grid HorizontalAlignment="Stretch">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="380"/>
-                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="32"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
@@ -120,14 +120,14 @@
 
                     <TextBlock Grid.Row="0"
                               Text="Hình ảnh sản phẩm" 
-                              FontSize="13"
+                              FontSize="16"
                               FontWeight="SemiBold"
-                              Margin="0,0,0,10"/>
+                              Margin="0,0,0,16"/>
                     
-                    <!-- View Mode: FlipView Gallery -->
+                    <!-- View Mode: Classic E-commerce Slider -->
                     <Grid Grid.Row="1" x:Name="ImageGalleryPanel">
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="350"/>
+                            <RowDefinition Height="400"/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
@@ -135,14 +135,15 @@
                         <Border Grid.Row="0"
                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                 BorderThickness="1"
-                                CornerRadius="8"
+                                CornerRadius="12"
                                 Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                                Margin="0,0,0,12">
+                                Margin="0,0,0,16">
                             <FlipView x:Name="ImageFlipView"
-                                     ItemsSource="{x:Bind Product.ImageUrls, Mode=OneWay}">
+                                     ItemsSource="{x:Bind Product.ImageUrls, Mode=OneWay}"
+                                     Background="Transparent">
                                 <FlipView.ItemTemplate>
                                     <DataTemplate x:DataType="x:String">
-                                        <Grid Padding="16">
+                                        <Grid Padding="0">
                                             <Image Source="{Binding Converter={StaticResource RelativeToAbsoluteUrlConverter}}"
                                                   Stretch="Uniform"
                                                   HorizontalAlignment="Center"
@@ -162,102 +163,169 @@
                             <GridView.ItemTemplate>
                                 <DataTemplate x:DataType="x:String">
                                     <Border Width="80" Height="80"
-                                            CornerRadius="4"
+                                            CornerRadius="8"
                                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                             BorderThickness="1"
-                                            Margin="4">
+                                            Margin="6"
+                                            Background="{ThemeResource LayerFillColorDefaultBrush}">
                                         <Image Source="{Binding Converter={StaticResource RelativeToAbsoluteUrlConverter}}"
-                                               Stretch="UniformToFill"/>
+                                               Stretch="UniformToFill"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"/>
                                     </Border>
                                 </DataTemplate>
                             </GridView.ItemTemplate>
                             <GridView.ItemsPanel>
                                 <ItemsPanelTemplate>
-                                    <StackPanel Orientation="Horizontal" Spacing="8"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="4"/>
                                 </ItemsPanelTemplate>
                             </GridView.ItemsPanel>
                         </GridView>
                     </Grid>
 
                     <!-- Edit Mode: Image Editor -->
-                    <ScrollViewer Grid.Row="1" x:Name="ImageEditorPanel" Visibility="Collapsed">
-                        <StackPanel Spacing="16">
-                            <!-- Info Tip -->
-                            <InfoBar Severity="Informational"
-                                     IsOpen="True"
-                                     IsClosable="False"
-                                     Title="Mẹo"
-                                     Message="Kéo thả ảnh để thay đổi thứ tự. Ảnh đầu tiên sẽ được dùng làm ảnh đại diện." />
+                    <Grid Grid.Row="1" x:Name="ImageEditorPanel" Visibility="Collapsed">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="400"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
 
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <StackPanel Grid.Row="0" Spacing="8" Margin="0,0,0,16">
+                            <!-- Info Tip -->                            
+                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                                 <TextBlock FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}">
                                     <Run Text="{x:Bind ViewModel.SelectedImageUrls.Count, Mode=OneWay}"/>
                                     <Run Text="/ 3"/>
                                 </TextBlock>
                             </StackPanel>
+                        </StackPanel>
 
-                            <!-- Image List (GridView for Drag & Drop) -->
-                            <GridView ItemsSource="{x:Bind ViewModel.SelectedImageUrls, Mode=OneWay}"
-                                      CanReorderItems="True"
-                                      CanDragItems="True"
-                                      AllowDrop="True"
-                                      SelectionMode="None">
-                                <GridView.ItemTemplate>
+                        <!-- Big Image Preview -->
+                        <Border Grid.Row="1"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                BorderThickness="1"
+                                CornerRadius="12"
+                                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                Margin="0,0,0,8">
+                            <FlipView x:Name="EditorFlipView"
+                                     ItemsSource="{x:Bind ViewModel.SelectedImageUrls, Mode=OneWay}">
+                                <FlipView.ItemTemplate>
                                     <DataTemplate>
-                                        <Grid Margin="4" Width="200" Height="200">
-                                            <Border CornerRadius="8" 
-                                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                                    BorderThickness="1"
-                                                    Background="{ThemeResource LayerFillColorDefaultBrush}">
-                                                <Grid>
-                                                    <Image Source="{Binding Converter={StaticResource RelativeToAbsoluteUrlConverter}}" 
-                                                           Stretch="UniformToFill"
-                                                           HorizontalAlignment="Center"
-                                                           VerticalAlignment="Center"/>
-                                                    
-                                                    <!-- Remove Button Overlay -->
-                                                    <Button Command="{Binding ElementName=RootPage, Path=ViewModel.RemoveImageCommand}"
-                                                            CommandParameter="{Binding}"
-                                                            VerticalAlignment="Top"
-                                                            HorizontalAlignment="Right"
-                                                            Margin="8"
-                                                            Padding="8"
-                                                            Background="#CCFF0000"
-                                                            Foreground="White"
-                                                            CornerRadius="4">
-                                                        <FontIcon Glyph="&#xE74D;" FontSize="14"/>
-                                                    </Button>
-                                                </Grid>
-                                            </Border>
+                                        <Grid Padding="0">
+                                            <Image Source="{Binding Converter={StaticResource RelativeToAbsoluteUrlConverter}}"
+                                                  Stretch="Uniform"
+                                                  HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center"/>
                                         </Grid>
                                     </DataTemplate>
-                                </GridView.ItemTemplate>
-                                <GridView.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <ItemsWrapGrid Orientation="Horizontal" />
-                                    </ItemsPanelTemplate>
-                                </GridView.ItemsPanel>
-                            </GridView>
+                                </FlipView.ItemTemplate>
+                            </FlipView>
+                        </Border>
 
-                            <!-- Add Image Button -->
-                            <Button Command="{x:Bind ViewModel.PickImagesCommand}"
-                                    HorizontalAlignment="Stretch"
-                                    Height="50"
-                                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                    BorderThickness="1">
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <FontIcon Glyph="&#xE710;" FontSize="16"/>
-                                    <TextBlock Text="Thêm ảnh (Tối đa 3)" FontSize="13"/>
+                        <!-- Thumbnails List (Draggable) -->
+                        <ScrollViewer Grid.Row="2">
+                            <StackPanel Spacing="16">
+                                
+                                <!-- Image List (GridView for Drag & Drop) -->
+                                <GridView x:Name="EditorImageGridView"
+                                          ItemsSource="{x:Bind ViewModel.SelectedImageUrls, Mode=OneWay}"
+                                          CanReorderItems="True"
+                                          CanDragItems="True"
+                                          AllowDrop="True"
+                                          SelectionMode="Single"
+                                          SelectedIndex="{Binding ElementName=EditorFlipView, Path=SelectedIndex, Mode=TwoWay}"
+                                          DragItemsCompleted="EditorImageGridView_DragItemsCompleted"
+                                          HorizontalAlignment="Center">
+                                    <GridView.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid Margin="6" Width="80" Height="95">
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="80"/>
+                                                    <RowDefinition Height="15"/>
+                                                </Grid.RowDefinitions>
+                                                
+                                                <Border Grid.Row="0" CornerRadius="8" 
+                                                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                                        BorderThickness="1"
+                                                        Background="{ThemeResource LayerFillColorDefaultBrush}">
+                                                    <Grid>
+                                                        <Image Source="{Binding Converter={StaticResource RelativeToAbsoluteUrlConverter}}" 
+                                                               Stretch="UniformToFill"
+                                                               HorizontalAlignment="Center"
+                                                               VerticalAlignment="Center"/>
+                                                        
+                                                        <!-- Remove Button Overlay -->
+                                                        <Button Command="{Binding ElementName=RootPage, Path=ViewModel.RemoveImageCommand}"
+                                                                CommandParameter="{Binding}"
+                                                                VerticalAlignment="Top"
+                                                                HorizontalAlignment="Right"
+                                                                Margin="4"
+                                                                Padding="4"
+                                                                Background="#CCFF0000"
+                                                                Foreground="White"
+                                                                CornerRadius="4"
+                                                                Width="24" Height="24">
+                                                            <FontIcon Glyph="&#xE74D;" FontSize="10"/>
+                                                        </Button>
+                                                    </Grid>
+                                                </Border>
+                                                
+                                                <!-- Drag Grip Handle (6 dots) -->
+                                                <Grid Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                      Opacity="0.5" Margin="0,2,0,0">
+                                                    <StackPanel Orientation="Horizontal" Spacing="3">
+                                                        <StackPanel Spacing="2">
+                                                            <Ellipse Width="3" Height="3" Fill="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                                            <Ellipse Width="3" Height="3" Fill="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                                        </StackPanel>
+                                                        <StackPanel Spacing="2">
+                                                            <Ellipse Width="3" Height="3" Fill="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                                            <Ellipse Width="3" Height="3" Fill="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                                        </StackPanel>
+                                                        <StackPanel Spacing="2">
+                                                            <Ellipse Width="3" Height="3" Fill="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                                            <Ellipse Width="3" Height="3" Fill="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                                        </StackPanel>
+                                                    </StackPanel>
+                                                </Grid>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </GridView.ItemTemplate>
+                                    <GridView.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Orientation="Horizontal" Spacing="4"/>
+                                        </ItemsPanelTemplate>
+                                    </GridView.ItemsPanel>
+                                </GridView>
+
+                                <!-- Add Image Button -->
+                                <Button Command="{x:Bind ViewModel.PickImagesCommand}"
+                                        HorizontalAlignment="Stretch"
+                                        Height="50"
+                                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                        BorderThickness="1">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <FontIcon Glyph="&#xE710;" FontSize="16"/>
+                                        <TextBlock Text="Thêm ảnh (Tối đa 3)" FontSize="13"/>
+                                    </StackPanel>
+                                </Button>
+                                
+                                <StackPanel Spacing="4">
+                                    <TextBlock Text="Mẹo: Kéo thả ảnh thumbnails để thay đổi thứ tự." 
+                                              FontSize="11" 
+                                              Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                              HorizontalAlignment="Center"
+                                              FontStyle="Italic"/>
+                                    <TextBlock Text="Hỗ trợ: .jpg, .png, .jpeg" 
+                                              FontSize="11" 
+                                              Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                              HorizontalAlignment="Center"/>
                                 </StackPanel>
-                            </Button>
-                            
-                            <TextBlock Text="Hỗ trợ: .jpg, .png, .jpeg" 
-                                      FontSize="11" 
-                                      Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                      HorizontalAlignment="Center"/>
-                        </StackPanel>
-                    </ScrollViewer>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Grid>
                 </Grid>
 
                 <!-- Right Column: Product Information -->

@@ -101,47 +101,8 @@ public sealed partial class OrdersListPage : Page
 
             if (result == ContentDialogResult.Primary)
             {
-                // Execute delete command
+                // Execute delete command - Toast handles success/error feedback
                 await ViewModel.DeleteOrderCommand.ExecuteAsync(order);
-                
-                // Determine result message
-                string resultTitle;
-                string resultContent;
-                
-                if (string.IsNullOrEmpty(ViewModel.ErrorMessage))
-                {
-                    resultTitle = "Thành công";
-                    resultContent = $"Đã xóa đơn hàng #{order.OrderId} thành công!\n\nKho hàng đã được hoàn lại.";
-                }
-                else
-                {
-                    resultTitle = "Không thể xóa";
-                    
-                    // Check if error contains status info (from API)
-                    if (ViewModel.ErrorMessage.Contains("Only 'New' orders can be deleted") || 
-                        ViewModel.ErrorMessage.Contains("Cannot delete order with status"))
-                    {
-                        resultContent = $"Không thể xóa đơn hàng #{order.OrderId}\n\nLý do: Chỉ có thể xóa đơn hàng có trạng thái 'New'.\nĐơn hàng này đang ở trạng thái '{order.Status}'.";
-                    }
-                    else
-                    {
-                        resultContent = $"Không thể xóa đơn hàng #{order.OrderId}\n\nLỗi: {ViewModel.ErrorMessage}";
-                    }
-                }
-                
-                // Show result dialog
-                var resultDialog = new ContentDialog
-                {
-                    Title = resultTitle,
-                    Content = resultContent,
-                    CloseButtonText = "OK",
-                    XamlRoot = this.XamlRoot
-                };
-                
-                await resultDialog.ShowAsync();
-                
-                // Clear error message after showing
-                ViewModel.ErrorMessage = null;
             }
         }
     }

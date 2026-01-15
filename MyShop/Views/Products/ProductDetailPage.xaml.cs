@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
@@ -42,6 +43,16 @@ public sealed partial class ProductDetailPage : Page, INotifyPropertyChanged
     {
         InitializeComponent();
         ViewModel = App.Current.Services.GetRequiredService<ProductViewModel>();
+    }
+
+    /// <summary>
+    /// Handles image reordering when drag-drop completes
+    /// </summary>
+    private void EditorImageGridView_DragItemsCompleted(ListViewBase sender, DragItemsCompletedEventArgs args)
+    {
+        // Get the new order from GridView.Items (which reflects the visual order after reorder)
+        var newOrder = sender.Items.ToList();
+        ViewModel.ReorderImages(newOrder);
     }
 
     protected override async void OnNavigatedTo(NavigationEventArgs e)

@@ -95,17 +95,7 @@
                          Width="50" Height="50"
                          HorizontalAlignment="Center"/>
 
-            <!-- Error Message -->
-            <InfoBar IsOpen="{x:Bind ViewModel.ErrorMessage, Mode=OneWay, Converter={StaticResource StringToBoolConverter}}"
-                    Severity="Error"
-                    Message="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}"
-                    Visibility="{x:Bind ViewModel.ErrorMessage, Mode=OneWay, Converter={StaticResource StringToVisibilityConverter}}"/>
 
-            <!-- Success Message -->
-            <InfoBar IsOpen="{x:Bind ViewModel.SuccessMessage, Mode=OneWay, Converter={StaticResource StringToBoolConverter}}"
-                    Severity="Success"
-                    Message="{x:Bind ViewModel.SuccessMessage, Mode=OneWay}"
-                    Visibility="{x:Bind ViewModel.SuccessMessage, Mode=OneWay, Converter={StaticResource StringToVisibilityConverter}}"/>
 
             <!-- Order Details -->
             <Grid Visibility="{x:Bind ViewModel.CurrentOrder, Mode=OneWay, Converter={StaticResource NullToVisibilityConverter}}"

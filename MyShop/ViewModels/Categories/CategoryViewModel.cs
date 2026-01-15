@@ -7,6 +7,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MyShop.Models.Categories;
 using MyShop.Services.Categories;
+using MyShop.Services.Shared;
 
 namespace MyShop.ViewModels.Categories;
 
@@ -17,6 +18,7 @@ namespace MyShop.ViewModels.Categories;
 public partial class CategoryViewModel : ObservableObject
 {
     private readonly ICategoryService _categoryService;
+    private readonly IToastService _toastService;
 
     [ObservableProperty]
     private ObservableCollection<Category> _categories = new();
@@ -28,17 +30,12 @@ public partial class CategoryViewModel : ObservableObject
     private bool _isLoading;
 
     [ObservableProperty]
-    private bool _hasError;
-
-    [ObservableProperty]
-    private string _errorMessage = string.Empty;
-
-    [ObservableProperty]
     private int _categoryCount;
 
-    public CategoryViewModel(ICategoryService categoryService)
+    public CategoryViewModel(ICategoryService categoryService, IToastService toastService)
     {
         _categoryService = categoryService;
+        _toastService = toastService;
     }
 
     /// <summary>
@@ -58,8 +55,6 @@ public partial class CategoryViewModel : ObservableObject
         try
         {
             IsLoading = true;
-            HasError = false;
-            ErrorMessage = string.Empty;
 
             var categories = await _categoryService.GetCategoriesAsync();
             
@@ -73,8 +68,7 @@ public partial class CategoryViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            HasError = true;
-            ErrorMessage = $"Lỗi khi tải danh mục: {ex.Message}";
+            _toastService.ShowError($"Lỗi khi tải danh mục: {ex.Message}");
             System.Diagnostics.Debug.WriteLine($"Error loading categories: {ex}");
         }
         finally
@@ -100,8 +94,6 @@ public partial class CategoryViewModel : ObservableObject
         try
         {
             IsLoading = true;
-            HasError = false;
-            ErrorMessage = string.Empty;
 
             var newCategory = await _categoryService.CreateCategoryAsync(name, description);
             
@@ -109,17 +101,16 @@ public partial class CategoryViewModel : ObservableObject
             {
                 Categories.Add(newCategory);
                 CategoryCount = Categories.Count;
+                _toastService.ShowSuccess($"Tạo danh mục '{name}' thành công!");
                 return true;
             }
             
-            HasError = true;
-            ErrorMessage = "Không thể tạo danh mục. Tên đã tồn tại.";
+            _toastService.ShowError("Không thể tạo danh mục. Tên đã tồn tại.");
             return false;
         }
         catch (Exception ex)
         {
-            HasError = true;
-            ErrorMessage = $"Lỗi khi tạo danh mục: {ex.Message}";
+            _toastService.ShowError($"Lỗi khi tạo danh mục: {ex.Message}");
             System.Diagnostics.Debug.WriteLine($"Error creating category: {ex}");
             return false;
         }
@@ -137,8 +128,6 @@ public partial class CategoryViewModel : ObservableObject
         try
         {
             IsLoading = true;
-            HasError = false;
-            ErrorMessage = string.Empty;
 
             var updatedCategory = await _categoryService.UpdateCategoryAsync(id, name, description);
             
@@ -150,17 +139,16 @@ public partial class CategoryViewModel : ObservableObject
                     var index = Categories.IndexOf(existing);
                     Categories[index] = updatedCategory;
                 }
+                _toastService.ShowSuccess($"Cập nhật danh mục '{name}' thành công!");
                 return true;
             }
             
-            HasError = true;
-            ErrorMessage = "Không thể cập nhật danh mục. Tên đã tồn tại.";
+            _toastService.ShowError("Không thể cập nhật danh mục. Tên đã tồn tại.");
             return false;
         }
         catch (Exception ex)
         {
-            HasError = true;
-            ErrorMessage = $"Lỗi khi cập nhật danh mục: {ex.Message}";
+            _toastService.ShowError($"Lỗi khi cập nhật danh mục: {ex.Message}");
             System.Diagnostics.Debug.WriteLine($"Error updating category: {ex}");
             return false;
         }
@@ -179,8 +167,6 @@ public partial class CategoryViewModel : ObservableObject
         try
         {
             IsLoading = true;
-            HasError = false;
-            ErrorMessage = string.Empty;
 
             var (success, errorMessage) = await _categoryService.DeleteCategoryAsync(id);
             
@@ -192,17 +178,16 @@ public partial class CategoryViewModel : ObservableObject
                     Categories.Remove(category);
                     CategoryCount = Categories.Count;
                 }
+                _toastService.ShowSuccess("Xóa danh mục thành công!");
                 return (true, null);
             }
             
-            HasError = true;
-            ErrorMessage = errorMessage ?? "Không thể xóa danh mục";
+            _toastService.ShowError(errorMessage ?? "Không thể xóa danh mục");
             return (false, errorMessage);
         }
         catch (Exception ex)
         {
-            HasError = true;
-            ErrorMessage = $"Lỗi khi xóa danh mục: {ex.Message}";
+            _toastService.ShowError($"Lỗi khi xóa danh mục: {ex.Message}");
             System.Diagnostics.Debug.WriteLine($"Error deleting category: {ex}");
             return (false, ex.Message);
         }

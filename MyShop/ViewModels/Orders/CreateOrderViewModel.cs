@@ -10,6 +10,7 @@ using MyShop.Models.Orders;
 using MyShop.Services.Customers;
 using MyShop.Services.Products;
 using MyShop.Services.Orders;
+using MyShop.Services.Shared;
 using System.Diagnostics;
 
 namespace MyShop.ViewModels.Orders;
@@ -24,6 +25,7 @@ public partial class CreateOrderViewModel : ObservableObject
     private readonly ICustomerService _customerService;
     private readonly IProductService _productService;
     private readonly IOrderService _orderService;
+    private readonly IToastService _toastService;
 
     #endregion
 
@@ -116,9 +118,6 @@ public partial class CreateOrderViewModel : ObservableObject
     private bool _isLoading;
 
     [ObservableProperty]
-    private string _errorMessage = string.Empty;
-
-    [ObservableProperty]
     private bool _hasError;
 
     /// <summary>
@@ -131,11 +130,12 @@ public partial class CreateOrderViewModel : ObservableObject
 
     #region Constructor
 
-    public CreateOrderViewModel(ICustomerService customerService, IProductService productService, IOrderService orderService)
+    public CreateOrderViewModel(ICustomerService customerService, IProductService productService, IOrderService orderService, IToastService toastService)
     {
         _customerService = customerService;
         _productService = productService;
         _orderService = orderService;
+        _toastService = toastService;
 
         // Subscribe to cart changes
         CartItems.CollectionChanged += (s, e) =>
@@ -499,15 +499,13 @@ public partial class CreateOrderViewModel : ObservableObject
     {
         if (!HasItems)
         {
-            ErrorMessage = "Vui lòng thêm sản phẩm vào đơn hàng";
-            HasError = true;
+            _toastService.ShowWarning("Vui lòng thêm sản phẩm vào đơn hàng");
             return;
         }
 
         try
         {
             IsLoading = true;
-            HasError = false;
 
             var request = new OrderCheckoutRequest
             {
@@ -537,19 +535,16 @@ public partial class CreateOrderViewModel : ObservableObject
                 CustomerSearchText = string.Empty;
                 ClearCoupon();
                 
-                ErrorMessage = $"Tạo đơn hàng #{response.OrderId} thành công!";
-                HasError = false;
+                _toastService.ShowSuccess($"Tạo đơn hàng #{response.OrderId} thành công!");
             }
             else
             {
-                ErrorMessage = "Không thể tạo đơn hàng. Vui lòng thử lại.";
-                HasError = true;
+                _toastService.ShowError("Không thể tạo đơn hàng. Vui lòng thử lại.");
             }
         }
         catch (Exception ex)
         {
-            ErrorMessage = $"Lỗi: {ex.Message}";
-            HasError = true;
+            _toastService.ShowError($"Lỗi: {ex.Message}");
         }
         finally
         {

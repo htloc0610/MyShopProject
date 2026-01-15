@@ -19,6 +19,7 @@ public partial class OrderDetailViewModel : ObservableObject
     private readonly IOrderService _orderService;
     private readonly IPrintService _printService;
     private readonly ISessionService _sessionService;
+    private readonly IToastService _toastService;
     private readonly Frame? _navigationFrame;
 
     [ObservableProperty]
@@ -27,12 +28,6 @@ public partial class OrderDetailViewModel : ObservableObject
 
     [ObservableProperty]
     private bool _isLoading = false;
-
-    [ObservableProperty]
-    private string? _errorMessage;
-
-    [ObservableProperty]
-    private string? _successMessage;
 
     // Edit mode properties
     [ObservableProperty]
@@ -48,11 +43,12 @@ public partial class OrderDetailViewModel : ObservableObject
         "Cancelled"
     };
 
-    public OrderDetailViewModel(IOrderService orderService, IPrintService printService, ISessionService sessionService, Frame? navigationFrame = null)
+    public OrderDetailViewModel(IOrderService orderService, IPrintService printService, ISessionService sessionService, IToastService toastService, Frame? navigationFrame = null)
     {
         _orderService = orderService;
         _printService = printService;
         _sessionService = sessionService;
+        _toastService = toastService;
         _navigationFrame = navigationFrame;
     }
 
@@ -62,7 +58,6 @@ public partial class OrderDetailViewModel : ObservableObject
     public async Task LoadOrderAsync(int orderId)
     {
         IsLoading = true;
-        ErrorMessage = null;
 
         try
         {
@@ -70,7 +65,7 @@ public partial class OrderDetailViewModel : ObservableObject
 
             if (CurrentOrder == null)
             {
-                ErrorMessage = "Không tìm thấy đơn hàng";
+                _toastService.ShowError("Không tìm thấy đơn hàng");
             }
             else
             {
@@ -80,7 +75,7 @@ public partial class OrderDetailViewModel : ObservableObject
         }
         catch (System.Exception ex)
         {
-            ErrorMessage = $"Lỗi: {ex.Message}";
+            _toastService.ShowError($"Lỗi: {ex.Message}");
         }
         finally
         {
@@ -114,8 +109,6 @@ public partial class OrderDetailViewModel : ObservableObject
         if (CurrentOrder == null) return;
 
         IsLoading = true;
-        ErrorMessage = null;
-        SuccessMessage = null;
 
         try
         {
@@ -133,16 +126,16 @@ public partial class OrderDetailViewModel : ObservableObject
                 CurrentOrder = updatedOrder;
                 SelectedStatus = updatedOrder.Status; // Ensure status is synced
                 IsEditMode = false;
-                SuccessMessage = "Cập nhật trạng thái thành công";
+                _toastService.ShowSuccess("Cập nhật trạng thái thành công");
             }
             else
             {
-                ErrorMessage = "Không thể lưu thay đổi";
+                _toastService.ShowError("Không thể lưu thay đổi");
             }
         }
         catch (System.Exception ex)
         {
-            ErrorMessage = $"Lỗi: {ex.Message}";
+            _toastService.ShowError($"Lỗi: {ex.Message}");
         }
         finally
         {
@@ -185,7 +178,6 @@ public partial class OrderDetailViewModel : ObservableObject
         if (CurrentOrder == null) return;
 
         IsLoading = true;
-        ErrorMessage = null;
 
         try
         {
@@ -193,17 +185,18 @@ public partial class OrderDetailViewModel : ObservableObject
 
             if (success)
             {
+                _toastService.ShowSuccess("Xóa đơn hàng thành công");
                 // Navigate back to orders list
                 GoBack();
             }
             else
             {
-                ErrorMessage = "Không thể xóa đơn hàng";
+                _toastService.ShowError("Không thể xóa đơn hàng");
             }
         }
         catch (System.Exception ex)
         {
-            ErrorMessage = $"Lỗi: {ex.Message}";
+            _toastService.ShowError($"Lỗi: {ex.Message}");
         }
         finally
         {
@@ -219,9 +212,6 @@ public partial class OrderDetailViewModel : ObservableObject
     {
         if (CurrentOrder == null) return;
 
-        ErrorMessage = null;
-        SuccessMessage = null;
-
         try
         {
             // Create the invoice view
@@ -234,12 +224,12 @@ public partial class OrderDetailViewModel : ObservableObject
 
             if (success)
             {
-                SuccessMessage = "Đã gửi hóa đơn đến máy in";
+                _toastService.ShowSuccess("Đã gửi hóa đơn đến máy in");
             }
         }
         catch (System.Exception ex)
         {
-            ErrorMessage = $"Lỗi khi in hóa đơn: {ex.Message}";
+            _toastService.ShowError($"Lỗi khi in hóa đơn: {ex.Message}");
         }
     }
 
