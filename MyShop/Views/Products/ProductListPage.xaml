@@ -272,13 +272,13 @@
                               ColumnHeaderHeight="44">
                 <controls:DataGrid.ColumnHeaderStyle>
                     <Style TargetType="controlsprimitives:DataGridColumnHeader">
-                        <Setter Property="Background" Value="{ThemeResource AccentFillColorDefaultBrush}"/>
-                        <Setter Property="Foreground" Value="White"/>
+                        <Setter Property="Background" Value="{ThemeResource SubtleFillColorSecondaryBrush}"/>
+                        <Setter Property="Foreground" Value="{ThemeResource TextFillColorPrimaryBrush}"/>
                         <Setter Property="FontWeight" Value="SemiBold"/>
                         <Setter Property="FontSize" Value="14"/>
                         <Setter Property="Padding" Value="12,8"/>
-                        <Setter Property="BorderThickness" Value="0,0,1,0"/>
-                        <Setter Property="BorderBrush" Value="{ThemeResource ControlStrokeColorSecondaryBrush}"/>
+                        <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                        <Setter Property="BorderBrush" Value="{ThemeResource ControlStrokeColorDefaultBrush}"/>
                     </Style>
                 </controls:DataGrid.ColumnHeaderStyle>
                 <controls:DataGrid.Columns>
