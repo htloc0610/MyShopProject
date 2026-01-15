@@ -78,3 +78,6 @@ secrets.json
 *.bak
 *.tmp
 *.cache
+
+# User-uploaded product images
+wwwroot/images/products/
