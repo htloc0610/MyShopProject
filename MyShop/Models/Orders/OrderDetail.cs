@@ -35,6 +35,17 @@ public class OrderDetail
     public string FormattedTotalAmount { get { return $"{TotalAmount:N0} VNĐ"; } }
     public string FormattedFinalAmount { get { return $"{FinalAmount:N0} VNĐ"; } }
     public string FormattedDiscountAmount { get { return $"-{DiscountAmount:N0} VNĐ"; } }
+    
+    /// <summary>
+    /// Display status in Vietnamese for UI.
+    /// </summary>
+    public string DisplayStatus => Status switch
+    {
+        "Created" => "Mới tạo",
+        "Paid" => "Đã thanh toán",
+        "Cancelled" => "Đã hủy",
+        _ => Status
+    };
 }
 
 /// <summary>

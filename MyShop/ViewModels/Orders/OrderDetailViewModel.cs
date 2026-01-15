@@ -34,13 +34,31 @@ public partial class OrderDetailViewModel : ObservableObject
     private bool _isEditMode = false;
 
     [ObservableProperty]
-    private string _selectedStatus = "Created";
+    private string _selectedStatus = "Mới tạo";
 
     public ObservableCollection<string> AvailableStatuses { get; } = new()
     {
-        "Created",
-        "Paid",
-        "Cancelled"
+        "Mới tạo",
+        "Đã thanh toán",
+        "Đã hủy"
+    };
+
+    // Helper to convert Vietnamese status to API value
+    private static string StatusToApiValue(string status) => status switch
+    {
+        "Mới tạo" => "Created",
+        "Đã thanh toán" => "Paid",
+        "Đã hủy" => "Cancelled",
+        _ => status
+    };
+
+    // Helper to convert API status to Vietnamese display
+    private static string StatusToVietnamese(string status) => status switch
+    {
+        "Created" => "Mới tạo",
+        "Paid" => "Đã thanh toán",
+        "Cancelled" => "Đã hủy",
+        _ => status
     };
 
     public OrderDetailViewModel(IOrderService orderService, IPrintService printService, ISessionService sessionService, IToastService toastService, Frame? navigationFrame = null)
@@ -69,8 +87,8 @@ public partial class OrderDetailViewModel : ObservableObject
             }
             else
             {
-                // Initialize selected status from current order
-                SelectedStatus = CurrentOrder.Status;
+                // Initialize selected status from current order (convert to Vietnamese)
+                SelectedStatus = StatusToVietnamese(CurrentOrder.Status);
             }
         }
         catch (System.Exception ex)
@@ -95,8 +113,8 @@ public partial class OrderDetailViewModel : ObservableObject
 
         if (IsEditMode)
         {
-            // Entering edit mode - copy current status
-            SelectedStatus = CurrentOrder.Status;
+            // Entering edit mode - copy current status (convert to Vietnamese)
+            SelectedStatus = StatusToVietnamese(CurrentOrder.Status);
         }
     }
 
@@ -118,13 +136,13 @@ public partial class OrderDetailViewModel : ObservableObject
                 CurrentOrder.CustomerName,  // Keep existing
                 CurrentOrder.CustomerPhone, // Keep existing
                 CurrentOrder.CustomerAddress, // Keep existing
-                SelectedStatus // Only this changes
+                StatusToApiValue(SelectedStatus) // Convert Vietnamese to API value
             );
 
             if (updatedOrder != null)
             {
                 CurrentOrder = updatedOrder;
-                SelectedStatus = updatedOrder.Status; // Ensure status is synced
+                SelectedStatus = StatusToVietnamese(updatedOrder.Status); // Ensure status is synced (convert to Vietnamese)
                 IsEditMode = false;
                 _toastService.ShowSuccess("Cập nhật trạng thái thành công");
             }
@@ -151,8 +169,8 @@ public partial class OrderDetailViewModel : ObservableObject
     {
         if (CurrentOrder == null) return;
 
-        // Revert to original status
-        SelectedStatus = CurrentOrder.Status;
+        // Revert to original status (convert to Vietnamese)
+        SelectedStatus = StatusToVietnamese(CurrentOrder.Status);
 
         IsEditMode = false;
     }

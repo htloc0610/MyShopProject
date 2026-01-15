@@ -511,6 +511,16 @@ public sealed partial class AddProductPage : Page
                 CategoryComboBox.SelectedItem = category;
             }
         }
+
+        // Restore images if any
+        if (draft.Images != null && draft.Images.Any())
+        {
+            ViewModel.SelectedImageUrls.Clear();
+            foreach (var imageUrl in draft.Images)
+            {
+                ViewModel.SelectedImageUrls.Add(imageUrl);
+            }
+        }
     }
 
     /// <summary>
@@ -526,7 +536,8 @@ public sealed partial class AddProductPage : Page
             SellingPrice = (decimal)SellingPriceNumberBox.Value,
             Stock = (int)StockNumberBox.Value,
             Description = DescriptionTextBox.Text?.Trim(),
-            CategoryId = CategoryComboBox.SelectedValue as int?
+            CategoryId = CategoryComboBox.SelectedValue as int?,
+            Images = ViewModel.SelectedImageUrls.ToList()
         };
 
         // Only save if there's meaningful data
@@ -580,6 +591,12 @@ public sealed partial class AddProductPage : Page
                 ? draft.Description.Substring(0, 50) + "..." 
                 : draft.Description;
             lines.Add($"• Mô tả: {desc}");
+        }
+
+        // Show image count
+        if (draft.Images != null && draft.Images.Count > 0)
+        {
+            lines.Add($"• Hình ảnh: {draft.Images.Count} ảnh");
         }
         
         return lines.Count > 0 

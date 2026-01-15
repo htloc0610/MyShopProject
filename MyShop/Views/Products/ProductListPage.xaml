@@ -66,7 +66,7 @@
                              ToolTipService.ToolTip="Chuyển đổi chế độ lọc">
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <FontIcon x:Name="FilterModeIcon" Glyph="&#xE713;" FontSize="16"/>
-                        <TextBlock x:Name="FilterModeText" Text="Plugin Filter"/>
+                        <TextBlock x:Name="FilterModeText" Text="Plugin lọc"/>
                     </StackPanel>
                 </ToggleButton>
                 
@@ -110,7 +110,7 @@
                         
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <FontIcon Glyph="&#xE74C;" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"/>
-                            <TextBlock Text="Advanced Search Plugin" 
+                            <TextBlock Text="Plugin tìm kiếm nâng cao" 
                                       FontWeight="SemiBold"
                                       Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"/>
                         </StackPanel>
@@ -119,7 +119,7 @@
                                Background="{ThemeResource SystemFillColorSuccessBrush}"
                                CornerRadius="4"
                                Padding="8,4">
-                            <TextBlock Text="✓ Loaded" 
+                            <TextBlock Text="✓ Đã tải" 
                                       FontSize="12"
                                       FontWeight="SemiBold"
                                       Foreground="White"/>

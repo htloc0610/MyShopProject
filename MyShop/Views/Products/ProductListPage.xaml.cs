@@ -159,7 +159,7 @@ public sealed partial class ProductListPage : Page
             System.Diagnostics.Debug.WriteLine("Plugin UI setup complete!");
             
             // Show success notification
-            ShowPluginStatus($"Plugin loaded: {_searchPlugin.Name}", true);
+            ShowPluginStatus($"Đã tải plugin: {_searchPlugin.Name}", true);
         }
         catch (Exception ex)
         {
@@ -167,7 +167,7 @@ public sealed partial class ProductListPage : Page
             System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
             ShowBuiltInFilters();
             DisablePluginToggle();
-            ShowPluginStatus($"Failed to load plugin: {ex.Message}", false);
+            ShowPluginStatus($"Không thể tải plugin: {ex.Message}", false);
         }
     }
 

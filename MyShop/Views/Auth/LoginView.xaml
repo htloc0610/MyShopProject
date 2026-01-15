@@ -61,20 +61,20 @@
                              IsClosable="False"/>
 
                     <TextBox Header="Email" 
-                             PlaceholderText="name@example.com"
+                             PlaceholderText="ten@vidu.com"
                              Text="{x:Bind ViewModel.Email, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                     
-                    <TextBox Header="Shop Name" 
+                    <TextBox Header="Tên cửa hàng" 
                              x:Name="ShopNameInput"
-                             PlaceholderText="My Awesome Shop"
+                             PlaceholderText="Cửa hàng của tôi"
                              Text="{x:Bind ViewModel.ShopName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                              Visibility="{x:Bind ViewModel.IsLoginMode, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}"/>
 
-                    <PasswordBox Header="Password" 
+                    <PasswordBox Header="Mật khẩu" 
                                  Password="{x:Bind ViewModel.Password, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
                     <CheckBox x:Name="RememberMeCheck"
-                              Content="Remember Me"
+                              Content="Nhớ mật khẩu"
                               IsChecked="{x:Bind ViewModel.RememberMe, Mode=TwoWay}"
                               Visibility="{x:Bind ViewModel.IsLoginMode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
 

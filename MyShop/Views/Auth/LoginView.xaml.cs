@@ -55,9 +55,9 @@ public class ModeToButtonTextConverter : IValueConverter
     {
         if (value is bool isLogin)
         {
-            return isLogin ? "Login" : "Register";
+            return isLogin ? "Đăng nhập" : "Đăng ký";
         }
-        return "Login"; // Default
+        return "Đăng nhập"; // Default
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, string language)
@@ -109,7 +109,7 @@ public class ModeToTitleConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, string language)
     {
-        return (value is bool b && b) ? "Login to your account" : "Create an account";
+        return (value is bool b && b) ? "Đăng nhập tài khoản" : "Tạo tài khoản mới";
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, string language)
@@ -122,7 +122,7 @@ public class ModeToToggleTextConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, string language)
     {
-        return (value is bool b && b) ? "Don't have an account?" : "Already have an account?";
+        return (value is bool b && b) ? "Chưa có tài khoản?" : "Đã có tài khoản?";
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, string language)
@@ -135,7 +135,7 @@ public class ModeToToggleActionConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, string language)
     {
-        return (value is bool b && b) ? "Sign up" : "Login";
+        return (value is bool b && b) ? "Đăng ký" : "Đăng nhập";
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, string language)

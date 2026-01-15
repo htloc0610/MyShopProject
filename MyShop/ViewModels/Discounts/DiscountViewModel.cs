@@ -91,7 +91,7 @@ public partial class DiscountViewModel : ObservableObject
         try
         {
             IsLoading = true;
-            StatusMessage = "Loading discounts...";
+            StatusMessage = "Đang tải mã giảm giá...";
 
             var result = await _discountService.GetDiscountsPagedAsync(CurrentPage, PageSize);
             
@@ -108,11 +108,11 @@ public partial class DiscountViewModel : ObservableObject
             // Debug output
             System.Diagnostics.Debug.WriteLine($"Loaded page {CurrentPage}/{TotalPages}, {result.Items.Count} items, Total: {TotalCount}");
 
-            StatusMessage = $"Loaded {Discounts.Count} discount(s)";
+            StatusMessage = $"Đã tải {Discounts.Count} mã giảm giá";
         }
         catch (Exception ex)
         {
-            StatusMessage = $"Error loading discounts: {ex.Message}";
+            StatusMessage = $"Lỗi khi tải mã giảm giá: {ex.Message}";
             System.Diagnostics.Debug.WriteLine($"Error in LoadDiscountsAsync: {ex}");
         }
         finally
@@ -195,19 +195,19 @@ public partial class DiscountViewModel : ObservableObject
             // Validation
             if (string.IsNullOrWhiteSpace(EditCode))
             {
-                StatusMessage = "Code is required";
+                StatusMessage = "Mã giảm giá không được để trống";
                 return;
             }
 
             if (EditAmount <= 0)
             {
-                StatusMessage = "Amount must be greater than 0";
+                StatusMessage = "Số tiền giảm phải lớn hơn 0";
                 return;
             }
 
             if (EditEndDate <= EditStartDate)
             {
-                StatusMessage = "End date must be after start date";
+                StatusMessage = "Ngày kết thúc phải sau ngày bắt đầu";
                 return;
             }
 
@@ -232,12 +232,12 @@ public partial class DiscountViewModel : ObservableObject
                 var success = await _discountService.UpdateDiscountAsync(discount.DiscountId, discount);
                 if (success)
                 {
-                    StatusMessage = "Discount updated successfully";
+                    StatusMessage = "Cập nhật mã giảm giá thành công";
                     await LoadDiscountsAsync();
                 }
                 else
                 {
-                    StatusMessage = "Failed to update discount";
+                    StatusMessage = "Không thể cập nhật mã giảm giá";
                 }
             }
             else
@@ -246,19 +246,19 @@ public partial class DiscountViewModel : ObservableObject
                 var created = await _discountService.CreateDiscountAsync(discount);
                 if (created != null)
                 {
-                    StatusMessage = "Discount created successfully";
+                    StatusMessage = "Tạo mã giảm giá thành công";
                     await LoadDiscountsAsync();
                     ClearForm();
                 }
                 else
                 {
-                    StatusMessage = "Failed to create discount";
+                    StatusMessage = "Không thể tạo mã giảm giá";
                 }
             }
         }
         catch (Exception ex)
         {
-            StatusMessage = $"Error: {ex.Message}";
+            StatusMessage = $"Lỗi: {ex.Message}";
         }
         finally
         {
@@ -277,22 +277,22 @@ public partial class DiscountViewModel : ObservableObject
         try
         {
             IsLoading = true;
-            StatusMessage = "Deleting discount...";
+            StatusMessage = "Đang xóa mã giảm giá...";
 
             var success = await _discountService.DeleteDiscountAsync(discount.DiscountId);
             if (success)
             {
                 Discounts.Remove(discount);
-                StatusMessage = "Discount deleted successfully";
+                StatusMessage = "Xóa mã giảm giá thành công";
             }
             else
             {
-                StatusMessage = "Failed to delete discount";
+                StatusMessage = "Không thể xóa mã giảm giá";
             }
         }
         catch (Exception ex)
         {
-            StatusMessage = $"Error: {ex.Message}";
+            StatusMessage = $"Lỗi: {ex.Message}";
         }
         finally
         {
@@ -319,8 +319,8 @@ public partial class DiscountViewModel : ObservableObject
             if (success)
             {
                 StatusMessage = discount.IsActive 
-                    ? $"Discount '{discount.Code}' activated" 
-                    : $"Discount '{discount.Code}' deactivated";
+                    ? $"Đã kích hoạt mã '{discount.Code}'" 
+                    : $"Đã vô hiệu hóa mã '{discount.Code}'";
                 
                 // Refresh the list to update UI
                 await LoadDiscountsAsync();
@@ -329,12 +329,12 @@ public partial class DiscountViewModel : ObservableObject
             {
                 // Revert on failure
                 discount.IsActive = !discount.IsActive;
-                StatusMessage = "Failed to update discount status";
+                StatusMessage = "Không thể cập nhật trạng thái";
             }
         }
         catch (Exception ex)
         {
-            StatusMessage = $"Error: {ex.Message}";
+            StatusMessage = $"Lỗi: {ex.Message}";
         }
         finally
         {

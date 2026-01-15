@@ -30,6 +30,7 @@ public class ProductDraftService
         public int Stock { get; set; }
         public string? Description { get; set; }
         public int? CategoryId { get; set; }
+        public System.Collections.Generic.List<string> Images { get; set; } = new();
         public DateTime SavedAt { get; set; }
     }
 
@@ -105,6 +106,7 @@ public class ProductDraftService
                draft.SellingPrice > 0 ||
                draft.Stock > 0 ||
                !string.IsNullOrWhiteSpace(draft.Description) ||
-               draft.CategoryId.HasValue;
+               draft.CategoryId.HasValue ||
+               (draft.Images != null && draft.Images.Count > 0);
     }
 }
