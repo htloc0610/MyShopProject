@@ -80,4 +80,5 @@ secrets.json
 *.cache
 
 # User-uploaded product images
-wwwroot/images/products/
+wwwroot/images/products/*
+!wwwroot/images/products/.gitkeep
