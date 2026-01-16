@@ -13,7 +13,7 @@ namespace MyShopAPI.Controllers;
 /// </summary>
 [Authorize]
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/discounts")]
 public class DiscountsController : ControllerBase
 {
     private readonly AppDbContext _context;
