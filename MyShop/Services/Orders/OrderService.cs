@@ -267,7 +267,7 @@ public class OrderService : IOrderService
                 // If not JSON, use the raw content
             }
             
-            throw new Exception($"Không thể xóa đơn hàng (Status: {response.StatusCode})");
+            throw new Exception($"Không thể xóa đơn hàng.");
         }
         catch (Exception ex)
         {

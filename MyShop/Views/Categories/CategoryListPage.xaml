@@ -37,14 +37,6 @@
             </StackPanel>
 
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
-                <Button Command="{x:Bind ViewModel.RefreshCommand}"
-                       ToolTipService.ToolTip="Làm mới">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <FontIcon Glyph="&#xE72C;" FontSize="16"/>
-                        <TextBlock Text="Làm mới"/>
-                    </StackPanel>
-                </Button>
-
                 <Button Click="AddCategoryButton_Click"
                        Style="{StaticResource AccentButtonStyle}"
                        ToolTipService.ToolTip="Thêm danh mục mới">

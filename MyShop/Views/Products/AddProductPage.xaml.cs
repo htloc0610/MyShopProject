@@ -27,6 +27,7 @@ public sealed partial class AddProductPage : Page
     private readonly IProductService _productService;
     private readonly ICategoryService _categoryService;
     private readonly ProductDraftService _draftService;
+    private readonly IToastService _toastService;
     private bool _savedSuccessfully = false;
 
     public AddProductPage()
@@ -35,6 +36,7 @@ public sealed partial class AddProductPage : Page
         ViewModel = App.Current.Services.GetRequiredService<ProductViewModel>();
         _productService = App.Current.Services.GetRequiredService<IProductService>();
         _categoryService = App.Current.Services.GetRequiredService<ICategoryService>();
+        _toastService = App.Current.Services.GetRequiredService<IToastService>();
         _draftService = new ProductDraftService();
     }
 
@@ -110,7 +112,7 @@ public sealed partial class AddProductPage : Page
             _draftService.ClearDraft();
 
             // Show success message
-            await ShowDialogAsync("Thành công", "Đã thêm sản phẩm mới thành công!");
+            _toastService.ShowSuccess("Đã thêm sản phẩm mới thành công!");
 
             // Navigate back to product list
             if (Frame.CanGoBack)
@@ -120,7 +122,7 @@ public sealed partial class AddProductPage : Page
         }
         catch (Exception ex)
         {
-            await ShowDialogAsync("Lỗi", $"Lỗi khi thêm sản phẩm: {ex.Message}");
+            _toastService.ShowError($"Lỗi khi thêm sản phẩm: {ex.Message}");
         }
     }
 
@@ -132,7 +134,7 @@ public sealed partial class AddProductPage : Page
     private void UploadImageButton_Click(object sender, RoutedEventArgs e)
     {
         // TODO: Implement image upload functionality
-        _ = ShowDialogAsync("Thông báo", "Chức năng tải ảnh lên sẽ được cập nhật trong phiên bản sau.");
+        _toastService.ShowInfo("Chức năng tải ảnh lên sẽ được cập nhật trong phiên bản sau.");
     }
 
     private async void DownloadTemplateButton_Click(object sender, RoutedEventArgs e)
@@ -164,7 +166,7 @@ public sealed partial class AddProductPage : Page
         }
         catch (Exception ex)
         {
-            await ShowDialogAsync("Lỗi", $"Lỗi khi tạo file mẫu: {ex.Message}");
+            _toastService.ShowError($"Lỗi khi tạo file mẫu: {ex.Message}");
         }
     }
 
@@ -204,7 +206,7 @@ public sealed partial class AddProductPage : Page
                     if (!categories.Any())
                     {
                         loadingDialog.Hide();
-                        await ShowDialogAsync("Lỗi", "Không tìm thấy loại sản phẩm nào trong hệ thống. Vui lòng tạo ít nhất một loại sản phẩm trước.");
+                        _toastService.ShowError("Không tìm thấy loại sản phẩm nào trong hệ thống. Vui lòng tạo ít nhất một loại sản phẩm trước.");
                         return;
                     }
 
@@ -241,7 +243,7 @@ public sealed partial class AddProductPage : Page
 
                     if (!products.Any())
                     {
-                        await ShowDialogAsync("Thông báo", "File không chứa dữ liệu hợp lệ nào.");
+                        _toastService.ShowInfo("File không chứa dữ liệu hợp lệ nào.");
                         return;
                     }
 
@@ -284,7 +286,7 @@ public sealed partial class AddProductPage : Page
                                 }
                             }
 
-                            await ShowDialogAsync("Import hoàn tất", message);
+                            _toastService.ShowSuccess(message);
 
                             // Refresh product list
                             await ViewModel.LoadProductsPagedCommand.ExecuteAsync(null);
@@ -298,20 +300,20 @@ public sealed partial class AddProductPage : Page
                                 errorMessage += $"\n\n...và {importErrors.Count - 10} lỗi khác";
                             }
 
-                            await ShowDialogAsync("Lỗi Import", errorMessage);
+                            _toastService.ShowError(errorMessage);
                         }
                     }
                 }
                 catch (Exception ex)
                 {
                     loadingDialog.Hide();
-                    await ShowDialogAsync("Lỗi", $"Lỗi khi xử lý file: {ex.Message}");
+                    _toastService.ShowError($"Lỗi khi xử lý file: {ex.Message}");
                 }
             }
         }
         catch (Exception ex)
         {
-            await ShowDialogAsync("Lỗi", $"Lỗi khi chọn file: {ex.Message}");
+            _toastService.ShowError($"Lỗi khi chọn file: {ex.Message}");
         }
     }
 
@@ -331,7 +333,7 @@ public sealed partial class AddProductPage : Page
         // Validate name
         if (string.IsNullOrWhiteSpace(NameTextBox.Text))
         {
-            _ = ShowDialogAsync("Lỗi", "Tên sản phẩm không được để trống.");
+            _toastService.ShowWarning("Tên sản phẩm không được để trống.");
             NameTextBox.Focus(FocusState.Programmatic);
             return false;
         }
@@ -339,7 +341,7 @@ public sealed partial class AddProductPage : Page
         // Validate SKU
         if (string.IsNullOrWhiteSpace(SkuTextBox.Text))
         {
-            _ = ShowDialogAsync("Lỗi", "Mã SKU không được để trống.");
+            _toastService.ShowWarning("Mã SKU không được để trống.");
             SkuTextBox.Focus(FocusState.Programmatic);
             return false;
         }
@@ -347,7 +349,7 @@ public sealed partial class AddProductPage : Page
         // Validate import price
         if (ImportPriceNumberBox.Value < 0)
         {
-            _ = ShowDialogAsync("Lỗi", "Giá nhập không được âm.");
+            _toastService.ShowWarning("Giá nhập không được âm.");
             ImportPriceNumberBox.Focus(FocusState.Programmatic);
             return false;
         }
@@ -355,7 +357,7 @@ public sealed partial class AddProductPage : Page
         // Validate selling price
         if (SellingPriceNumberBox.Value <= 0)
         {
-            _ = ShowDialogAsync("Lỗi", "Giá bán phải lớn hơn 0.");
+            _toastService.ShowWarning("Giá bán phải lớn hơn 0.");
             SellingPriceNumberBox.Focus(FocusState.Programmatic);
             return false;
         }
@@ -363,7 +365,7 @@ public sealed partial class AddProductPage : Page
         // Validate category
         if (CategoryComboBox.SelectedValue == null)
         {
-            _ = ShowDialogAsync("Lỗi", "Vui lòng chọn loại sản phẩm.");
+            _toastService.ShowWarning("Vui lòng chọn loại sản phẩm.");
             CategoryComboBox.Focus(FocusState.Programmatic);
             return false;
         }
@@ -371,10 +373,11 @@ public sealed partial class AddProductPage : Page
         // Validate stock
         if (StockNumberBox.Value < 0)
         {
-            _ = ShowDialogAsync("Lỗi", "Số lượng tồn kho không được âm.");
+            _toastService.ShowWarning("Số lượng tồn kho không được âm.");
             StockNumberBox.Focus(FocusState.Programmatic);
             return false;
         }
+
 
         return true;
     }

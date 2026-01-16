@@ -23,7 +23,8 @@ public sealed partial class OrderDetailPage : Page
         var orderService = App.Current.Services.GetService(typeof(IOrderService)) as IOrderService;
         var printService = App.Current.Services.GetService(typeof(IPrintService)) as IPrintService;
         var sessionService = App.Current.Services.GetService(typeof(ISessionService)) as ISessionService;
-        ViewModel = new OrderDetailViewModel(orderService!, printService!, sessionService!, null);
+        var toastService = App.Current.Services.GetService(typeof(IToastService)) as IToastService;
+        ViewModel = new OrderDetailViewModel(orderService!, printService!, sessionService!, toastService!, null!);
     }
 
     protected override async void OnNavigatedTo(NavigationEventArgs e)

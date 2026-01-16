@@ -61,15 +61,16 @@ namespace MyShopAPI.Controllers
                 query = query.Where(o => o.Status == orderStatus);
             }
 
-            // Apply date range filter
+            // Apply date range filter (convert to UTC for PostgreSQL)
             if (startDate.HasValue)
             {
-                query = query.Where(o => o.OrderDate >= startDate.Value);
+                var startDateUtc = DateTime.SpecifyKind(startDate.Value.Date, DateTimeKind.Utc);
+                query = query.Where(o => o.OrderDate >= startDateUtc);
             }
             if (endDate.HasValue)
             {
-                // Include the entire end date (until 23:59:59)
-                var endOfDay = endDate.Value.Date.AddDays(1).AddTicks(-1);
+                // Include the entire end date (until 23:59:59) and convert to UTC
+                var endOfDay = DateTime.SpecifyKind(endDate.Value.Date.AddDays(1).AddTicks(-1), DateTimeKind.Utc);
                 query = query.Where(o => o.OrderDate <= endOfDay);
             }
 
@@ -155,7 +156,7 @@ namespace MyShopAPI.Controllers
                 .FirstOrDefaultAsync(o => o.OrderId == id && o.UserId == userId);
 
             if (order == null)
-                return NotFound(new { message = "Order not found" });
+                return NotFound(new { message = "Đơn hàng không tồn tại" });
 
             var orderDetail = new OrderDetailDto
             {
@@ -201,12 +202,12 @@ namespace MyShopAPI.Controllers
                 .FirstOrDefaultAsync(o => o.OrderId == id && o.UserId == userId);
 
             if (order == null)
-                return NotFound(new { message = "Order not found" });
+                return NotFound(new { message = "Đơn hàng không tồn tại" });
 
             // Prevent editing cancelled orders
             if (order.Status == OrderStatus.Cancelled)
             {
-                return BadRequest(new { message = $"Cannot update order with status '{order.Status}'. Order is already finalized." });
+                return BadRequest(new { message = $"Không thể cập nhật đơn hàng có trạng thái '{order.Status}'. Đơn hàng đã được hoàn tất." });
             }
 
             // Update customer info (if customer exists)
@@ -268,7 +269,7 @@ namespace MyShopAPI.Controllers
                             // Check if enough stock available
                             if (product.Count < item.Quantity)
                             {
-                                return BadRequest(new { message = $"Insufficient stock for product '{product.Name}' to un-cancel order. Available: {product.Count}, Required: {item.Quantity}" });
+                                return BadRequest(new { message = $"Không đủ tồn kho cho sản phẩm '{product.Name}' để khôi phục đơn hàng. Còn: {product.Count}, Cần: {item.Quantity}" });
                             }
                             
                             product.Count -= item.Quantity;
@@ -290,7 +291,7 @@ namespace MyShopAPI.Controllers
             }
             else
             {
-                return BadRequest(new { message = $"Invalid status value: {updateDto.Status}" });
+                return BadRequest(new { message = $"Trạng thái không hợp lệ: {updateDto.Status}" });
             }
 
             await _context.SaveChangesAsync();
@@ -330,7 +331,7 @@ namespace MyShopAPI.Controllers
         {
             if (request.Items == null || !request.Items.Any())
             {
-                return BadRequest(new { message = "Order must contain at least one item" });
+                return BadRequest(new { message = "Đơn hàng phải có ít nhất một sản phẩm" });
             }
 
             // Step 1: Validate products and calculate total amount
@@ -342,17 +343,16 @@ namespace MyShopAPI.Controllers
 
                 if (product == null)
                 {
-                    return BadRequest(new { message = $"Product with ID {item.ProductId} not found" });
+                    return BadRequest(new { message = $"Không tìm thấy sản phẩm với ID {item.ProductId}" });
                 }
 
                 if (item.Quantity <= 0)
                 {
-                    return BadRequest(new { message = "Quantity must be greater than 0" });
+                    return BadRequest(new { message = "Số lượng phải lớn hơn 0" });
                 }
 
-                // Calculate item total using ImportPrice as base
-                // In real scenario, you might have a SalePrice field
-                totalAmount += product.ImportPrice * item.Quantity;
+                // Calculate item total using SellingPrice (customer price)
+                totalAmount += product.SellingPrice * item.Quantity;
             }
 
             // Step 2: Validate coupon if provided
@@ -413,14 +413,14 @@ namespace MyShopAPI.Controllers
         {
             if (request.Items == null || !request.Items.Any())
             {
-                return BadRequest(new { message = "Order must contain at least one item" });
+                return BadRequest(new { message = "Đơn hàng phải có ít nhất một sản phẩm" });
             }
 
             // Get the current user ID from the authenticated user
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userId))
             {
-                return Unauthorized(new { message = "User not authenticated" });
+                return Unauthorized(new { message = "Người dùng chưa đăng nhập" });
             }
 
             // Begin database transaction
@@ -439,24 +439,24 @@ namespace MyShopAPI.Controllers
                     if (product == null)
                     {
                         await transaction.RollbackAsync();
-                        return BadRequest(new { message = $"Product with ID {item.ProductId} not found" });
+                        return BadRequest(new { message = $"Không tìm thấy sản phẩm với ID {item.ProductId}" });
                     }
 
                     if (item.Quantity <= 0)
                     {
                         await transaction.RollbackAsync();
-                        return BadRequest(new { message = "Quantity must be greater than 0" });
+                        return BadRequest(new { message = "Số lượng phải lớn hơn 0" });
                     }
 
                     // Check stock availability
                     if (product.Count < item.Quantity)
                     {
                         await transaction.RollbackAsync();
-                        return BadRequest(new { message = $"Insufficient stock for product '{product.Name}'. Available: {product.Count}, Requested: {item.Quantity}" });
+                        return BadRequest(new { message = $"Không đủ tồn kho cho sản phẩm '{product.Name}'. Còn: {product.Count}, Cần: {item.Quantity}" });
                     }
 
-                    // Calculate amounts
-                    decimal unitPrice = product.ImportPrice;
+                    // Calculate amounts using SellingPrice (customer price)
+                    decimal unitPrice = product.SellingPrice;
                     decimal itemTotal = unitPrice * item.Quantity;
                     totalAmount += itemTotal;
 
@@ -542,7 +542,7 @@ namespace MyShopAPI.Controllers
             catch (Exception ex)
             {
                 await transaction.RollbackAsync();
-                return StatusCode(500, new { message = "An error occurred while processing the order", error = ex.Message });
+                return StatusCode(500, new { message = "Có lỗi xảy ra khi xử lý đơn hàng", error = ex.Message });
             }
         }
 
@@ -562,8 +562,8 @@ namespace MyShopAPI.Controllers
                         // Filter by user ownership (null = global, or owned by current user)
                         (d.UserId == null || (userId != null && d.UserId == userId)) &&
                         // Check validity using IsValid logic
-                        (d.StartDate == null || d.StartDate <= now) &&
-                        (d.EndDate == null || d.EndDate >= now) &&
+                        d.StartDate <= now &&
+                        d.EndDate >= now &&
                         (d.UsageLimit == null || d.UsedCount < d.UsageLimit))
                     .OrderByDescending(d => d.Amount) // Best deals first
                     .Select(d => new AvailableCouponDto
@@ -581,7 +581,7 @@ namespace MyShopAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Error fetching available coupons", error = ex.Message });
+                return StatusCode(500, new { message = "Lỗi khi lấy danh sách mã giảm giá", error = ex.Message });
             }
         }
 
@@ -602,12 +602,12 @@ namespace MyShopAPI.Controllers
                 .FirstOrDefaultAsync(o => o.OrderId == id && o.UserId == userId);
 
             if (order == null)
-                return NotFound(new { message = "Order not found" });
+                return NotFound(new { message = "Đơn hàng không tồn tại" });
 
             // Only allow deletion of Created orders
             if (order.Status != OrderStatus.Created)
             {
-                return BadRequest(new { message = $"Cannot delete order with status '{order.Status}'. Only 'Created' orders can be deleted." });
+                return BadRequest(new { message = $"Không thể xóa đơn hàng hiện tại. Chỉ có thể xóa đơn hàng 'Mới tạo'." });
             }
 
             // Begin transaction to restore stock
@@ -647,12 +647,12 @@ namespace MyShopAPI.Controllers
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
 
-                return Ok(new { message = "Order deleted successfully" });
+                return Ok(new { message = "Xóa đơn hàng thành công" });
             }
             catch (Exception ex)
             {
                 await transaction.RollbackAsync();
-                return StatusCode(500, new { message = "Error deleting order", error = ex.Message });
+                return StatusCode(500, new { message = "Lỗi khi xóa đơn hàng", error = ex.Message });
             }
         }
 

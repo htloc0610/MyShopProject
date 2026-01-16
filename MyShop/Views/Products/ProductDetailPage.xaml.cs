@@ -10,6 +10,7 @@ using Microsoft.UI.Xaml.Navigation;
 using MyShop.Models.Products;
 using MyShop.ViewModels.Products;
 using MyShop.Services.Products;
+using MyShop.Services.Shared;
 
 namespace MyShop.Views.Products;
 
@@ -36,6 +37,7 @@ public sealed partial class ProductDetailPage : Page, INotifyPropertyChanged
     }
 
     public ProductViewModel ViewModel { get; }
+    private readonly IToastService _toastService;
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -43,6 +45,7 @@ public sealed partial class ProductDetailPage : Page, INotifyPropertyChanged
     {
         InitializeComponent();
         ViewModel = App.Current.Services.GetRequiredService<ProductViewModel>();
+        _toastService = App.Current.Services.GetRequiredService<IToastService>();
     }
 
     /// <summary>
@@ -98,14 +101,14 @@ public sealed partial class ProductDetailPage : Page, INotifyPropertyChanged
 
             // Populate images for editing
             ViewModel.SelectedImageUrls.Clear();
-            if (Product.Images != null)
+            if (Product?.Images != null)
             {
                 foreach (var img in Product.Images)
                 {
                     ViewModel.SelectedImageUrls.Add(img);
                 }
             }
-            else if (!string.IsNullOrEmpty(Product.ImageUrl))
+            else if (Product != null && !string.IsNullOrEmpty(Product.ImageUrl))
             {
                 // Legacy support for single image
                 ViewModel.SelectedImageUrls.Add(Product.ImageUrl);
@@ -130,12 +133,12 @@ public sealed partial class ProductDetailPage : Page, INotifyPropertyChanged
             _isEditMode = false;
             UpdateUIState();
 
-            await ShowDialogAsync("Thành công", "Đã cập nhật sản phẩm thành công!");
+            _toastService.ShowSuccess("Đã cập nhật sản phẩm thành công!");
             await ReloadProductAsync();
         }
         catch (Exception ex)
         {
-            await ShowDialogAsync("Lỗi", $"Lỗi khi cập nhật sản phẩm: {ex.Message}");
+            _toastService.ShowError($"Lỗi khi cập nhật sản phẩm: {ex.Message}");
         }
     }
 
@@ -181,7 +184,7 @@ public sealed partial class ProductDetailPage : Page, INotifyPropertyChanged
         }
         catch (Exception ex)
         {
-            await ShowDialogAsync("Lỗi", $"Lỗi khi tải lại sản phẩm: {ex.Message}");
+            _toastService.ShowError($"Lỗi khi tải lại sản phẩm: {ex.Message}");
         }
     }
 
@@ -271,35 +274,35 @@ public sealed partial class ProductDetailPage : Page, INotifyPropertyChanged
         // Validate name
         if (string.IsNullOrWhiteSpace(NameTextBox.Text))
         {
-            _ = ShowDialogAsync("Lỗi", "Tên sản phẩm không được để trống.");
+            _toastService.ShowWarning("Tên sản phẩm không được để trống.");
             return false;
         }
 
         // Validate import price
         if (ImportPriceNumberBox.Value < 0)
         {
-            _ = ShowDialogAsync("Lỗi", "Giá nhập không được âm.");
+            _toastService.ShowWarning("Giá nhập không được âm.");
             return false;
         }
 
         // Validate selling price
         if (SellingPriceNumberBox.Value <= 0)
         {
-             _ = ShowDialogAsync("Lỗi", "Giá bán phải lớn hơn 0.");
+             _toastService.ShowWarning("Giá bán phải lớn hơn 0.");
              return false;
         }
 
         // Validate category
         if (CategoryComboBox.SelectedValue == null)
         {
-            _ = ShowDialogAsync("Lỗi", "Vui lòng chọn loại sản phẩm.");
+            _toastService.ShowWarning("Vui lòng chọn loại sản phẩm.");
             return false;
         }
 
         // Validate stock
         if (StockNumberBox.Value < 0)
         {
-            _ = ShowDialogAsync("Lỗi", "Số lượng tồn kho không được âm.");
+            _toastService.ShowWarning("Số lượng tồn kho không được âm.");
             return false;
         }
 
