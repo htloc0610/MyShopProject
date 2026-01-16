@@ -39,18 +39,29 @@
                 </TextBlock>
             </StackPanel>
 
-            <Button Grid.Column="1"
-                   Command="{x:Bind ViewModel.CreateNewOrderCommand}"
-                   Style="{StaticResource AccentButtonStyle}">
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                    <FontIcon Glyph="&#xE710;" FontSize="16"/>
-                    <TextBlock Text="Tạo Đơn Mới"/>
-                </StackPanel>
-            </Button>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                <!-- Filter Toggle -->
+                <ToggleButton IsChecked="{x:Bind ViewModel.IsFilterExpanded, Mode=TwoWay}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon Glyph="&#xE71C;" FontSize="14"/>
+                        <TextBlock Text="Bộ lọc"/>
+                    </StackPanel>
+                </ToggleButton>
+                
+                <!-- Create New Order -->
+                <Button Command="{x:Bind ViewModel.CreateNewOrderCommand}"
+                       Style="{StaticResource AccentButtonStyle}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon Glyph="&#xE710;" FontSize="16"/>
+                        <TextBlock Text="Tạo Đơn Mới"/>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
         </Grid>
 
-        <!-- Unified Search & Filter Card -->
+        <!-- Unified Search & Filter Card (Only visible when filter expanded) -->
         <Border Grid.Row="1" 
+                Visibility="{x:Bind ViewModel.IsFilterExpanded, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
                 Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                 BorderThickness="1"
@@ -58,63 +69,37 @@
                 Padding="16"
                 Margin="0,0,0,16">
             <StackPanel Spacing="16">
-                <!-- Top Row: Search and Controls -->
-                <Grid ColumnSpacing="12">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-
-                    <!-- Search Box -->
-                    <TextBox Grid.Column="0"
-                             PlaceholderText="Tìm theo tên khách, SĐT, mã giảm giá..."
-                             Text="{x:Bind ViewModel.SearchKeyword, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                             VerticalAlignment="Bottom">
-                        <TextBox.Header>
-                            <TextBlock Text="Tìm kiếm" FontWeight="SemiBold"/>
-                        </TextBox.Header>
-                    </TextBox>
-
-                    <!-- Action Buttons -->
-                    <StackPanel Grid.Column="1" 
-                               Orientation="Horizontal" 
-                               Spacing="8" 
-                               VerticalAlignment="Bottom">
+                <!-- Expanded Filters Area -->
+                <StackPanel Spacing="16">
+                    
+                    <!-- Row 1: Search Box -->
+                    <Grid ColumnSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
                         
-                        <!-- Search Button -->
-                        <Button Command="{x:Bind ViewModel.SearchCommand}"
-                               Style="{StaticResource AccentButtonStyle}">
+                        <TextBox Grid.Column="0"
+                                 PlaceholderText="Tìm theo tên khách, SĐT, mã giảm giá..."
+                                 Text="{x:Bind ViewModel.SearchKeyword, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                            <TextBox.Header>
+                                <TextBlock Text="Tìm kiếm" FontWeight="SemiBold"/>
+                            </TextBox.Header>
+                        </TextBox>
+                        
+                        <Button Grid.Column="1" 
+                                Command="{x:Bind ViewModel.SearchCommand}"
+                                Style="{StaticResource AccentButtonStyle}"
+                                VerticalAlignment="Bottom">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <FontIcon Glyph="&#xE721;" FontSize="14"/>
                                 <TextBlock Text="Tìm kiếm"/>
                             </StackPanel>
                         </Button>
+                    </Grid>
 
-                        <!-- Filter Toggle -->
-                        <ToggleButton IsChecked="{x:Bind ViewModel.IsFilterExpanded, Mode=TwoWay}">
-                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                <FontIcon Glyph="&#xE71C;" FontSize="14"/>
-                                <TextBlock Text="Bộ lọc nâng cao"/>
-                            </StackPanel>
-                        </ToggleButton>
-                    </StackPanel>
-                </Grid>
-
-                <!-- Expanded Filters Area -->
-                <Grid Visibility="{x:Bind ViewModel.IsFilterExpanded, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
-                      RowSpacing="16"
-                      BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                      BorderThickness="0,1,0,0"
-                      Padding="0,16,0,0">
-                    
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-
-                    <!-- Row 1: Status and Date Range -->
-                    <Grid x:Name="FilterRow1" Grid.Row="0" ColumnSpacing="12">
+                    <!-- Row 2: Status and Date Range -->
+                    <Grid x:Name="FilterRow1" ColumnSpacing="12">
                         <VisualStateManager.VisualStateGroups>
                             <VisualStateGroup>
                                 <VisualState x:Name="WideFilters">
@@ -159,18 +144,20 @@
                         <!-- Start Date -->
                         <CalendarDatePicker x:Name="StartDateFilter" Grid.Column="1"
                                            Header="Từ ngày"
+                                           PlaceholderText="Chọn ngày"
                                            Date="{x:Bind ViewModel.StartDate, Mode=TwoWay}"
                                            HorizontalAlignment="Stretch"/>
 
                         <!-- End Date -->
                         <CalendarDatePicker x:Name="EndDateFilter" Grid.Column="2"
                                            Header="Đến ngày"
+                                           PlaceholderText="Chọn ngày"
                                            Date="{x:Bind ViewModel.EndDate, Mode=TwoWay}"
                                            HorizontalAlignment="Stretch"/>
                     </Grid>
 
-                    <!-- Row 2: Amount Range -->
-                    <Grid Grid.Row="1" ColumnSpacing="12">
+                    <!-- Row 3: Amount Range -->
+                    <Grid ColumnSpacing="12">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
@@ -192,9 +179,8 @@
                                 HorizontalAlignment="Stretch"/>
                     </Grid>
 
-                    <!-- Row 3: Filter Actions (Clear/Apply is mostly redundant if realtime, but good for explicit action) -->
-                    <StackPanel Grid.Row="2" 
-                               Orientation="Horizontal" 
+                    <!-- Row 4: Filter Actions -->
+                    <StackPanel Orientation="Horizontal" 
                                Spacing="8"
                                HorizontalAlignment="Right">
                         <Button Command="{x:Bind ViewModel.ClearFiltersCommand}">
@@ -211,7 +197,7 @@
                             </StackPanel>
                         </Button>
                     </StackPanel>
-                </Grid>
+                </StackPanel>
             </StackPanel>
         </Border>
 

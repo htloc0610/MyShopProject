@@ -45,8 +45,9 @@
                 <ToggleButton IsChecked="{x:Bind ViewModel.IsGridView, Mode=TwoWay}"
                              ToolTipService.ToolTip="Chuyển đổi dạng danh sách / lưới">
                     <StackPanel Orientation="Horizontal" Spacing="8">
-                        <FontIcon Glyph="{x:Bind ViewModel.IsGridView, Mode=OneWay, Converter={StaticResource BoolToGlyphConverter}, ConverterParameter='&#xE80A;|&#xE80B;'}" FontSize="16"/>
-                        <TextBlock Text="{x:Bind ViewModel.IsGridView, Mode=OneWay, Converter={StaticResource BoolToStringConverter}, ConverterParameter='Dạng lưới|Dạng danh sách'}" />
+                        <!-- When IsGridView=true (grid mode), show list icon to switch TO list; when false, show grid icon -->
+                        <FontIcon Glyph="{x:Bind ViewModel.IsGridView, Mode=OneWay, Converter={StaticResource BoolToGlyphConverter}, ConverterParameter='&#xE8FD;|&#xE80A;'}" FontSize="16"/>
+                        <TextBlock Text="{x:Bind ViewModel.IsGridView, Mode=OneWay, Converter={StaticResource BoolToStringConverter}, ConverterParameter='Dạng danh sách|Dạng lưới'}" />
                     </StackPanel>
                 </ToggleButton>
 
@@ -66,15 +67,18 @@
                              ToolTipService.ToolTip="Chuyển đổi chế độ lọc">
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <FontIcon x:Name="FilterModeIcon" Glyph="&#xE713;" FontSize="16"/>
-                        <TextBlock x:Name="FilterModeText" Text="Plugin lọc"/>
+                        <TextBlock x:Name="FilterModeText" Text="Tìm kiếm thường"/>
                     </StackPanel>
                 </ToggleButton>
                 
-                <Button Command="{x:Bind ViewModel.RefreshCommand}"
-                       ToolTipService.ToolTip="Làm mới danh sách">
+                <!-- Create Product Button -->
+                <Button x:Name="CreateProductButton"
+                       Click="CreateProductButton_Click"
+                       Style="{StaticResource AccentButtonStyle}"
+                       ToolTipService.ToolTip="Tạo sản phẩm mới">
                     <StackPanel Orientation="Horizontal" Spacing="8">
-                        <FontIcon Glyph="&#xE72C;" FontSize="16"/>
-                        <TextBlock Text="Làm mới"/>
+                        <FontIcon Glyph="&#xE710;" FontSize="16"/>
+                        <TextBlock Text="Tạo sản phẩm"/>
                     </StackPanel>
                 </Button>
             </StackPanel>
@@ -368,7 +372,7 @@
                           ItemsSource="{x:Bind ViewModel.Products, Mode=OneWay}"
                           Visibility="{x:Bind ViewModel.IsGridView, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
                           DesiredWidth="240"
-                          ItemHeight="320"
+                          ItemHeight="280"
                           StretchContentForSingleRow="False"
                           SelectionMode="None"
                           IsItemClickEnabled="True"

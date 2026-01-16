@@ -135,7 +135,7 @@ namespace MyShopAPI.Controllers
                 .FirstOrDefaultAsync(p => p.ProductId == id);
 
             if (product == null)
-                return NotFound(new { message = $"Product {id} not found" });
+                return NotFound(new { message = $"Không tìm thấy sản phẩm {id}" });
 
             return Ok(ProductMapper.ToDto(product));
         }
@@ -150,12 +150,12 @@ namespace MyShopAPI.Controllers
                 .AnyAsync(c => c.CategoryId == createDto.CategoryId);
 
             if (!categoryExists)
-                return BadRequest(new { message = "Invalid category id" });
+                return BadRequest(new { message = "ID loại sản phẩm không hợp lệ" });
 
             // Set UserId for data ownership
             var userId = _userContextService.GetUserId();
             if (string.IsNullOrEmpty(userId))
-                return Unauthorized(new { message = "User not authenticated" });
+                return Unauthorized(new { message = "Người dùng chưa đăng nhập" });
 
             // Map DTO to Product entity
             var product = new Product
@@ -211,7 +211,7 @@ namespace MyShopAPI.Controllers
             if (id != updateDto.ProductId)
             {
                 _logger.LogWarning("Product ID mismatch. URL id: {UrlId}, DTO id: {DtoId}", id, updateDto.ProductId);
-                return BadRequest(new { message = "Product ID mismatch" });
+                return BadRequest(new { message = "ID sản phẩm không khớp" });
             }
 
             var product = await _context.Products
@@ -221,7 +221,7 @@ namespace MyShopAPI.Controllers
             if (product == null)
             {
                 _logger.LogWarning("Product {ProductId} not found", id);
-                return NotFound(new { message = $"Product {id} not found" });
+                return NotFound(new { message = $"Không tìm thấy sản phẩm {id}" });
             }
 
             // Validate category exists
@@ -231,7 +231,7 @@ namespace MyShopAPI.Controllers
             if (!categoryExists)
             {
                 _logger.LogWarning("Invalid category id: {CategoryId}", updateDto.CategoryId);
-                return BadRequest(new { message = "Invalid category id" });
+                return BadRequest(new { message = "ID loại sản phẩm không hợp lệ" });
             }
 
             // Update product properties
@@ -285,7 +285,7 @@ namespace MyShopAPI.Controllers
         {
             var product = await _context.Products.FindAsync(id);
             if (product == null)
-                return NotFound(new { message = $"Product {id} not found" });
+                return NotFound(new { message = $"Không tìm thấy sản phẩm {id}" });
 
             _context.Products.Remove(product);
             await _context.SaveChangesAsync();

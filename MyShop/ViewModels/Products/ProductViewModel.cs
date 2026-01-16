@@ -79,10 +79,10 @@ public partial class ProductViewModel : ObservableObject
     #region Observable Properties - Sorting
 
     [ObservableProperty]
-    private string _sortColumn = "id";
+    private string _sortColumn = "createdAt";
 
     [ObservableProperty]
-    private bool _isDescending = false;
+    private bool _isDescending = true;
 
     #endregion
 
@@ -256,7 +256,7 @@ public partial class ProductViewModel : ObservableObject
 
             if (ProductCount == 0)
             {
-                _toastService.ShowWarning("Không tìm thấy sản phẩm nào.");
+                _toastService.ShowInfo("Không tìm thấy sản phẩm nào.");
             }
         }
         catch (System.Exception ex)
@@ -533,6 +533,9 @@ public partial class ProductViewModel : ObservableObject
                 Products.Remove(product);
                 ProductCount--;
                 OnPropertyChanged(nameof(PaginationInfo));
+                
+                // Show success toast
+                _toastService.ShowSuccess($"Đã xóa sản phẩm '{product.Name}' thành công!");
                 
                 // Notify that products have changed
                 _productChangeNotifier.NotifyProductsChanged();

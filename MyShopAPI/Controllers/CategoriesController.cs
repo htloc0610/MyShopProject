@@ -56,7 +56,7 @@ namespace MyShopAPI.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting categories");
-                return StatusCode(500, new { message = "Error retrieving categories" });
+                return StatusCode(500, new { message = "Lỗi khi lấy danh sách loại sản phẩm" });
             }
         }
 
@@ -73,7 +73,7 @@ namespace MyShopAPI.Controllers
                     .FirstOrDefaultAsync(c => c.CategoryId == id);
 
                 if (category == null)
-                    return NotFound(new { message = $"Category {id} not found" });
+                    return NotFound(new { message = $"Không tìm thấy loại sản phẩm {id}" });
 
                 var dto = new CategoryDto
                 {
@@ -88,7 +88,7 @@ namespace MyShopAPI.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting category {CategoryId}", id);
-                return StatusCode(500, new { message = "Error retrieving category" });
+                return StatusCode(500, new { message = "Lỗi khi lấy loại sản phẩm" });
             }
         }
 
