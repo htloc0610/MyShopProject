@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MyShop.Models.Discounts;
 using MyShop.Services.Discounts;
+using MyShop.Services.Shared;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -16,10 +17,12 @@ namespace MyShop.ViewModels.Discounts;
 public partial class DiscountViewModel : ObservableObject
 {
     private readonly IDiscountService _discountService;
+    private readonly IToastService _toastService;
 
-    public DiscountViewModel(IDiscountService discountService)
+    public DiscountViewModel(IDiscountService discountService, IToastService toastService)
     {
         _discountService = discountService;
+        _toastService = toastService;
     }
 
     [ObservableProperty]
@@ -120,7 +123,6 @@ public partial class DiscountViewModel : ObservableObject
         try
         {
             IsLoading = true;
-            StatusMessage = "Đang tải mã giảm giá...";
 
             // Convert filter values
             double? minAmountFilter = MinAmount > 0 ? MinAmount : null;
@@ -150,12 +152,10 @@ public partial class DiscountViewModel : ObservableObject
 
             // Debug output
             System.Diagnostics.Debug.WriteLine($"Loaded page {CurrentPage}/{TotalPages}, {result.Items.Count} items, Total: {TotalCount}");
-
-            StatusMessage = $"Đã tải {Discounts.Count} mã giảm giá";
         }
         catch (Exception ex)
         {
-            StatusMessage = $"Lỗi khi tải mã giảm giá: {ex.Message}";
+            _toastService.ShowError($"Lỗi khi tải mã giảm giá: {ex.Message}");
             System.Diagnostics.Debug.WriteLine($"Error in LoadDiscountsAsync: {ex}");
         }
         finally
@@ -273,19 +273,19 @@ public partial class DiscountViewModel : ObservableObject
             // Validation
             if (string.IsNullOrWhiteSpace(EditCode))
             {
-                StatusMessage = "Mã giảm giá không được để trống";
+                _toastService.ShowError("Mã giảm giá không được để trống");
                 return;
             }
 
             if (EditAmount <= 0)
             {
-                StatusMessage = "Số tiền giảm phải lớn hơn 0";
+                _toastService.ShowError("Số tiền giảm phải lớn hơn 0");
                 return;
             }
 
             if (EditEndDate <= EditStartDate)
             {
-                StatusMessage = "Ngày kết thúc phải sau ngày bắt đầu";
+                _toastService.ShowError("Ngày kết thúc phải sau ngày bắt đầu");
                 return;
             }
 
@@ -310,12 +310,12 @@ public partial class DiscountViewModel : ObservableObject
                 var success = await _discountService.UpdateDiscountAsync(discount.DiscountId, discount);
                 if (success)
                 {
-                    StatusMessage = "Cập nhật mã giảm giá thành công";
+                    _toastService.ShowSuccess("Cập nhật mã giảm giá thành công");
                     await LoadDiscountsAsync();
                 }
                 else
                 {
-                    StatusMessage = "Không thể cập nhật mã giảm giá";
+                    _toastService.ShowError("Không thể cập nhật mã giảm giá");
                 }
             }
             else
@@ -324,13 +324,13 @@ public partial class DiscountViewModel : ObservableObject
                 var created = await _discountService.CreateDiscountAsync(discount);
                 if (created != null)
                 {
-                    StatusMessage = "Tạo mã giảm giá thành công";
+                    _toastService.ShowSuccess("Tạo mã giảm giá thành công");
                     await LoadDiscountsAsync();
                     ClearForm();
                 }
                 else
                 {
-                    StatusMessage = "Không thể tạo mã giảm giá";
+                    _toastService.ShowError("Không thể tạo mã giảm giá");
                 }
             }
         }
@@ -355,17 +355,16 @@ public partial class DiscountViewModel : ObservableObject
         try
         {
             IsLoading = true;
-            StatusMessage = "Đang xóa mã giảm giá...";
 
             var success = await _discountService.DeleteDiscountAsync(discount.DiscountId);
             if (success)
             {
                 Discounts.Remove(discount);
-                StatusMessage = "Xóa mã giảm giá thành công";
+                _toastService.ShowSuccess("Xóa mã giảm giá thành công");
             }
             else
             {
-                StatusMessage = "Không thể xóa mã giảm giá";
+                _toastService.ShowError("Không thể xóa mã giảm giá");
             }
         }
         catch (Exception ex)
@@ -396,9 +395,9 @@ public partial class DiscountViewModel : ObservableObject
             var success = await _discountService.UpdateDiscountAsync(discount.DiscountId, discount);
             if (success)
             {
-                StatusMessage = discount.IsActive 
+                _toastService.ShowSuccess(discount.IsActive 
                     ? $"Đã kích hoạt mã '{discount.Code}'" 
-                    : $"Đã vô hiệu hóa mã '{discount.Code}'";
+                    : $"Đã vô hiệu hóa mã '{discount.Code}'");
                 
                 // Refresh the list to update UI
                 await LoadDiscountsAsync();
@@ -407,7 +406,7 @@ public partial class DiscountViewModel : ObservableObject
             {
                 // Revert on failure
                 discount.IsActive = !discount.IsActive;
-                StatusMessage = "Không thể cập nhật trạng thái";
+                _toastService.ShowError("Không thể cập nhật trạng thái");
             }
         }
         catch (Exception ex)

@@ -428,7 +428,7 @@
                     <NumberBox Header="Số tiền giảm *" 
                               PlaceholderText="Nhập số tiền"
                               Value="{x:Bind ViewModel.EditAmount, Mode=TwoWay}"
-                              Minimum="1"
+                              Minimum="0"
                               SpinButtonPlacementMode="Inline"/>
 
                     <!-- Start Date -->
