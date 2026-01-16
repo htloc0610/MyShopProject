@@ -12,6 +12,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
@@ -32,15 +33,25 @@
                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
             </StackPanel>
 
-            <Button Grid.Column="1" 
-                   Content="Thêm mã giảm giá"
-                   Style="{StaticResource AccentButtonStyle}"
-                   Command="{x:Bind ViewModel.PrepareAddCommand}"
-                   Click="AddButton_Click">
-                <Button.KeyboardAccelerators>
-                    <KeyboardAccelerator Key="N" Modifiers="Control"/>
-                </Button.KeyboardAccelerators>
-            </Button>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
+                <!-- Toggle Filter Button -->
+                <ToggleButton IsChecked="{x:Bind ViewModel.IsFilterVisible, Mode=TwoWay}"
+                             ToolTipService.ToolTip="Hiện/Ẩn bộ lọc">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon Glyph="&#xE71C;" FontSize="16"/>
+                        <TextBlock Text="Bộ lọc" />
+                    </StackPanel>
+                </ToggleButton>
+
+                <Button Content="Thêm mã giảm giá"
+                       Style="{StaticResource AccentButtonStyle}"
+                       Command="{x:Bind ViewModel.PrepareAddCommand}"
+                       Click="AddButton_Click">
+                    <Button.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="N" Modifiers="Control"/>
+                    </Button.KeyboardAccelerators>
+                </Button>
+            </StackPanel>
         </Grid>
 
         <!-- Status Bar -->
@@ -50,8 +61,147 @@
                 Severity="Informational"
                 Margin="0,0,0,16"/>
 
+        <!-- Filter Section -->
+        <Border Grid.Row="2"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                BorderThickness="1"
+                CornerRadius="8"
+                Padding="16"
+                Margin="0,0,0,16"
+                Visibility="{x:Bind ViewModel.IsFilterVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- First Row: Search and Status -->
+                <Grid Grid.Row="0" Margin="0,0,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition Width="12"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Search Box -->
+                    <TextBox Grid.Column="0"
+                            PlaceholderText="Tìm kiếm theo mã giảm giá..."
+                            Text="{x:Bind ViewModel.SearchKeyword, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            VerticalAlignment="Center">
+                        <TextBox.Header>
+                            <TextBlock Text="Tìm kiếm" FontWeight="SemiBold"/>
+                        </TextBox.Header>
+                    </TextBox>
+
+                    <!-- Status Filter -->
+                    <ComboBox Grid.Column="2"
+                             ItemsSource="{x:Bind ViewModel.StatusOptions, Mode=OneWay}"
+                             SelectedValue="{x:Bind ViewModel.SelectedStatus, Mode=TwoWay}"
+                             DisplayMemberPath="Display"
+                             SelectedValuePath="Value"
+                             HorizontalAlignment="Stretch"
+                             VerticalAlignment="Center">
+                        <ComboBox.Header>
+                            <TextBlock Text="Trạng thái" FontWeight="SemiBold"/>
+                        </ComboBox.Header>
+                    </ComboBox>
+                </Grid>
+
+                <!-- Second Row: Amount Range -->
+                <Grid Grid.Row="1" Margin="0,0,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="12"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Min Amount -->
+                    <NumberBox Grid.Column="0"
+                              Value="{x:Bind ViewModel.MinAmount, Mode=TwoWay}"
+                              PlaceholderText="0"
+                              SpinButtonPlacementMode="Compact"
+                              Minimum="0"
+                              VerticalAlignment="Center">
+                        <NumberBox.Header>
+                            <TextBlock Text="Số tiền tối thiểu (VNĐ)" FontWeight="SemiBold"/>
+                        </NumberBox.Header>
+                    </NumberBox>
+
+                    <!-- Max Amount -->
+                    <NumberBox Grid.Column="2"
+                              Value="{x:Bind ViewModel.MaxAmount, Mode=TwoWay}"
+                              PlaceholderText="0"
+                              SpinButtonPlacementMode="Compact"
+                              Minimum="0"
+                              VerticalAlignment="Center">
+                        <NumberBox.Header>
+                            <TextBlock Text="Số tiền tối đa (VNĐ)" FontWeight="SemiBold"/>
+                        </NumberBox.Header>
+                    </NumberBox>
+                </Grid>
+
+                <!-- Third Row: Date Range and Buttons -->
+                <Grid Grid.Row="2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="12"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="12"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Start Date -->
+                    <CalendarDatePicker Grid.Column="0"
+                                       Date="{x:Bind ViewModel.FilterStartDate, Mode=TwoWay}"
+                                       PlaceholderText="Chọn ngày bắt đầu"
+                                       HorizontalAlignment="Stretch"
+                                       VerticalAlignment="Center">
+                        <CalendarDatePicker.Header>
+                            <TextBlock Text="Ngày bắt đầu" FontWeight="SemiBold"/>
+                        </CalendarDatePicker.Header>
+                    </CalendarDatePicker>
+
+                    <!-- End Date -->
+                    <CalendarDatePicker Grid.Column="2"
+                                       Date="{x:Bind ViewModel.FilterEndDate, Mode=TwoWay}"
+                                       PlaceholderText="Chọn ngày kết thúc"
+                                       HorizontalAlignment="Stretch"
+                                       VerticalAlignment="Center">
+                        <CalendarDatePicker.Header>
+                            <TextBlock Text="Ngày kết thúc" FontWeight="SemiBold"/>
+                        </CalendarDatePicker.Header>
+                    </CalendarDatePicker>
+
+                    <!-- Filter Buttons -->
+                    <StackPanel Grid.Column="4" 
+                               Orientation="Horizontal" 
+                               Spacing="8" 
+                               VerticalAlignment="Bottom">
+                        <Button Command="{x:Bind ViewModel.ApplyFiltersCommand}"
+                               Style="{StaticResource AccentButtonStyle}"
+                               Width="100">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon Glyph="&#xE71C;" FontSize="16"/>
+                                <TextBlock Text="Lọc"/>
+                            </StackPanel>
+                        </Button>
+                        
+                        <Button Command="{x:Bind ViewModel.ClearFiltersCommand}"
+                               Width="120">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon Glyph="&#xE894;" FontSize="16"/>
+                                <TextBlock Text="Xóa lọc"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </Border>
+
         <!-- Data Grid -->
-        <Grid Grid.Row="2">
+        <Grid Grid.Row="3">
             <ProgressRing IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}"
                          Width="60" Height="60"
                          HorizontalAlignment="Center"
@@ -196,7 +346,7 @@
         </Grid>
 
         <!-- Pagination Controls -->
-        <Border Grid.Row="3" 
+        <Border Grid.Row="4" 
                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                BorderThickness="1"

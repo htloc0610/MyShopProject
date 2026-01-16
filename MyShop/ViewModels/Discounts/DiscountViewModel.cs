@@ -82,6 +82,35 @@ public partial class DiscountViewModel : ObservableObject
 
     public ObservableCollection<int> PageSizeOptions { get; } = new() { 10, 20, 50 };
 
+    // Filter properties
+    [ObservableProperty]
+    private string _searchKeyword = string.Empty;
+
+    [ObservableProperty]
+    private string _selectedStatus = "all";
+
+    [ObservableProperty]
+    private double _minAmount = 0;
+
+    [ObservableProperty]
+    private double _maxAmount = 0;
+
+    [ObservableProperty]
+    private DateTimeOffset? _filterStartDate;
+
+    [ObservableProperty]
+    private DateTimeOffset? _filterEndDate;
+
+    [ObservableProperty]
+    private bool _isFilterVisible = false;
+
+    public ObservableCollection<StatusFilterOption> StatusOptions { get; } = new()
+    {
+        new StatusFilterOption { Value = "all", Display = "-- Tất cả --" },
+        new StatusFilterOption { Value = "active", Display = "Đang hoạt động" },
+        new StatusFilterOption { Value = "inactive", Display = "Đã tắt" }
+    };
+
     /// <summary>
     /// Load discounts with pagination.
     /// </summary>
@@ -93,7 +122,21 @@ public partial class DiscountViewModel : ObservableObject
             IsLoading = true;
             StatusMessage = "Đang tải mã giảm giá...";
 
-            var result = await _discountService.GetDiscountsPagedAsync(CurrentPage, PageSize);
+            // Convert filter values
+            double? minAmountFilter = MinAmount > 0 ? MinAmount : null;
+            double? maxAmountFilter = MaxAmount > 0 ? MaxAmount : null;
+            DateTime? startDateFilter = FilterStartDate?.UtcDateTime;
+            DateTime? endDateFilter = FilterEndDate?.UtcDateTime;
+
+            var result = await _discountService.GetDiscountsPagedAsync(
+                CurrentPage, 
+                PageSize,
+                SearchKeyword,
+                SelectedStatus,
+                minAmountFilter,
+                maxAmountFilter,
+                startDateFilter,
+                endDateFilter);
             
             Discounts.Clear();
             foreach (var discount in result.Items)
@@ -149,6 +192,41 @@ public partial class DiscountViewModel : ObservableObject
     private bool CanGoToPreviousPage()
     {
         return !IsLoading && CurrentPage > 1;
+    }
+
+    /// <summary>
+    /// Toggle filter visibility.
+    /// </summary>
+    [RelayCommand]
+    private void ToggleFilter()
+    {
+        IsFilterVisible = !IsFilterVisible;
+    }
+
+    /// <summary>
+    /// Apply filters and reload discounts.
+    /// </summary>
+    [RelayCommand]
+    private async Task ApplyFiltersAsync()
+    {
+        CurrentPage = 1;
+        await LoadDiscountsAsync();
+    }
+
+    /// <summary>
+    /// Clear all filters and reload discounts.
+    /// </summary>
+    [RelayCommand]
+    private async Task ClearFiltersAsync()
+    {
+        SearchKeyword = string.Empty;
+        SelectedStatus = "all";
+        MinAmount = 0;
+        MaxAmount = 0;
+        FilterStartDate = null;
+        FilterEndDate = null;
+        CurrentPage = 1;
+        await LoadDiscountsAsync();
     }
 
     /// <summary>
