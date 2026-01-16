@@ -17,8 +17,13 @@ public class StatusToColorConverter : IValueConverter
             return status switch
             {
                 "Active" => Windows.UI.Color.FromArgb(255, 34, 197, 94), // Green
+                "Đang hoạt động" => Windows.UI.Color.FromArgb(255, 34, 197, 94), // Green
                 "Expired" => Windows.UI.Color.FromArgb(255, 239, 68, 68), // Red
+                "Hết hạn" => Windows.UI.Color.FromArgb(255, 239, 68, 68), // Red
                 "Limit Reached" => Windows.UI.Color.FromArgb(255, 245, 158, 11), // Amber
+                "Đã hết lượt" => Windows.UI.Color.FromArgb(255, 245, 158, 11), // Amber
+                "Inactive" => Windows.UI.Color.FromArgb(255, 156, 163, 175), // Gray
+                "Đã tắt" => Windows.UI.Color.FromArgb(255, 156, 163, 175), // Gray
                 _ => Windows.UI.Color.FromArgb(255, 156, 163, 175) // Gray
             };
         }

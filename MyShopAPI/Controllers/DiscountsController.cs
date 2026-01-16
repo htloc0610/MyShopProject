@@ -31,13 +31,19 @@ public class DiscountsController : ControllerBase
     }
 
     // ====================================================
-    // GET: api/discounts?page=1&pageSize=10
-    // Get discounts for the current user with pagination
+    // GET: api/discounts?page=1&pageSize=10&search=CODE&status=active&minAmount=1000&maxAmount=5000&startDate=2024-01-01&endDate=2024-12-31
+    // Get discounts for the current user with pagination and filtering
     // ====================================================
     [HttpGet]
     public async Task<ActionResult<object>> GetDiscounts(
         [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 10)
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string? search = null,
+        [FromQuery] string? status = null,
+        [FromQuery] double? minAmount = null,
+        [FromQuery] double? maxAmount = null,
+        [FromQuery] DateTime? startDate = null,
+        [FromQuery] DateTime? endDate = null)
     {
         try
         {
@@ -45,8 +51,45 @@ public class DiscountsController : ControllerBase
             if (page < 1) page = 1;
             if (pageSize < 1 || pageSize > 100) pageSize = 10;
 
-            var query = _context.Discounts
-                .OrderByDescending(d => d.StartDate);
+            var query = _context.Discounts.AsQueryable();
+
+            // Apply search filter (search by code)
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                query = query.Where(d => d.Code.Contains(search));
+            }
+
+            // Apply status filter
+            if (!string.IsNullOrWhiteSpace(status) && status != "all")
+            {
+                bool isActive = status == "active";
+                query = query.Where(d => d.IsActive == isActive);
+            }
+
+            // Apply amount range filter
+            if (minAmount.HasValue && minAmount.Value > 0)
+            {
+                query = query.Where(d => d.Amount >= minAmount.Value);
+            }
+
+            if (maxAmount.HasValue && maxAmount.Value > 0)
+            {
+                query = query.Where(d => d.Amount <= maxAmount.Value);
+            }
+
+            // Apply date range filter (filter by discount validity period)
+            if (startDate.HasValue)
+            {
+                query = query.Where(d => d.StartDate >= startDate.Value);
+            }
+
+            if (endDate.HasValue)
+            {
+                query = query.Where(d => d.EndDate <= endDate.Value);
+            }
+
+            // Order by start date descending
+            query = query.OrderByDescending(d => d.StartDate);
 
             var totalCount = await query.CountAsync();
             var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);

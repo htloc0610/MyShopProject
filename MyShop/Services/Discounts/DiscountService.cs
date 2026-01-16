@@ -13,7 +13,15 @@ namespace MyShop.Services.Discounts;
 public interface IDiscountService
 {
     Task<List<Discount>> GetAllDiscountsAsync();
-    Task<DiscountPagedResult> GetDiscountsPagedAsync(int page, int pageSize);
+    Task<DiscountPagedResult> GetDiscountsPagedAsync(
+        int page, 
+        int pageSize, 
+        string? searchKeyword = null,
+        string? status = null,
+        double? minAmount = null,
+        double? maxAmount = null,
+        DateTime? startDate = null,
+        DateTime? endDate = null);
     Task<Discount?> GetDiscountByIdAsync(int id);
     Task<Discount?> CreateDiscountAsync(Discount discount);
     Task<bool> UpdateDiscountAsync(int id, Discount discount);
@@ -55,13 +63,57 @@ public class DiscountService : IDiscountService
     }
 
     /// <summary>
-    /// Gets discounts with pagination.
+    /// Gets discounts with pagination and filtering.
     /// </summary>
-    public async Task<DiscountPagedResult> GetDiscountsPagedAsync(int page, int pageSize)
+    public async Task<DiscountPagedResult> GetDiscountsPagedAsync(
+        int page, 
+        int pageSize, 
+        string? searchKeyword = null,
+        string? status = null,
+        double? minAmount = null,
+        double? maxAmount = null,
+        DateTime? startDate = null,
+        DateTime? endDate = null)
     {
         try
         {
-            var url = $"{DiscountsEndpoint}?page={page}&pageSize={pageSize}";
+            var queryParams = new List<string>
+            {
+                $"page={page}",
+                $"pageSize={pageSize}"
+            };
+
+            if (!string.IsNullOrWhiteSpace(searchKeyword))
+            {
+                queryParams.Add($"search={Uri.EscapeDataString(searchKeyword)}");
+            }
+
+            if (!string.IsNullOrWhiteSpace(status) && status != "all")
+            {
+                queryParams.Add($"status={status}");
+            }
+
+            if (minAmount.HasValue && minAmount.Value > 0)
+            {
+                queryParams.Add($"minAmount={minAmount.Value}");
+            }
+
+            if (maxAmount.HasValue && maxAmount.Value > 0)
+            {
+                queryParams.Add($"maxAmount={maxAmount.Value}");
+            }
+
+            if (startDate.HasValue)
+            {
+                queryParams.Add($"startDate={startDate.Value:yyyy-MM-dd}");
+            }
+
+            if (endDate.HasValue)
+            {
+                queryParams.Add($"endDate={endDate.Value:yyyy-MM-dd}");
+            }
+
+            var url = $"{DiscountsEndpoint}?{string.Join("&", queryParams)}";
             var result = await _httpClient.GetFromJsonAsync<DiscountPagedResult>(url);
             return result ?? new DiscountPagedResult();
         }
