@@ -82,7 +82,7 @@ namespace MyShop.Services.Auth
                 return new AuthResult
                 {
                     Success = false,
-                    ErrorMessage = ExtractErrorMessage(errorContent) ?? "Registration failed"
+                    ErrorMessage = ExtractErrorMessage(errorContent) ?? "Đăng ký thất bại"
                 };
             }
             catch (Exception ex)
@@ -135,7 +135,7 @@ namespace MyShop.Services.Auth
                 return new AuthResult
                 {
                     Success = false,
-                    ErrorMessage = ExtractErrorMessage(errorContent) ?? "Invalid email or password"
+                    ErrorMessage = ExtractErrorMessage(errorContent) ?? "Email hoặc mật khẩu không đúng"
                 };
             }
             catch (Exception ex)
@@ -159,7 +159,7 @@ namespace MyShop.Services.Auth
                     return new AuthResult
                     {
                         Success = false,
-                        ErrorMessage = "No refresh token available"
+                        ErrorMessage = "Không có refresh token"
                     };
                 }
 
@@ -195,7 +195,7 @@ namespace MyShop.Services.Auth
                 return new AuthResult
                 {
                     Success = false,
-                    ErrorMessage = "Token refresh failed"
+                    ErrorMessage = "Làm mới token thất bại"
                 };
             }
             catch (Exception ex)
@@ -272,7 +272,7 @@ namespace MyShop.Services.Auth
                     return new ActivationResult
                     {
                         Success = false,
-                        ErrorMessage = "Not authenticated"
+                        ErrorMessage = "Chưa đăng nhập"
                     };
                 }
 
@@ -299,7 +299,7 @@ namespace MyShop.Services.Auth
                 return new ActivationResult
                 {
                     Success = false,
-                    ErrorMessage = ExtractErrorMessage(errorContent) ?? "Activation failed"
+                    ErrorMessage = ExtractErrorMessage(errorContent) ?? "Kích hoạt thất bại"
                 };
             }
             catch (Exception ex)
@@ -307,7 +307,7 @@ namespace MyShop.Services.Auth
                 return new ActivationResult
                 {
                     Success = false,
-                    ErrorMessage = $"Connection error: {ex.Message}"
+                    ErrorMessage = $"Lỗi kết nối: {ex.Message}"
                 };
             }
         }
