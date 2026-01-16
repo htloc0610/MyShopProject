@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MyShop.Services.Auth;
@@ -84,6 +85,12 @@ public partial class LoginViewModel : ObservableObject
             return;
         }
 
+        // Validate password strength for registration
+        if (!IsLoginMode && !ValidatePassword(Password))
+        {
+            return; // Error toast already shown in ValidatePassword
+        }
+
         IsLoading = true;
 
         try
@@ -133,23 +140,55 @@ public partial class LoginViewModel : ObservableObject
             }
             else
             {
-                // Show error toast instead of setting ErrorMessage
+                // Show error toast only
                 var errorMsg = result.ErrorMessage ?? (IsLoginMode ? "Đăng nhập thất bại" : "Đăng ký thất bại");
                 _toastService.ShowError(errorMsg);
-                
-                // Still set ErrorMessage for InfoBar fallback
-                ErrorMessage = errorMsg;
             }
         }
         catch (Exception ex)
         {
-            // Show exception as error toast
+            // Show exception as error toast only
             _toastService.ShowError($"Lỗi: {ex.Message}");
-            ErrorMessage = ex.Message;
         }
         finally
         {
             IsLoading = false;
         }
+    }
+
+    /// <summary>
+    /// Validate password strength according to backend requirements.
+    /// </summary>
+    private bool ValidatePassword(string password)
+    {
+        // Minimum length: 6 characters
+        if (password.Length < 6)
+        {
+            _toastService.ShowError("Mật khẩu phải có ít nhất 6 ký tự!");
+            return false;
+        }
+
+        // Must contain at least one uppercase letter
+        if (!password.Any(char.IsUpper))
+        {
+            _toastService.ShowError("Mật khẩu phải có ít nhất 1 chữ in hoa!");
+            return false;
+        }
+
+        // Must contain at least one lowercase letter
+        if (!password.Any(char.IsLower))
+        {
+            _toastService.ShowError("Mật khẩu phải có ít nhất 1 chữ thường!");
+            return false;
+        }
+
+        // Must contain at least one digit
+        if (!password.Any(char.IsDigit))
+        {
+            _toastService.ShowError("Mật khẩu phải có ít nhất 1 chữ số!");
+            return false;
+        }
+
+        return true;
     }
 }

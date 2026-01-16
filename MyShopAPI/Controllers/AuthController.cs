@@ -45,7 +45,7 @@ namespace MyShopAPI.Controllers
             var existingUser = await _userManager.FindByEmailAsync(registerDto.Email);
             if (existingUser != null)
             {
-                return BadRequest(new { Message = "User with this email already exists." });
+                return BadRequest(new { Message = "Người dùng với email này đã tồn tại." });
             }
 
             // Create new user
@@ -61,7 +61,7 @@ namespace MyShopAPI.Controllers
 
             if (!result.Succeeded)
             {
-                return BadRequest(new { Message = "Registration failed.", Errors = result.Errors });
+                return BadRequest(new { Message = "Đăng ký thất bại.", Errors = result.Errors });
             }
 
             // Assign role (default to Owner if not specified)
@@ -116,13 +116,13 @@ namespace MyShopAPI.Controllers
             var user = await _userManager.FindByEmailAsync(loginDto.Email);
             if (user == null)
             {
-                return Unauthorized(new { Message = "Invalid email or password." });
+                return Unauthorized(new { Message = "Email hoặc mật khẩu không đúng." });
             }
 
             var result = await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, lockoutOnFailure: false);
             if (!result.Succeeded)
             {
-                return Unauthorized(new { Message = "Invalid email or password." });
+                return Unauthorized(new { Message = "Email hoặc mật khẩu không đúng." });
             }
 
             // Get user role
@@ -176,7 +176,7 @@ namespace MyShopAPI.Controllers
             var user = await _tokenService.ValidateRefreshTokenAsync(refreshTokenDto.RefreshToken);
             if (user == null)
             {
-                return Unauthorized(new { Message = "Invalid or expired refresh token." });
+                return Unauthorized(new { Message = "Refresh token không hợp lệ hoặc đã hết hạn." });
             }
 
             // Revoke the old refresh token
@@ -226,7 +226,7 @@ namespace MyShopAPI.Controllers
 
             _logger.LogInformation("User {UserId} logged out successfully", userId);
 
-            return Ok(new { Message = "Logged out successfully." });
+            return Ok(new { Message = "Đăng xuất thành công." });
         }
 
         /// <summary>
@@ -292,7 +292,7 @@ namespace MyShopAPI.Controllers
                 return BadRequest(new ActivateAccountResponseDto
                 {
                     Success = false,
-                    Message = "No activation code is pending for this account."
+                    Message = "Không có mã kích hoạt nào đang chờ cho tài khoản này."
                 });
             }
 
@@ -302,7 +302,7 @@ namespace MyShopAPI.Controllers
                 return BadRequest(new ActivateAccountResponseDto
                 {
                     Success = false,
-                    Message = "Invalid Activation Code"
+                    Message = "Mã kích hoạt không hợp lệ"
                 });
             }
 
@@ -316,7 +316,7 @@ namespace MyShopAPI.Controllers
             return Ok(new ActivateAccountResponseDto
             {
                 Success = true,
-                Message = "Account activated successfully!"
+                Message = "Kích hoạt tài khoản thành công!"
             });
         }
 
