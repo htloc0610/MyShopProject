@@ -225,8 +225,8 @@ namespace MyShopAPI.Controllers
             {
                 order.Status = newStatus;
                 
-                // If status changed to Cancelled, reduce customer's TotalSpent AND restore stock
-                if (oldStatus != OrderStatus.Cancelled && newStatus == OrderStatus.Cancelled)
+                // If status changed to Cancelled FROM Paid, reduce customer's TotalSpent AND restore stock
+                if (oldStatus == OrderStatus.Paid && newStatus == OrderStatus.Cancelled)
                 {
                     // Restore product stock
                     foreach (var item in order.OrderItems)
@@ -240,7 +240,7 @@ namespace MyShopAPI.Controllers
                         }
                     }
                     
-                    // Reduce customer's TotalSpent
+                    // Reduce customer's TotalSpent (only if previously Paid)
                     if (order.CustomerId.HasValue)
                     {
                         var customer = await _context.Customers
@@ -255,10 +255,39 @@ namespace MyShopAPI.Controllers
                         }
                     }
                 }
-                // If status changed FROM Cancelled to something else, restore TotalSpent AND decrement stock
-                else if (oldStatus == OrderStatus.Cancelled && newStatus != OrderStatus.Cancelled)
+                // If status changed to Cancelled FROM Created (not yet paid), just restore stock
+                else if (oldStatus == OrderStatus.Created && newStatus == OrderStatus.Cancelled)
                 {
-                    // Decrement product stock (order is active again)
+                    // Restore product stock (no TotalSpent change since not paid)
+                    foreach (var item in order.OrderItems)
+                    {
+                        var product = await _context.Products
+                            .FirstOrDefaultAsync(p => p.ProductId == item.ProductId);
+                        
+                        if (product != null)
+                        {
+                            product.Count += item.Quantity;
+                        }
+                    }
+                }
+                // If status changed TO Paid, add to customer's TotalSpent
+                else if (oldStatus != OrderStatus.Paid && newStatus == OrderStatus.Paid)
+                {
+                    if (order.CustomerId.HasValue)
+                    {
+                        var customer = await _context.Customers
+                            .FirstOrDefaultAsync(c => c.Id == order.CustomerId.Value);
+                        
+                        if (customer != null)
+                        {
+                            customer.TotalSpent += (long)order.FinalAmount;
+                        }
+                    }
+                }
+                // If status changed FROM Cancelled back to Created, restore stock reservation
+                else if (oldStatus == OrderStatus.Cancelled && newStatus == OrderStatus.Created)
+                {
+                    // Decrement product stock (order is active again, reserve items)
                     foreach (var item in order.OrderItems)
                     {
                         var product = await _context.Products
@@ -275,18 +304,7 @@ namespace MyShopAPI.Controllers
                             product.Count -= item.Quantity;
                         }
                     }
-                    
-                    // Restore customer's TotalSpent
-                    if (order.CustomerId.HasValue)
-                    {
-                        var customer = await _context.Customers
-                            .FirstOrDefaultAsync(c => c.Id == order.CustomerId.Value);
-                        
-                        if (customer != null)
-                        {
-                            customer.TotalSpent += (long)order.FinalAmount;
-                        }
-                    }
+                    // No TotalSpent change - order is back to Created, not Paid
                 }
             }
             else
@@ -517,17 +535,7 @@ namespace MyShopAPI.Controllers
                 _context.OrderItems.AddRange(orderItems);
                 await _context.SaveChangesAsync();
 
-                // Step 5: Update customer's total spent
-                if (request.CustomerId.HasValue)
-                {
-                    var customer = await _context.Customers
-                        .FirstOrDefaultAsync(c => c.Id == request.CustomerId.Value);
-                    
-                    if (customer != null)
-                    {
-                        customer.TotalSpent += (long)finalAmount;
-                    }
-                }
+                // Note: TotalSpent is NOT updated here - it will be updated when order status changes to Paid
 
                 // Commit transaction
                 await transaction.CommitAsync();
