@@ -143,6 +143,7 @@ namespace MyShopAPI.Controllers
                 DateTimeKind.Utc);
 
             query = query.Where(x => x.Order.OrderDate < toUtcExclusive);
+            query = query.Where(x => x.Order.Status == Models.OrderStatus.Paid);
 
             var rows = await query
                 .Select(x => new { x.Order.OrderDate, x.Quantity })
@@ -193,6 +194,7 @@ namespace MyShopAPI.Controllers
                 DateTimeKind.Utc);
 
             query = query.Where(x => x.Order.OrderDate < toUtcExclusive);
+            query = query.Where(x => x.Order.Status == Models.OrderStatus.Paid);
 
             var rows = await query
                 .Select(x => new

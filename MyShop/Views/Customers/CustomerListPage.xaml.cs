@@ -8,7 +8,7 @@ using MyShop.ViewModels.Customers;
 namespace MyShop.Views.Customers
 {
     /// <summary>
-    /// Customer list page with master-detail layout.
+    /// Customer list page with DataGrid layout.
     /// </summary>
     public sealed partial class CustomerListPage : Page
     {
@@ -32,35 +32,38 @@ namespace MyShop.Views.Customers
             await ShowCustomerDialogAsync("Thêm Khách Hàng Mới");
         }
 
-        private async void EditCustomerButton_Click(object sender, RoutedEventArgs e)
+        private async void EditButton_Click(object sender, RoutedEventArgs e)
         {
-            if (ViewModel.SelectedCustomer == null) return;
-            ViewModel.PrepareEditCustomerCommand.Execute(ViewModel.SelectedCustomer);
-            await ShowCustomerDialogAsync("Sửa Thông Tin Khách Hàng");
-        }
-
-        private async void DeleteCustomerButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (ViewModel.SelectedCustomer == null) return;
-
-            var dialog = new ContentDialog
+            if (sender is Button button && button.Tag is Customer customer)
             {
-                Title = "Xác nhận xóa",
-                Content = $"Bạn có chắc chắn muốn xóa khách hàng \"{ViewModel.SelectedCustomer.Name}\"?\n\nHành động này không thể hoàn tác.",
-                PrimaryButtonText = "Xóa",
-                CloseButtonText = "Hủy",
-                DefaultButton = ContentDialogButton.Close,
-                XamlRoot = this.XamlRoot
-            };
-
-            var result = await dialog.ShowAsync();
-            if (result == ContentDialogResult.Primary)
-            {
-                await ViewModel.DeleteCustomerCommand.ExecuteAsync(ViewModel.SelectedCustomer);
+                ViewModel.PrepareEditCustomerCommand.Execute(customer);
+                await ShowCustomerDialogAsync("Sửa Thông Tin Khách Hàng");
             }
         }
 
-        private async System.Threading.Tasks.Task ShowCustomerDialogAsync(string title)
+        private async void DeleteButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && button.Tag is Customer customer)
+            {
+                var dialog = new ContentDialog
+                {
+                    Title = "Xác nhận xóa",
+                    Content = $"Bạn có chắc chắn muốn xóa khách hàng \"{customer.Name}\"?\n\nHành động này không thể hoàn tác.",
+                    PrimaryButtonText = "Xóa",
+                    CloseButtonText = "Hủy",
+                    DefaultButton = ContentDialogButton.Close,
+                    XamlRoot = this.XamlRoot
+                };
+
+                var result = await dialog.ShowAsync();
+                if (result == ContentDialogResult.Primary)
+                {
+                    await ViewModel.DeleteCustomerCommand.ExecuteAsync(customer);
+                }
+            }
+        }
+
+        private async Task ShowCustomerDialogAsync(string title)
         {
             var nameBox = new TextBox
             {
