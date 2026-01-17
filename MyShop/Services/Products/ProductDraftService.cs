@@ -1,21 +1,30 @@
 using System;
+using System.IO;
 using System.Text.Json;
-using Windows.Storage;
 
 namespace MyShop.Services.Products;
 
 /// <summary>
 /// Service for managing product draft in local storage.
 /// Auto-saves form data when navigating away without saving.
+/// Uses file-based storage to work with both packaged and unpackaged apps.
 /// </summary>
 public class ProductDraftService
 {
-    private const string DraftKey = "ProductDraft";
-    private readonly ApplicationDataContainer _localSettings;
+    private const string DraftFileName = "ProductDraft.json";
+    private readonly string _draftFilePath;
 
     public ProductDraftService()
     {
-        _localSettings = ApplicationData.Current.LocalSettings;
+        // Use LocalApplicationData folder - works for both packaged and unpackaged apps
+        var appDataFolder = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "MyShop");
+
+        // Ensure directory exists
+        Directory.CreateDirectory(appDataFolder);
+
+        _draftFilePath = Path.Combine(appDataFolder, DraftFileName);
     }
 
     /// <summary>
@@ -35,15 +44,15 @@ public class ProductDraftService
     }
 
     /// <summary>
-    /// Saves a product draft to local storage.
+    /// Saves a product draft to file.
     /// </summary>
     public void SaveDraft(ProductDraft draft)
     {
         try
         {
             draft.SavedAt = DateTime.Now;
-            var json = JsonSerializer.Serialize(draft);
-            _localSettings.Values[DraftKey] = json;
+            var json = JsonSerializer.Serialize(draft, new JsonSerializerOptions { WriteIndented = true });
+            File.WriteAllText(_draftFilePath, json);
         }
         catch
         {
@@ -52,15 +61,16 @@ public class ProductDraftService
     }
 
     /// <summary>
-    /// Loads a product draft from local storage.
+    /// Loads a product draft from file.
     /// Returns null if no draft exists.
     /// </summary>
     public ProductDraft? LoadDraft()
     {
         try
         {
-            if (_localSettings.Values.TryGetValue(DraftKey, out var value) && value is string json)
+            if (File.Exists(_draftFilePath))
             {
+                var json = File.ReadAllText(_draftFilePath);
                 return JsonSerializer.Deserialize<ProductDraft>(json);
             }
         }
@@ -79,7 +89,10 @@ public class ProductDraftService
     {
         try
         {
-            _localSettings.Values.Remove(DraftKey);
+            if (File.Exists(_draftFilePath))
+            {
+                File.Delete(_draftFilePath);
+            }
         }
         catch
         {
@@ -92,7 +105,7 @@ public class ProductDraftService
     /// </summary>
     public bool HasDraft()
     {
-        return _localSettings.Values.ContainsKey(DraftKey);
+        return File.Exists(_draftFilePath);
     }
 
     /// <summary>
