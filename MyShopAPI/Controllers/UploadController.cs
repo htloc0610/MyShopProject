@@ -21,7 +21,7 @@ namespace MyShopAPI.Controllers
         public async Task<IActionResult> Upload(IFormFile file)
         {
             if (file == null || file.Length == 0)
-                return BadRequest(new { message = "No file uploaded" });
+                return BadRequest(new { message = "Không có file được tải lên" });
 
             try
             {
@@ -50,7 +50,7 @@ namespace MyShopAPI.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error uploading file");
-                return StatusCode(500, new { message = "Internal server error during upload" });
+                return StatusCode(500, new { message = "Lỗi server khi tải file lên" });
             }
         }
     }

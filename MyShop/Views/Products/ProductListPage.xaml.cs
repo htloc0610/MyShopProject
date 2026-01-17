@@ -231,12 +231,12 @@ public sealed partial class ProductListPage : Page
         if (isPluginMode)
         {
             FilterModeIcon.Glyph = "\uE74C"; // Plugin icon
-            FilterModeText.Text = "Plugin Mode";
+            FilterModeText.Text = "Tìm kiếm thường";
         }
         else
         {
             FilterModeIcon.Glyph = "\uE713"; // Settings icon
-            FilterModeText.Text = "Built-in Filter";
+            FilterModeText.Text = "Tìm kiếm thông minh";
         }
     }
 
@@ -270,6 +270,15 @@ public sealed partial class ProductListPage : Page
             ShowBuiltInFilters();
             System.Diagnostics.Debug.WriteLine("🔧 Switched to Built-in Filter mode");
         }
+    }
+
+    /// <summary>
+    /// Handles create product button click - navigates to AddProductPage.
+    /// </summary>
+    private void CreateProductButton_Click(object sender, RoutedEventArgs e)
+    {
+        // Navigate to AddProductPage
+        Frame.Navigate(typeof(AddProductPage));
     }
 
     /// <summary>

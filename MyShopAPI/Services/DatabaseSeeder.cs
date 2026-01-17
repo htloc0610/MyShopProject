@@ -336,7 +336,6 @@ public class DatabaseSeeder
         var today = DateTime.UtcNow.Date;
         var startDate = today.AddDays(-29);
 
-        int orderIdCounter = 1;
 
         // Array of possible statuses with weights (80% Created, 15% Paid, 5% Cancelled)
         var statusWeights = new[] { 

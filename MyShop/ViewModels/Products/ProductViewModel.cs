@@ -72,17 +72,17 @@ public partial class ProductViewModel : ObservableObject
 
     public ObservableCollection<int> PageSizeOptions { get; } = new() { 10, 20, 50 };
 
-    public string PaginationInfo => $"Trang {CurrentPage} trên {TotalPages}";
+    public string PaginationInfo => ProductCount > 0 ? $"Trang {CurrentPage}/{TotalPages} (Tổng {ProductCount} sản phẩm)" : "Không có sản phẩm";
 
     #endregion
 
     #region Observable Properties - Sorting
 
     [ObservableProperty]
-    private string _sortColumn = "id";
+    private string _sortColumn = "createdAt";
 
     [ObservableProperty]
-    private bool _isDescending = false;
+    private bool _isDescending = true;
 
     #endregion
 
@@ -256,7 +256,7 @@ public partial class ProductViewModel : ObservableObject
 
             if (ProductCount == 0)
             {
-                _toastService.ShowWarning("Không tìm thấy sản phẩm nào.");
+                _toastService.ShowInfo("Không tìm thấy sản phẩm nào.");
             }
         }
         catch (System.Exception ex)
@@ -533,6 +533,9 @@ public partial class ProductViewModel : ObservableObject
                 Products.Remove(product);
                 ProductCount--;
                 OnPropertyChanged(nameof(PaginationInfo));
+                
+                // Show success toast
+                _toastService.ShowSuccess($"Đã xóa sản phẩm '{product.Name}' thành công!");
                 
                 // Notify that products have changed
                 _productChangeNotifier.NotifyProductsChanged();

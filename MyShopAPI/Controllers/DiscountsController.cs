@@ -13,7 +13,7 @@ namespace MyShopAPI.Controllers;
 /// </summary>
 [Authorize]
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/discounts")]
 public class DiscountsController : ControllerBase
 {
     private readonly AppDbContext _context;
@@ -31,13 +31,19 @@ public class DiscountsController : ControllerBase
     }
 
     // ====================================================
-    // GET: api/discounts?page=1&pageSize=10
-    // Get discounts for the current user with pagination
+    // GET: api/discounts?page=1&pageSize=10&search=CODE&status=active&minAmount=1000&maxAmount=5000&startDate=2024-01-01&endDate=2024-12-31
+    // Get discounts for the current user with pagination and filtering
     // ====================================================
     [HttpGet]
     public async Task<ActionResult<object>> GetDiscounts(
         [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 10)
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string? search = null,
+        [FromQuery] string? status = null,
+        [FromQuery] double? minAmount = null,
+        [FromQuery] double? maxAmount = null,
+        [FromQuery] DateTime? startDate = null,
+        [FromQuery] DateTime? endDate = null)
     {
         try
         {
@@ -45,8 +51,45 @@ public class DiscountsController : ControllerBase
             if (page < 1) page = 1;
             if (pageSize < 1 || pageSize > 100) pageSize = 10;
 
-            var query = _context.Discounts
-                .OrderByDescending(d => d.StartDate);
+            var query = _context.Discounts.AsQueryable();
+
+            // Apply search filter (search by code)
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                query = query.Where(d => d.Code.Contains(search));
+            }
+
+            // Apply status filter
+            if (!string.IsNullOrWhiteSpace(status) && status != "all")
+            {
+                bool isActive = status == "active";
+                query = query.Where(d => d.IsActive == isActive);
+            }
+
+            // Apply amount range filter
+            if (minAmount.HasValue && minAmount.Value > 0)
+            {
+                query = query.Where(d => d.Amount >= minAmount.Value);
+            }
+
+            if (maxAmount.HasValue && maxAmount.Value > 0)
+            {
+                query = query.Where(d => d.Amount <= maxAmount.Value);
+            }
+
+            // Apply date range filter (filter by discount validity period)
+            if (startDate.HasValue)
+            {
+                query = query.Where(d => d.StartDate >= startDate.Value);
+            }
+
+            if (endDate.HasValue)
+            {
+                query = query.Where(d => d.EndDate <= endDate.Value);
+            }
+
+            // Order by start date descending
+            query = query.OrderByDescending(d => d.StartDate);
 
             var totalCount = await query.CountAsync();
             var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
@@ -85,7 +128,7 @@ public class DiscountsController : ControllerBase
 
             if (discount == null)
             {
-                return NotFound(new { message = "Discount not found" });
+                return NotFound(new { message = "Không tìm thấy mã giảm giá" });
             }
 
             return Ok(discount);
@@ -173,18 +216,18 @@ public class DiscountsController : ControllerBase
             var userId = _userContextService.GetUserId();
             if (string.IsNullOrEmpty(userId))
             {
-                return Unauthorized(new { message = "User not authenticated" });
+                return Unauthorized(new { message = "Người dùng chưa đăng nhập" });
             }
 
             // Validation
             if (discount.Amount <= 0)
             {
-                return BadRequest(new { message = "Amount must be greater than 0" });
+                return BadRequest(new { message = "Số tiền giảm phải lớn hơn 0" });
             }
 
             if (discount.EndDate <= discount.StartDate)
             {
-                return BadRequest(new { message = "End date must be after start date" });
+                return BadRequest(new { message = "Ngày kết thúc phải sau ngày bắt đầu" });
             }
 
             // Check if code already exists for this user
@@ -193,7 +236,7 @@ public class DiscountsController : ControllerBase
 
             if (existingCode)
             {
-                return BadRequest(new { message = "A discount with this code already exists" });
+                return BadRequest(new { message = "Mã giảm giá này đã tồn tại" });
             }
 
             // Set ownership
@@ -225,7 +268,7 @@ public class DiscountsController : ControllerBase
     {
         if (id != discount.DiscountId)
         {
-            return BadRequest(new { message = "Discount ID mismatch" });
+            return BadRequest(new { message = "ID mã giảm giá không khớp" });
         }
 
         try
@@ -233,18 +276,18 @@ public class DiscountsController : ControllerBase
             var existingDiscount = await _context.Discounts.FindAsync(id);
             if (existingDiscount == null)
             {
-                return NotFound(new { message = "Discount not found" });
+                return NotFound(new { message = "Không tìm thấy mã giảm giá" });
             }
 
             // Validation
             if (discount.Amount <= 0)
             {
-                return BadRequest(new { message = "Amount must be greater than 0" });
+                return BadRequest(new { message = "Số tiền giảm phải lớn hơn 0" });
             }
 
             if (discount.EndDate <= discount.StartDate)
             {
-                return BadRequest(new { message = "End date must be after start date" });
+                return BadRequest(new { message = "Ngày kết thúc phải sau ngày bắt đầu" });
             }
 
             // Check if code exists for another discount
@@ -253,7 +296,7 @@ public class DiscountsController : ControllerBase
 
             if (codeExists)
             {
-                return BadRequest(new { message = "A discount with this code already exists" });
+                return BadRequest(new { message = "Mã giảm giá này đã tồn tại" });
             }
 
             // Update fields (preserve UserId and UsedCount)
@@ -275,7 +318,7 @@ public class DiscountsController : ControllerBase
         {
             if (!await DiscountExists(id))
             {
-                return NotFound(new { message = "Discount not found" });
+                return NotFound(new { message = "Không tìm thấy mã giảm giá" });
             }
             throw;
         }
@@ -298,7 +341,7 @@ public class DiscountsController : ControllerBase
             var discount = await _context.Discounts.FindAsync(id);
             if (discount == null)
             {
-                return NotFound(new { message = "Discount not found" });
+                return NotFound(new { message = "Không tìm thấy mã giảm giá" });
             }
 
             _context.Discounts.Remove(discount);

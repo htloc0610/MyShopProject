@@ -3,6 +3,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 using MyShop.ViewModels.Orders;
 using MyShop.Services.Orders;
+using MyShop.Services.Shared;
 using MyShop.Models.Orders;
 
 namespace MyShop.Views.Orders;
@@ -15,9 +16,10 @@ public sealed partial class OrdersListPage : Page
     {
         this.InitializeComponent();
         
-        // Get service and initialize ViewModel (Frame will be set later)
+        // Get services and initialize ViewModel (Frame will be set later)
         var orderService = App.Current.Services.GetService(typeof(IOrderService)) as IOrderService;
-        ViewModel = new OrdersListViewModel(orderService!, null);
+        var toastService = App.Current.Services.GetService(typeof(IToastService)) as IToastService;
+        ViewModel = new OrdersListViewModel(orderService!, toastService!, null!);
     }
 
     protected override async void OnNavigatedTo(NavigationEventArgs e)
@@ -59,16 +61,13 @@ public sealed partial class OrdersListPage : Page
         };
 
         // Determine sort direction
-        string sortDirection;
         if (e.Column.SortDirection == CommunityToolkit.WinUI.UI.Controls.DataGridSortDirection.Ascending)
         {
             e.Column.SortDirection = CommunityToolkit.WinUI.UI.Controls.DataGridSortDirection.Descending;
-            sortDirection = "desc";
         }
         else
         {
             e.Column.SortDirection = CommunityToolkit.WinUI.UI.Controls.DataGridSortDirection.Ascending;
-            sortDirection = "asc";
         }
 
         // Clear sort direction on other columns

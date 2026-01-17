@@ -68,7 +68,7 @@ namespace MyShop.Models.Products
         /// <summary>
         /// Stock status for display
         /// </summary>
-        public string StockStatus => Stock > 0 ? $"{Stock} sản phẩm" : "Hết hàng";
+        public string StockStatus => Stock > 0 ? $"Tồn kho: {Stock}" : "Hết hàng";
 
         /// <summary>
         /// Stock color indicator

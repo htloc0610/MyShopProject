@@ -24,19 +24,19 @@ public static class ExcelHelper
         using var workbook = new XLWorkbook();
         var worksheet = workbook.Worksheets.Add("Products");
 
-        // Define column headers
+        // Define column headers (Vietnamese)
         var headers = new[]
         {
-            "ProductName",
-            "ImportPrice",
-            "SellingPrice",
-            "CategoryName",
-            "SKU",
-            "Stock",
-            "Description",
-            "Image1",
-            "Image2",
-            "Image3"
+            "Tên sản phẩm",
+            "Giá nhập",
+            "Giá bán",
+            "Loại sản phẩm",
+            "Mã SKU",
+            "Số lượng",
+            "Mô tả",
+            "Ảnh 1",
+            "Ảnh 2",
+            "Ảnh 3"
         };
 
         // Add headers to first row
@@ -49,17 +49,17 @@ public static class ExcelHelper
             cell.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
         }
 
-        // Add sample data row
-        worksheet.Cell(2, 1).Value = "Sản phẩm mẫu";
-        worksheet.Cell(2, 2).Value = 80000;   // Import Price
-        worksheet.Cell(2, 3).Value = 100000;  // Selling Price
-        worksheet.Cell(2, 4).Value = "Electronics";
-        worksheet.Cell(2, 5).Value = "SP001";
-        worksheet.Cell(2, 6).Value = 10;
-        worksheet.Cell(2, 7).Value = "Mô tả sản phẩm mẫu";
-        worksheet.Cell(2, 8).Value = "https://via.placeholder.com/400";
-        worksheet.Cell(2, 9).Value = "https://via.placeholder.com/400";
-        worksheet.Cell(2, 10).Value = "https://via.placeholder.com/400";
+        // Add sample data row (can be deleted by user)
+        worksheet.Cell(2, 1).Value = "Laptop đã qua sử dụng";
+        worksheet.Cell(2, 2).Value = 150000;   // Import Price
+        worksheet.Cell(2, 3).Value = 250000;  // Selling Price
+        worksheet.Cell(2, 4).Value = "Điện tử";
+        worksheet.Cell(2, 5).Value = "ATN-001";
+        worksheet.Cell(2, 6).Value = 50;
+        worksheet.Cell(2, 7).Value = "Laptop secondhand của team lập trình";
+        worksheet.Cell(2, 8).Value = "https://5.imimg.com/data5/SELLER/Default/2023/9/343162371/KW/HH/OD/12259429/second-hand-laptop-sales-services.jpg";
+        worksheet.Cell(2, 9).Value = "https://laptopminhman.com/upload/images/c%E1%BA%A7n-mua-laptop-2nd-c%C5%A9-%C4%91%E1%BA%B9p.jpg";
+        worksheet.Cell(2, 10).Value = "https://image.cdn.shpy.in/340080/WhatsAppImage2024-09-09at52355PM-1725892858542.jpeg?width=600&format=webp";
 
         // Auto-fit columns
         worksheet.Columns().AdjustToContents();
@@ -96,8 +96,8 @@ public static class ExcelHelper
                 return (products, errors);
             }
 
-            // Validate headers
-            var expectedHeaders = new[] { "ProductName", "ImportPrice", "SellingPrice", "CategoryName", "SKU", "Stock", "Description" };
+            // Validate headers (Vietnamese)
+            var expectedHeaders = new[] { "Tên sản phẩm", "Giá nhập", "Giá bán", "Loại sản phẩm", "Mã SKU", "Số lượng", "Mô tả" };
             var actualHeaders = new List<string>();
 
             for (int col = 1; col <= 7; col++)

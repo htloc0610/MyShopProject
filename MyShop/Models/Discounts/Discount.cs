@@ -37,22 +37,26 @@ public class Discount
     
     public bool IsLimitReached => UsageLimit.HasValue && UsedCount >= UsageLimit.Value;
 
-    public string FormattedAmount => $"${Amount:N0}";
+    public string FormattedAmount => $"{Amount:N0} ₫";
+
+    public string FormattedStartDate => StartDate.ToLocalTime().ToString("dd/MM/yyyy");
+    
+    public string FormattedEndDate => EndDate.ToLocalTime().ToString("dd/MM/yyyy");
 
     public string Status
     {
         get
         {
-            if (!IsActive) return "Inactive";
-            if (IsExpired) return "Expired";
-            if (IsLimitReached) return "Limit Reached";
-            if (IsValid) return "Active";
-            return "Inactive";
+            if (!IsActive) return "Đã tắt";
+            if (IsExpired) return "Hết hạn";
+            if (IsLimitReached) return "Đã hết lượt";
+            if (IsValid) return "Đang hoạt động";
+            return "Đã tắt";
         }
     }
 
     public string UsageDisplay =>
         UsageLimit.HasValue 
             ? $"{UsedCount}/{UsageLimit}" 
-            : $"{UsedCount}/Unlimited";
+            : $"{UsedCount}/Không giới hạn";
 }

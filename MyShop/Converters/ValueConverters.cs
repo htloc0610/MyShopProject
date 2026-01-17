@@ -329,7 +329,7 @@ namespace MyShop.Converters
             if (value == null || parameter == null)
                 return false;
 
-            return value.ToString().Equals(parameter.ToString(), StringComparison.OrdinalIgnoreCase);
+            return value.ToString()?.Equals(parameter.ToString(), StringComparison.OrdinalIgnoreCase) ?? false;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, string language)

@@ -40,12 +40,8 @@
                 
                 <NavigationViewItem Content="Danh Sách Sản Phẩm" 
                                   Tag="ProductList"
-                                  Icon="Shop">
-                    <NavigationViewItem.InfoBadge>
-                        <InfoBadge Value="{x:Bind ViewModel.TotalProducts, Mode=OneWay}" 
-                                  Style="{StaticResource AttentionValueInfoBadgeStyle}"/>
-                    </NavigationViewItem.InfoBadge>
-                </NavigationViewItem>
+                                  Icon="Shop"/>
+                
                 
                 <NavigationViewItem Content="Quản Lí Đơn Hàng" 
                                   Tag="OrdersList">

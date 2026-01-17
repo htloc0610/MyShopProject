@@ -35,7 +35,27 @@ public sealed partial class CreateOrderPage : Page
         _draftService = new OrderDraftService();
         _toastService = App.Current.Services.GetRequiredService<IToastService>();
         
+        // Subscribe to OrderCreated event for navigation after cash payment
+        ViewModel.OrderCreated += OnOrderCreated;
+        
         LoadPaymentPlugin();
+    }
+
+    /// <summary>
+    /// Handle order created event - navigate to order detail page (for cash payment)
+    /// </summary>
+    private void OnOrderCreated(object? sender, OrderCheckoutResponse response)
+    {
+        // Only navigate if NOT using QR payment (QR has its own navigation logic)
+        if (!ViewModel.IsPaymentCompleted)
+        {
+            // Cash payment - navigate to order detail
+            DispatcherQueue.TryEnqueue(() =>
+            {
+                _orderSavedSuccessfully = true;
+                this.Frame.Navigate(typeof(OrderDetailPage), response.OrderId);
+            });
+        }
     }
 
     protected override async void OnNavigatedTo(NavigationEventArgs e)
@@ -251,7 +271,7 @@ public sealed partial class CreateOrderPage : Page
     /// <summary>
     /// Handle payment completion from plugin
     /// </summary>
-    private async void OnPaymentCompleted(object? sender, PaymentResult result)
+    private void OnPaymentCompleted(object? sender, PaymentResult result)
     {
         // Run on UI thread
         DispatcherQueue.TryEnqueue(async () =>
@@ -270,7 +290,7 @@ public sealed partial class CreateOrderPage : Page
 
             if (result.IsSuccess)
             {
-                System.Diagnostics.Debug.WriteLine($"✅ Payment successful: {result.TransactionId}");
+                System.Diagnostics.Debug.WriteLine($"Payment successful: {result.TransactionId}");
                 ViewModel.IsPaymentCompleted = true; // Sync with ViewModel
                 MarkOrderSaved(); // Clear draft after successful order
             }
