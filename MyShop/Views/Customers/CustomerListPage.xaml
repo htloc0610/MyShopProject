@@ -116,32 +116,9 @@
 
                 <controls:DataGrid.Columns>
                     <!-- Name Column -->
-                    <controls:DataGridTemplateColumn Header="Khách Hàng" Width="2*">
-                        <controls:DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate x:DataType="models:Customer">
-                                <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center" Padding="8,0">
-                                    <!-- Avatar -->
-                                    <Border Width="36" Height="36" CornerRadius="18">
-                                        <Border.Background>
-                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                                <GradientStop Color="#6366F1" Offset="0"/>
-                                                <GradientStop Color="#8B5CF6" Offset="1"/>
-                                            </LinearGradientBrush>
-                                        </Border.Background>
-                                        <TextBlock Text="{x:Bind NameInitial}"
-                                                  FontSize="14"
-                                                  FontWeight="Bold"
-                                                  Foreground="White"
-                                                  HorizontalAlignment="Center"
-                                                  VerticalAlignment="Center"/>
-                                    </Border>
-                                    <TextBlock Text="{x:Bind Name}"
-                                              FontWeight="SemiBold"
-                                              VerticalAlignment="Center"/>
-                                </StackPanel>
-                            </DataTemplate>
-                        </controls:DataGridTemplateColumn.CellTemplate>
-                    </controls:DataGridTemplateColumn>
+                    <controls:DataGridTextColumn Header="Khách Hàng"
+                                                Binding="{Binding Name}"
+                                                Width="2*"/>
 
                     <!-- Phone Column -->
                     <controls:DataGridTextColumn Header="Số Điện Thoại"
