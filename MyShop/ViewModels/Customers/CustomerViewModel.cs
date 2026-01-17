@@ -82,6 +82,9 @@ namespace MyShop.ViewModels.Customers
         [ObservableProperty]
         private string _searchKeyword = string.Empty;
 
+        [ObservableProperty]
+        private bool _isFilterVisible = false;
+
         #endregion
 
         #region Observable Properties - Add/Edit Form

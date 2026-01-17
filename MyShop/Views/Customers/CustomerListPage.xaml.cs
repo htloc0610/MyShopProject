@@ -1,8 +1,10 @@
 using System;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using MyShop.Models.Customers;
+using MyShop.Services.Shared;
 using MyShop.ViewModels.Customers;
 
 namespace MyShop.Views.Customers
@@ -13,10 +15,12 @@ namespace MyShop.Views.Customers
     public sealed partial class CustomerListPage : Page
     {
         public CustomerViewModel ViewModel { get; }
+        private readonly IToastService _toastService;
 
         public CustomerListPage()
         {
             ViewModel = App.Current.Services.GetRequiredService<CustomerViewModel>();
+            _toastService = App.Current.Services.GetRequiredService<IToastService>();
             InitializeComponent();
             Loaded += CustomerListPage_Loaded;
         }
@@ -123,9 +127,45 @@ namespace MyShop.Views.Customers
             var result = await dialog.ShowAsync();
             if (result == ContentDialogResult.Primary)
             {
-                ViewModel.FormName = nameBox.Text;
-                ViewModel.FormPhoneNumber = phoneBox.Text;
-                ViewModel.FormAddress = addressBox.Text;
+                // Client-side validation
+                var name = nameBox.Text?.Trim();
+                var phone = phoneBox.Text?.Trim();
+
+                if (string.IsNullOrWhiteSpace(name))
+                {
+                    _toastService.ShowWarning("Vui lòng nhập tên khách hàng");
+                    return;
+                }
+
+                if (name.Length < 2)
+                {
+                    _toastService.ShowWarning("Tên khách hàng phải có ít nhất 2 ký tự");
+                    return;
+                }
+
+                if (string.IsNullOrWhiteSpace(phone))
+                {
+                    _toastService.ShowWarning("Vui lòng nhập số điện thoại");
+                    return;
+                }
+
+                // Validate phone number format (Vietnamese phone: 10 digits starting with 0)
+                if (!Regex.IsMatch(phone, @"^0\d{9}$"))
+                {
+                    _toastService.ShowWarning("Số điện thoại không hợp lệ (10 chữ số, bắt đầu bằng 0)");
+                    return;
+                }
+
+                // Validate birthday if provided
+                if (birthdayPicker.Date.HasValue && birthdayPicker.Date.Value.Date > DateTime.Today)
+                {
+                    _toastService.ShowWarning("Ngày sinh không thể là ngày trong tương lai");
+                    return;
+                }
+
+                ViewModel.FormName = name;
+                ViewModel.FormPhoneNumber = phone;
+                ViewModel.FormAddress = addressBox.Text?.Trim() ?? string.Empty;
                 ViewModel.FormBirthday = birthdayPicker.Date;
 
                 await ViewModel.SaveCustomerCommand.ExecuteAsync(null);
