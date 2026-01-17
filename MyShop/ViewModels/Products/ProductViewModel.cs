@@ -72,7 +72,7 @@ public partial class ProductViewModel : ObservableObject
 
     public ObservableCollection<int> PageSizeOptions { get; } = new() { 10, 20, 50 };
 
-    public string PaginationInfo => $"Trang {CurrentPage} trên {TotalPages}";
+    public string PaginationInfo => ProductCount > 0 ? $"Trang {CurrentPage}/{TotalPages} (Tổng {ProductCount} sản phẩm)" : "Không có sản phẩm";
 
     #endregion
 
