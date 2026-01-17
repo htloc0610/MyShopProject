@@ -32,8 +32,8 @@ public partial class DiscountViewModel : ObservableObject
     private Discount? _selectedDiscount;
 
     [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(GoToPreviousPageCommand))]
-    [NotifyCanExecuteChangedFor(nameof(GoToNextPageCommand))]
+    [NotifyPropertyChangedFor(nameof(CanGoToPreviousPage))]
+    [NotifyPropertyChangedFor(nameof(CanGoToNextPage))]
     private bool _isLoading;
 
     [ObservableProperty]
@@ -66,24 +66,32 @@ public partial class DiscountViewModel : ObservableObject
 
     // Pagination properties
     [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(GoToPreviousPageCommand))]
-    [NotifyCanExecuteChangedFor(nameof(GoToNextPageCommand))]
+    [NotifyPropertyChangedFor(nameof(PaginationInfo))]
+    [NotifyPropertyChangedFor(nameof(CanGoToPreviousPage))]
+    [NotifyPropertyChangedFor(nameof(CanGoToNextPage))]
     private int _currentPage = 1;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(PaginationInfo))]
     private int _pageSize = 10;
 
     [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(GoToPreviousPageCommand))]
-    [NotifyCanExecuteChangedFor(nameof(GoToNextPageCommand))]
+    [NotifyPropertyChangedFor(nameof(PaginationInfo))]
+    [NotifyPropertyChangedFor(nameof(CanGoToPreviousPage))]
+    [NotifyPropertyChangedFor(nameof(CanGoToNextPage))]
     private int _totalPages;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(PaginationInfo))]
     private int _totalCount;
 
-    public string PaginationInfo => $"Trang {CurrentPage} trên {TotalPages} ({TotalCount} mã giảm giá)";
+    public string PaginationInfo => $"Trang {CurrentPage}/{TotalPages} (Tổng {TotalCount} mã giảm giá)";
 
-    public ObservableCollection<int> PageSizeOptions { get; } = new() { 10, 20, 50 };
+    public ObservableCollection<int> PageSizeOptions { get; } = new() { 5, 10, 20, 50, 100 };
+
+    public bool CanGoToPreviousPage => TotalPages > 0 && CurrentPage > 1 && !IsLoading;
+
+    public bool CanGoToNextPage => TotalPages > 0 && CurrentPage < TotalPages && !IsLoading;
 
     // Filter properties
     [ObservableProperty]
@@ -167,31 +175,21 @@ public partial class DiscountViewModel : ObservableObject
     /// <summary>
     /// Go to the next page.
     /// </summary>
-    [RelayCommand(CanExecute = nameof(CanGoToNextPage))]
+    [RelayCommand]
     private async Task GoToNextPageAsync()
     {
         CurrentPage++;
         await LoadDiscountsAsync();
     }
 
-    private bool CanGoToNextPage()
-    {
-        return !IsLoading && TotalPages > 0 && CurrentPage < TotalPages;
-    }
-
     /// <summary>
     /// Go to the previous page.
     /// </summary>
-    [RelayCommand(CanExecute = nameof(CanGoToPreviousPage))]
+    [RelayCommand]
     private async Task GoToPreviousPageAsync()
     {
         CurrentPage--;
         await LoadDiscountsAsync();
-    }
-
-    private bool CanGoToPreviousPage()
-    {
-        return !IsLoading && CurrentPage > 1;
     }
 
     /// <summary>
