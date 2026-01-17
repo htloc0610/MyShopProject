@@ -81,7 +81,7 @@ public partial class DiscountViewModel : ObservableObject
     [ObservableProperty]
     private int _totalCount;
 
-    public string PaginationInfo => $"Trang {CurrentPage} trên {TotalPages} ({TotalCount} mã giảm giá)";
+    public string PaginationInfo => TotalCount > 0 ? $"Trang {CurrentPage}/{TotalPages} (Tổng {TotalCount} mã giảm giá)" : "Không có mã giảm giá";
 
     public ObservableCollection<int> PageSizeOptions { get; } = new() { 10, 20, 50 };
 
