@@ -141,30 +141,40 @@
 
   <!-- Publish Properties -->
   <PropertyGroup>
-    <PublishReadyToRun Condition="'$(Configuration)' == 'Debug'">False</PublishReadyToRun>
-    <PublishReadyToRun Condition="'$(Configuration)' != 'Debug'">True</PublishReadyToRun>
-    <PublishTrimmed Condition="'$(Configuration)' == 'Debug'">False</PublishTrimmed>
-    <PublishTrimmed Condition="'$(Configuration)' != 'Debug'">True</PublishTrimmed>
-    <TrimMode>partial</TrimMode>
+    <PublishReadyToRun>False</PublishReadyToRun>
+    <PublishTrimmed>False</PublishTrimmed>
     <JsonSerializerIsReflectionEnabledByDefault>true</JsonSerializerIsReflectionEnabledByDefault>
   </PropertyGroup>
   
-  <!-- Auto-copy Payment Plugin after build -->
-  <Target Name="CopyPaymentPlugin" AfterTargets="Build">
-    <Message Text="Copying MomoPayment plugin..." Importance="high" />
+  <!-- Auto-copy Plugins after build -->
+  <Target Name="CopyPlugins" AfterTargets="Build">
     <MakeDir Directories="$(OutputPath)Plugins" />
-    
-    <!-- Copy from correct source path with platform (x64) -->
-    <Copy SourceFiles="..\Plugins\MomoPayment\bin\x64\$(Configuration)\$(TargetFramework)\MomoPayment.dll" 
-          DestinationFolder="$(OutputPath)Plugins" 
+
+    <!-- Copy MomoPayment Plugin -->
+    <Message Text="Copying MomoPayment plugin..." Importance="high" />
+    <Copy SourceFiles="..\Plugins\MomoPayment\bin\x64\$(Configuration)\$(TargetFramework)\MomoPayment.dll"
+          DestinationFolder="$(OutputPath)Plugins"
           SkipUnchangedFiles="true"
           Condition="Exists('..\Plugins\MomoPayment\bin\x64\$(Configuration)\$(TargetFramework)\MomoPayment.dll')" />
-    
-    <Message Text="Payment plugin copied to: $(OutputPath)Plugins\" Importance="high" 
+
+    <Message Text="Payment plugin copied to: $(OutputPath)Plugins\" Importance="high"
              Condition="Exists('..\Plugins\MomoPayment\bin\x64\$(Configuration)\$(TargetFramework)\MomoPayment.dll')" />
-    
-    <Warning Text="MomoPayment.dll not found at: ..\Plugins\MomoPayment\bin\x64\$(Configuration)\$(TargetFramework)\MomoPayment.dll - build MomoPayment project first" 
+
+    <Warning Text="MomoPayment.dll not found at: ..\Plugins\MomoPayment\bin\x64\$(Configuration)\$(TargetFramework)\MomoPayment.dll - build MomoPayment project first"
              Condition="!Exists('..\Plugins\MomoPayment\bin\x64\$(Configuration)\$(TargetFramework)\MomoPayment.dll')" />
+
+    <!-- Copy FuzzySearch Plugin -->
+    <Message Text="Copying FuzzySearch plugin..." Importance="high" />
+    <Copy SourceFiles="..\Plugins\FuzzySearch\bin\x64\$(Configuration)\$(TargetFramework)\FuzzySearch.dll"
+          DestinationFolder="$(OutputPath)Plugins"
+          SkipUnchangedFiles="true"
+          Condition="Exists('..\Plugins\FuzzySearch\bin\x64\$(Configuration)\$(TargetFramework)\FuzzySearch.dll')" />
+
+    <Message Text="FuzzySearch plugin copied to: $(OutputPath)Plugins\" Importance="high"
+             Condition="Exists('..\Plugins\FuzzySearch\bin\x64\$(Configuration)\$(TargetFramework)\FuzzySearch.dll')" />
+
+    <Warning Text="FuzzySearch.dll not found at: ..\Plugins\FuzzySearch\bin\x64\$(Configuration)\$(TargetFramework)\FuzzySearch.dll - build FuzzySearch project first"
+             Condition="!Exists('..\Plugins\FuzzySearch\bin\x64\$(Configuration)\$(TargetFramework)\FuzzySearch.dll')" />
   </Target>
 
   <ItemGroup>
