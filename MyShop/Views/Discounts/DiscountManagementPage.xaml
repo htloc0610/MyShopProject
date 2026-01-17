@@ -369,16 +369,16 @@
                 <!-- Navigation Buttons -->
                 <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
                     <Button Command="{x:Bind ViewModel.GoToPreviousPageCommand}"
-                           ToolTipService.ToolTip="Trang trước"
+                           IsEnabled="{x:Bind ViewModel.CanGoToPreviousPage, Mode=OneWay}"
                            Width="100">
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <FontIcon Glyph="&#xE76B;" FontSize="14"/>
                             <TextBlock Text="Trước"/>
                         </StackPanel>
                     </Button>
-                    
+
                     <Button Command="{x:Bind ViewModel.GoToNextPageCommand}"
-                           ToolTipService.ToolTip="Trang sau"
+                           IsEnabled="{x:Bind ViewModel.CanGoToNextPage, Mode=OneWay}"
                            Width="100">
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <TextBlock Text="Sau"/>

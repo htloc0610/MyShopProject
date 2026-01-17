@@ -34,11 +34,12 @@ namespace MyShop.ViewModels.Customers
         private Customer? _selectedCustomer;
 
         [ObservableProperty]
-        [NotifyCanExecuteChangedFor(nameof(GoToPreviousPageCommand))]
-        [NotifyCanExecuteChangedFor(nameof(GoToNextPageCommand))]
+        [NotifyPropertyChangedFor(nameof(CanGoToPreviousPage))]
+        [NotifyPropertyChangedFor(nameof(CanGoToNextPage))]
         private bool _isLoading;
 
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(PageInfo))]
         private int _customerCount;
 
         [ObservableProperty]
@@ -49,19 +50,30 @@ namespace MyShop.ViewModels.Customers
         #region Observable Properties - Paging
 
         [ObservableProperty]
-        [NotifyCanExecuteChangedFor(nameof(GoToPreviousPageCommand))]
-        [NotifyCanExecuteChangedFor(nameof(GoToNextPageCommand))]
+        [NotifyPropertyChangedFor(nameof(PageInfo))]
+        [NotifyPropertyChangedFor(nameof(CanGoToPreviousPage))]
+        [NotifyPropertyChangedFor(nameof(CanGoToNextPage))]
         private int _currentPage = 1;
 
         [ObservableProperty]
-        private int _pageSize = 20;
+        [NotifyPropertyChangedFor(nameof(PageInfo))]
+        private int _pageSize = 10;
 
         [ObservableProperty]
-        [NotifyCanExecuteChangedFor(nameof(GoToPreviousPageCommand))]
-        [NotifyCanExecuteChangedFor(nameof(GoToNextPageCommand))]
+        [NotifyPropertyChangedFor(nameof(PageInfo))]
+        [NotifyPropertyChangedFor(nameof(CanGoToPreviousPage))]
+        [NotifyPropertyChangedFor(nameof(CanGoToNextPage))]
         private int _totalPages;
 
+        public ObservableCollection<int> AvailablePageSizes { get; } = new() { 5, 10, 20, 50, 100 };
+
         public string PaginationInfo => $"Trang {CurrentPage} trên {TotalPages}";
+
+        public string PageInfo => $"Trang {CurrentPage}/{TotalPages} (Tổng {CustomerCount} khách)";
+
+        public bool CanGoToPreviousPage => TotalPages > 0 && CurrentPage > 1 && !IsLoading;
+
+        public bool CanGoToNextPage => TotalPages > 0 && CurrentPage < TotalPages && !IsLoading;
 
         #endregion
 
@@ -69,6 +81,9 @@ namespace MyShop.ViewModels.Customers
 
         [ObservableProperty]
         private string _searchKeyword = string.Empty;
+
+        [ObservableProperty]
+        private bool _isFilterVisible = false;
 
         #endregion
 
@@ -206,28 +221,18 @@ namespace MyShop.ViewModels.Customers
 
         #region Commands - Paging
 
-        [RelayCommand(CanExecute = nameof(CanGoToNextPage))]
+        [RelayCommand]
         private async Task GoToNextPageAsync()
         {
             CurrentPage++;
             await LoadCustomersAsync();
         }
 
-        private bool CanGoToNextPage()
-        {
-            return TotalPages > 0 && CurrentPage < TotalPages && !IsLoading;
-        }
-
-        [RelayCommand(CanExecute = nameof(CanGoToPreviousPage))]
+        [RelayCommand]
         private async Task GoToPreviousPageAsync()
         {
             CurrentPage--;
             await LoadCustomersAsync();
-        }
-
-        private bool CanGoToPreviousPage()
-        {
-            return TotalPages > 0 && CurrentPage > 1 && !IsLoading;
         }
 
         #endregion
@@ -396,6 +401,12 @@ namespace MyShop.ViewModels.Customers
         partial void OnSelectedCustomerChanged(Customer? value)
         {
             IsDetailPaneVisible = value != null;
+        }
+
+        partial void OnPageSizeChanged(int value)
+        {
+            CurrentPage = 1;
+            _ = LoadCustomersAsync();
         }
 
         #endregion
