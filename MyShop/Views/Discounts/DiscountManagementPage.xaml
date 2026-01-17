@@ -6,47 +6,54 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:MyShop.Models.Discounts"
+    xmlns:controls="using:CommunityToolkit.WinUI.UI.Controls"
+    xmlns:controlsprimitives="using:CommunityToolkit.WinUI.UI.Controls.Primitives"
     mc:Ignorable="d">
 
-    <Grid Padding="24">
+    <Grid Padding="20">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- Header Section -->
-        <Grid Grid.Row="0" Margin="0,0,0,24">
+        <!-- Header -->
+        <Grid Grid.Row="0" Margin="0,0,0,20">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
             <StackPanel Grid.Column="0">
-                <TextBlock Text="Quản lý mã giảm giá" 
+                <TextBlock Text="Quản Lý Mã Giảm Giá" 
                           Style="{StaticResource TitleTextBlockStyle}"
-                          Margin="0,0,0,8"/>
-                <TextBlock Text="Quản lý các mã giảm giá và khuyến mãi" 
-                          Style="{StaticResource BodyTextBlockStyle}"
-                          Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                          FontWeight="Bold"/>
+                <TextBlock Style="{StaticResource BodyTextBlockStyle}"
+                          Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                          Margin="0,4,0,0">
+                    <Run Text="Tổng số:"/>
+                    <Run Text="{x:Bind ViewModel.TotalCount, Mode=OneWay}"/>
+                    <Run Text="mã giảm giá"/>
+                </TextBlock>
             </StackPanel>
 
-            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
                 <!-- Toggle Filter Button -->
-                <ToggleButton IsChecked="{x:Bind ViewModel.IsFilterVisible, Mode=TwoWay}"
-                             ToolTipService.ToolTip="Hiện/Ẩn bộ lọc">
+                <ToggleButton IsChecked="{x:Bind ViewModel.IsFilterVisible, Mode=TwoWay}">
                     <StackPanel Orientation="Horizontal" Spacing="8">
-                        <FontIcon Glyph="&#xE71C;" FontSize="16"/>
-                        <TextBlock Text="Bộ lọc" />
+                        <FontIcon Glyph="&#xE71C;" FontSize="14"/>
+                        <TextBlock Text="Bộ lọc"/>
                     </StackPanel>
                 </ToggleButton>
 
-                <Button Content="Thêm mã giảm giá"
-                       Style="{StaticResource AccentButtonStyle}"
+                <Button Style="{StaticResource AccentButtonStyle}"
                        Command="{x:Bind ViewModel.PrepareAddCommand}"
                        Click="AddButton_Click">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon Glyph="&#xE710;" FontSize="16"/>
+                        <TextBlock Text="Thêm Mã Giảm Giá"/>
+                    </StackPanel>
                     <Button.KeyboardAccelerators>
                         <KeyboardAccelerator Key="N" Modifiers="Control"/>
                     </Button.KeyboardAccelerators>
@@ -54,15 +61,8 @@
             </StackPanel>
         </Grid>
 
-        <!-- Status Bar -->
-        <InfoBar Grid.Row="1"
-                IsOpen="{x:Bind ViewModel.StatusMessage, Mode=OneWay, Converter={StaticResource StringToBoolConverter}}"
-                Message="{x:Bind ViewModel.StatusMessage, Mode=OneWay}"
-                Severity="Informational"
-                Margin="0,0,0,16"/>
-
         <!-- Filter Section -->
-        <Border Grid.Row="2"
+        <Border Grid.Row="1"
                 Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                 BorderThickness="1"
@@ -201,152 +201,140 @@
         </Border>
 
         <!-- Data Grid -->
-        <Grid Grid.Row="3">
+        <Grid Grid.Row="2">
+            <!-- Progress Ring -->
             <ProgressRing IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}"
-                         Width="60" Height="60"
+                         Width="60"
+                         Height="60"
                          HorizontalAlignment="Center"
-                         VerticalAlignment="Center"
-                         Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay}"/>
+                         VerticalAlignment="Center"/>
 
-            <ScrollViewer Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}">
-                <ItemsControl ItemsSource="{x:Bind ViewModel.Discounts, Mode=OneWay}">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate x:DataType="models:Discount">
-                            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                                   BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                   BorderThickness="1"
-                                   CornerRadius="8"
-                                   Padding="20"
-                                   Margin="0,0,0,12">
-                                <Grid>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                    </Grid.RowDefinitions>
+            <!-- DataGrid -->
+            <controls:DataGrid x:Name="DiscountsDataGrid"
+                              ItemsSource="{x:Bind ViewModel.Discounts, Mode=OneWay}"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True"
+                              GridLinesVisibility="Horizontal"
+                              HeadersVisibility="Column"
+                              AlternatingRowBackground="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                              CanUserResizeColumns="True"
+                              CanUserSortColumns="False"
+                              SelectionMode="Single"
+                              ColumnHeaderHeight="44"
+                              Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolToVisibilityInverseConverter}}">
 
-                                    <!-- Main Content Row -->
-                                    <Grid Grid.Row="0">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
+                <controls:DataGrid.ColumnHeaderStyle>
+                    <Style TargetType="controlsprimitives:DataGridColumnHeader">
+                        <Setter Property="Background" Value="{ThemeResource SubtleFillColorSecondaryBrush}"/>
+                        <Setter Property="Foreground" Value="{ThemeResource TextFillColorPrimaryBrush}"/>
+                        <Setter Property="FontWeight" Value="SemiBold"/>
+                        <Setter Property="FontSize" Value="14"/>
+                        <Setter Property="Padding" Value="12,8"/>
+                        <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                        <Setter Property="BorderBrush" Value="{ThemeResource ControlStrokeColorDefaultBrush}"/>
+                    </Style>
+                </controls:DataGrid.ColumnHeaderStyle>
 
-                                        <!-- Left: Code and Description -->
-                                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                                            <TextBlock Text="{x:Bind Code}" 
-                                                      FontWeight="SemiBold"
-                                                      FontSize="18"
-                                                      Margin="0,0,0,4"/>
-                                            <TextBlock Text="{x:Bind Description}" 
-                                                      Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                      TextWrapping="Wrap"
-                                                      Visibility="{x:Bind Description, Converter={StaticResource StringToVisibilityConverter}}"/>
+                <controls:DataGrid.Columns>
+                    <!-- Code Column -->
+                    <controls:DataGridTextColumn Header="Mã"
+                                                Binding="{Binding Code}"
+                                                Width="1.5*"/>
+
+                    <!-- Amount Column -->
+                    <controls:DataGridTextColumn Header="Số Tiền"
+                                                Binding="{Binding FormattedAmount}"
+                                                Width="1.2*"/>
+
+                    <!-- Usage Column -->
+                    <controls:DataGridTextColumn Header="Đã Dùng"
+                                                Binding="{Binding UsageDisplay}"
+                                                Width="1*"/>
+
+                    <!-- Start Date Column -->
+                    <controls:DataGridTextColumn Header="Ngày Bắt Đầu"
+                                                Binding="{Binding FormattedStartDate}"
+                                                Width="1.3*"/>
+
+                    <!-- End Date Column -->
+                    <controls:DataGridTextColumn Header="Ngày Kết Thúc"
+                                                Binding="{Binding FormattedEndDate}"
+                                                Width="1.3*"/>
+
+                    <!-- Status Column -->
+                    <controls:DataGridTemplateColumn Header="Trạng Thái"
+                                                    Width="1.2*">
+                        <controls:DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate x:DataType="models:Discount">
+                                <Border CornerRadius="10"
+                                       Padding="8,4"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center">
+                                    <Border.Background>
+                                        <SolidColorBrush Color="{x:Bind Status, Converter={StaticResource StatusToColorConverter}}"/>
+                                    </Border.Background>
+                                    <TextBlock Text="{x:Bind Status}" 
+                                              FontSize="11"
+                                              FontWeight="SemiBold"
+                                              Foreground="White"
+                                              TextAlignment="Center"/>
+                                </Border>
+                            </DataTemplate>
+                        </controls:DataGridTemplateColumn.CellTemplate>
+                    </controls:DataGridTemplateColumn>
+
+                    <!-- Actions Column -->
+                    <controls:DataGridTemplateColumn Header="Thao Tác"
+                                                    Width="1.8*">
+                        <controls:DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate x:DataType="models:Discount">
+                                <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                                    <!-- Edit Button -->
+                                    <Button Click="EditButton_Click"
+                                           Tag="{x:Bind}"
+                                           Style="{StaticResource AccentButtonStyle}"
+                                           Height="32">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <FontIcon Glyph="&#xE70F;" FontSize="14"/>
+                                            <TextBlock Text="Sửa"/>
                                         </StackPanel>
-
-                                        <!-- Right: Status Badge -->
-                                        <Border Grid.Column="1" 
-                                               Padding="12,6"
-                                               CornerRadius="4"
-                                               VerticalAlignment="Top"
-                                               Margin="16,0,0,0">
-                                            <Border.Background>
-                                                <SolidColorBrush Color="{x:Bind Status, Converter={StaticResource StatusToColorConverter}}"/>
-                                            </Border.Background>
-                                            <TextBlock Text="{x:Bind Status}" 
-                                                      FontWeight="SemiBold"
-                                                      FontSize="12"
-                                                      Foreground="White"/>
-                                        </Border>
-                                    </Grid>
-
-                                    <!-- Details and Actions Row -->
-                                    <Grid Grid.Row="1" Margin="0,16,0,0">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
-
-                                        <!-- Amount -->
-                                        <StackPanel Grid.Column="0" Margin="0,0,24,0">
-                                            <TextBlock Text="Số tiền" 
-                                                      FontSize="11"
-                                                      Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                      Margin="0,0,0,4"/>
-                                            <TextBlock Text="{x:Bind FormattedAmount}" 
-                                                      FontWeight="SemiBold"
-                                                      FontSize="16"
-                                                      Foreground="#6B46C1"/>
+                                    </Button>
+                                    
+                                    <!-- Delete Button -->
+                                    <Button Click="DeleteButton_Click"
+                                           Tag="{x:Bind}"
+                                           Height="32"
+                                           Background="#E81123"
+                                           BorderBrush="#D13438"
+                                           BorderThickness="1">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <FontIcon Glyph="&#xE74D;" FontSize="14" Foreground="White"/>
+                                            <TextBlock Text="Xóa" Foreground="White" FontWeight="SemiBold"/>
                                         </StackPanel>
-
-                                        <!-- Usage -->
-                                        <StackPanel Grid.Column="1" Margin="0,0,24,0">
-                                            <TextBlock Text="Đã dùng" 
-                                                      FontSize="11"
-                                                      Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                      Margin="0,0,0,4"/>
-                                            <TextBlock Text="{x:Bind UsageDisplay}" 
-                                                      FontWeight="SemiBold"
-                                                      FontSize="14"/>
-                                        </StackPanel>
-
-                                        <!-- Valid Period -->
-                                        <StackPanel Grid.Column="2" Margin="0,0,24,0">
-                                            <TextBlock Text="Hiệu lực" 
-                                                      FontSize="11"
-                                                      Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                      Margin="0,0,0,4"/>
-                                            <TextBlock FontSize="13">
-                                                <Run Text="{x:Bind FormattedStartDate}"/>
-                                                <Run Text=" - "/>
-                                                <Run Text="{x:Bind FormattedEndDate}"/>
-                                            </TextBlock>
-                                        </StackPanel>
-
-                                        <!-- Spacer -->
-                                        <Border Grid.Column="3"/>
-
-                                        <!-- Actions -->
-                                        <StackPanel Grid.Column="4" 
-                                                   Orientation="Horizontal" 
-                                                   Spacing="8">
-
-                                            <Button Content="Sửa"
-                                                   Style="{StaticResource SubtleButtonStyle}"
-                                                   Click="EditButton_Click"
-                                                   Tag="{x:Bind}"
-                                                   Height="36"/>
-                                            <Button Content="Xóa"
-                                                   Style="{StaticResource SubtleButtonStyle}"
-                                                   Click="DeleteButton_Click"
-                                                   Tag="{x:Bind}"
-                                                   Height="36"/>
-                                        </StackPanel>
-                                    </Grid>
-                                </Grid>
-                            </Border>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </ScrollViewer>
+                                    </Button>
+                                </StackPanel>
+                            </DataTemplate>
+                        </controls:DataGridTemplateColumn.CellTemplate>
+                    </controls:DataGridTemplateColumn>
+                </controls:DataGrid.Columns>
+            </controls:DataGrid>
 
             <!-- Empty State -->
-            <StackPanel HorizontalAlignment="Center" 
+            <StackPanel Spacing="12" 
+                       HorizontalAlignment="Center"
                        VerticalAlignment="Center"
+                       Margin="0,48,0,0"
                        Visibility="{x:Bind ViewModel.Discounts.Count, Mode=OneWay, Converter={StaticResource CountToVisibilityConverter}}">
-                <FontIcon Glyph="&#xE8F1;" FontSize="64" Foreground="{ThemeResource TextFillColorTertiaryBrush}"/>
-                <TextBlock Text="Chưa có mã giảm giá nào" 
-                          FontSize="16" 
-                          Margin="0,16,0,8"/>
-                <TextBlock Text="Nhấn 'Thêm mã giảm giá' để tạo mã đầu tiên" 
-                          Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                <FontIcon Glyph="&#xE8F1;" FontSize="64" Opacity="0.3"/>
+                <TextBlock Text="Không có mã giảm giá nào" 
+                          FontSize="18" 
+                          Opacity="0.6"
+                          HorizontalAlignment="Center"/>
             </StackPanel>
         </Grid>
 
-        <!-- Pagination Controls -->
-        <Border Grid.Row="4" 
+        <!-- Pagination -->
+        <Border Grid.Row="3" 
                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                BorderThickness="1"
