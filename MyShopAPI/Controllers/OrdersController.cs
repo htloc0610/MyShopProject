@@ -569,6 +569,8 @@ namespace MyShopAPI.Controllers
                     .Where(d => 
                         // Filter by user ownership (null = global, or owned by current user)
                         (d.UserId == null || (userId != null && d.UserId == userId)) &&
+                        // Only show active discounts
+                        d.IsActive == true &&
                         // Check validity using IsValid logic
                         d.StartDate <= now &&
                         d.EndDate >= now &&
