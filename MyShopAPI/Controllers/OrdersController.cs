@@ -306,6 +306,25 @@ namespace MyShopAPI.Controllers
                     }
                     // No TotalSpent change - order is back to Created, not Paid
                 }
+                // If status changed FROM Paid back to Created (refund/undo payment)
+                else if (oldStatus == OrderStatus.Paid && newStatus == OrderStatus.Created)
+                {
+                    // Reduce customer's TotalSpent (payment undone)
+                    if (order.CustomerId.HasValue)
+                    {
+                        var customer = await _context.Customers
+                            .FirstOrDefaultAsync(c => c.Id == order.CustomerId.Value);
+                        
+                        if (customer != null)
+                        {
+                            customer.TotalSpent -= (long)order.FinalAmount;
+                            // Ensure it doesn't go negative
+                            if (customer.TotalSpent < 0)
+                                customer.TotalSpent = 0;
+                        }
+                    }
+                    // Stock doesn't change - order items still reserved
+                }
             }
             else
             {
@@ -535,7 +554,16 @@ namespace MyShopAPI.Controllers
                 _context.OrderItems.AddRange(orderItems);
                 await _context.SaveChangesAsync();
 
-                // Note: TotalSpent is NOT updated here - it will be updated when order status changes to Paid
+                // Step 5: Update TotalSpent if order is immediately paid (e.g., payment plugin)
+                if (order.Status == Models.OrderStatus.Paid && request.CustomerId.HasValue)
+                {
+                    var customer = await _context.Customers.FindAsync(request.CustomerId.Value);
+                    if (customer != null)
+                    {
+                        customer.TotalSpent += (long)finalAmount;
+                        await _context.SaveChangesAsync();
+                    }
+                }
 
                 // Commit transaction
                 await transaction.CommitAsync();
