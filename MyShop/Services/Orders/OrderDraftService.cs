@@ -1,22 +1,31 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text.Json;
-using Windows.Storage;
 
 namespace MyShop.Services.Orders;
 
 /// <summary>
 /// Service for managing order draft in local storage.
 /// Auto-saves cart data when navigating away without completing order.
+/// Uses file-based storage to work with both packaged and unpackaged apps.
 /// </summary>
 public class OrderDraftService
 {
-    private const string DraftKey = "OrderDraft";
-    private readonly ApplicationDataContainer _localSettings;
+    private const string DraftFileName = "OrderDraft.json";
+    private readonly string _draftFilePath;
 
     public OrderDraftService()
     {
-        _localSettings = ApplicationData.Current.LocalSettings;
+        // Use LocalApplicationData folder - works for both packaged and unpackaged apps
+        var appDataFolder = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "MyShop");
+
+        // Ensure directory exists
+        Directory.CreateDirectory(appDataFolder);
+
+        _draftFilePath = Path.Combine(appDataFolder, DraftFileName);
     }
 
     /// <summary>
@@ -44,15 +53,15 @@ public class OrderDraftService
     }
 
     /// <summary>
-    /// Saves an order draft to local storage.
+    /// Saves an order draft to file.
     /// </summary>
     public void SaveDraft(OrderDraft draft)
     {
         try
         {
             draft.SavedAt = DateTime.Now;
-            var json = JsonSerializer.Serialize(draft);
-            _localSettings.Values[DraftKey] = json;
+            var json = JsonSerializer.Serialize(draft, new JsonSerializerOptions { WriteIndented = true });
+            File.WriteAllText(_draftFilePath, json);
         }
         catch
         {
@@ -61,15 +70,16 @@ public class OrderDraftService
     }
 
     /// <summary>
-    /// Loads an order draft from local storage.
+    /// Loads an order draft from file.
     /// Returns null if no draft exists.
     /// </summary>
     public OrderDraft? LoadDraft()
     {
         try
         {
-            if (_localSettings.Values.TryGetValue(DraftKey, out var value) && value is string json)
+            if (File.Exists(_draftFilePath))
             {
+                var json = File.ReadAllText(_draftFilePath);
                 return JsonSerializer.Deserialize<OrderDraft>(json);
             }
         }
@@ -88,7 +98,10 @@ public class OrderDraftService
     {
         try
         {
-            _localSettings.Values.Remove(DraftKey);
+            if (File.Exists(_draftFilePath))
+            {
+                File.Delete(_draftFilePath);
+            }
         }
         catch
         {
@@ -101,7 +114,7 @@ public class OrderDraftService
     /// </summary>
     public bool HasDraft()
     {
-        return _localSettings.Values.ContainsKey(DraftKey);
+        return File.Exists(_draftFilePath);
     }
 
     /// <summary>
@@ -109,7 +122,7 @@ public class OrderDraftService
     /// </summary>
     public bool HasMeaningfulData(OrderDraft draft)
     {
-        return draft.CustomerId.HasValue || 
+        return draft.CustomerId.HasValue ||
                draft.CartItems.Count > 0 ||
                !string.IsNullOrWhiteSpace(draft.CouponCode);
     }

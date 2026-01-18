@@ -119,24 +119,25 @@ namespace MyShopAPI.Controllers
             {
                 var now = DateTimeHelper.Now;
 
-                var start = new DateTime(
-                    now.Year,
-                    now.Month,
-                    1,
-                    0, 0, 0);
+                // Start of current month in Vietnam time, converted to UTC for query
+                var startVietnam = new DateTime(now.Year, now.Month, 1, 0, 0, 0);
+                var startUtc = DateTimeHelper.ToUtc(startVietnam);
+                var endUtc = DateTimeHelper.ToUtc(startVietnam.AddMonths(1));
 
-                var end = start.AddMonths(1);
+                var orders = await _context.Orders
+                    .Where(o => o.OrderDate >= startUtc && o.OrderDate < endUtc && o.Status == Models.OrderStatus.Paid)
+                    .ToListAsync();
 
-                var revenue = await _context.Orders
-                    .Where(o => o.OrderDate >= start && o.OrderDate < end && o.Status == Models.OrderStatus.Paid)
-                    .GroupBy(o => o.OrderDate.Day)
+                // Group by day in Vietnam timezone
+                var revenue = orders
+                    .GroupBy(o => DateTimeHelper.ToVietnam(o.OrderDate).Day)
                     .Select(g => new RevenueByDayDto
                     {
                         Day = g.Key,
                         Revenue = g.Sum(o => (decimal)o.FinalAmount)
                     })
                     .OrderBy(x => x.Day)
-                    .ToListAsync();
+                    .ToList();
 
                 return Ok(revenue);
             }

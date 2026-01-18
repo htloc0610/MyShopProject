@@ -1,0 +1,50 @@
+<?xml version='1.0'?>
+<Obfuscator>
+  <!-- Input/Output paths -->
+  <Var name="InPath" value="bin\Release\net8.0-windows10.0.19041.0\win-x64\publish" />
+  <Var name="OutPath" value="bin\Release\net8.0-windows10.0.19041.0\win-x64\publish-obfuscated" />
+
+  <!-- Conservative settings for WinUI 3 -->
+  <Var name="KeepPublicApi" value="true" />
+  <Var name="HidePrivateApi" value="true" />
+  <Var name="HideStrings" value="false" />
+  <Var name="UseUnicodeNames" value="false" />
+  <Var name="RenameProperties" value="false" />
+  <Var name="RenameEvents" value="false" />
+  <Var name="RenameFields" value="true" />
+  <Var name="ReuseNames" value="false" />
+
+  <!-- Only obfuscate MyShop.dll -->
+  <Module file="$(InPath)\MyShop.dll">
+    <!-- SKIP everything UI/WinRT related -->
+    <SkipType name="MyShop.App" />
+    <SkipType name="MyShop.App_*" />
+    <SkipType name="MyShop.MainWindow" />
+    <SkipType name="MyShop.MainWindow_*" />
+
+    <!-- Skip all generated XamlTypeInfo -->
+    <SkipType name="MyShop.XamlTypeInfo.*" />
+    <SkipType name="XamlGeneratedNamespace.*" />
+
+    <!-- Skip Views (XAML code-behind) -->
+    <SkipNamespace name="MyShop.Views" />
+    <SkipNamespace name="MyShop.Views.*" />
+
+    <!-- Skip ViewModels (data binding) -->
+    <SkipNamespace name="MyShop.ViewModels" />
+    <SkipNamespace name="MyShop.ViewModels.*" />
+
+    <!-- Skip Models (JSON serialization) -->
+    <SkipNamespace name="MyShop.Models" />
+    <SkipNamespace name="MyShop.Models.*" />
+
+    <!-- Skip Converters (XAML) -->
+    <SkipNamespace name="MyShop.Converters" />
+
+    <!-- Skip Helpers -->
+    <SkipNamespace name="MyShop.Helpers" />
+
+    <!-- ONLY obfuscate Services (internal business logic) -->
+    <!-- Services will have their private methods/fields obfuscated -->
+  </Module>
+</Obfuscator>
