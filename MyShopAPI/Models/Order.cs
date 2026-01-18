@@ -10,7 +10,7 @@ namespace MyShopAPI.Models
         public int OrderId { get; set; }
 
         /// <summary>
-        /// Date and time when the order was created.
+        /// Date and time when the order was created (stored in UTC).
         /// </summary>
         [Required]
         public DateTime OrderDate { get; set; } = DateTime.UtcNow;

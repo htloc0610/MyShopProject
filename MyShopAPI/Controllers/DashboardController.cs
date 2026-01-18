@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MyShopAPI.Data;
 using MyShopAPI.DTOs;
+using MyShopAPI.Helpers;
 using System.Diagnostics;
 
 namespace MyShopAPI.Controllers
@@ -25,15 +26,17 @@ namespace MyShopAPI.Controllers
         [HttpGet("summary")]
         public async Task<ActionResult<DashboardSummaryDto>> GetSummary()
         {
-            var today = DateTime.UtcNow.Date;
+            // Today in Vietnam time, converted to UTC for database query
+            var todayVietnam = DateTimeHelper.Today; // e.g., 19-Jan 00:00 Vietnam
+            var todayUtc = todayVietnam.AddHours(-7); // e.g., 18-Jan 17:00 UTC
 
             var totalProducts = await _context.Products.CountAsync();
 
             var todayOrders = await _context.Orders
-                .CountAsync(o => o.OrderDate >= today && o.Status == Models.OrderStatus.Paid);
+                .CountAsync(o => o.OrderDate >= todayUtc && o.Status == Models.OrderStatus.Paid);
 
             var todayRevenue = await _context.Orders
-                .Where(o => o.OrderDate >= today && o.Status == Models.OrderStatus.Paid)
+                .Where(o => o.OrderDate >= todayUtc && o.Status == Models.OrderStatus.Paid)
                 .SumAsync(o => (decimal?)o.FinalAmount) ?? 0;
             return Ok(new DashboardSummaryDto
             {
@@ -114,14 +117,13 @@ namespace MyShopAPI.Controllers
         {
             try
             {
-                var now = DateTime.UtcNow;
+                var now = DateTimeHelper.Now;
 
                 var start = new DateTime(
                     now.Year,
                     now.Month,
                     1,
-                    0, 0, 0,
-                    DateTimeKind.Utc);
+                    0, 0, 0);
 
                 var end = start.AddMonths(1);
 
