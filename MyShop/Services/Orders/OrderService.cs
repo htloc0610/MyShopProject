@@ -208,7 +208,7 @@ public class OrderService : IOrderService
     {
         try
         {
-            var updateDto = new
+            var updateDto = new UpdateOrderRequest
             {
                 CustomerName = customerName,
                 CustomerPhone = customerPhone,

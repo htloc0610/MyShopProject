@@ -66,7 +66,7 @@ public class CategoryService : ICategoryService
     {
         try
         {
-            var createDto = new { Name = name, Description = description };
+            var createDto = new CreateCategoryRequest { Name = name, Description = description };
             var response = await _httpClient.PostAsJsonAsync(CategoriesEndpoint, createDto);
             
             if (response.IsSuccessStatusCode)
@@ -92,7 +92,7 @@ public class CategoryService : ICategoryService
     {
         try
         {
-            var updateDto = new { CategoryId = id, Name = name, Description = description };
+            var updateDto = new UpdateCategoryRequest { CategoryId = id, Name = name, Description = description };
             var response = await _httpClient.PutAsJsonAsync($"{CategoriesEndpoint}/{id}", updateDto);
             
             if (response.IsSuccessStatusCode)
