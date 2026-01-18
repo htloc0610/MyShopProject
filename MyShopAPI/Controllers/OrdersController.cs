@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using MyShopAPI.Data;
 using MyShopAPI.DTOs;
 using MyShopAPI.Models;
+using MyShopAPI.Helpers;
 
 namespace MyShopAPI.Controllers
 {
@@ -61,17 +62,23 @@ namespace MyShopAPI.Controllers
                 query = query.Where(o => o.Status == orderStatus);
             }
 
-            // Apply date range filter (convert to UTC for PostgreSQL)
+            // Apply date range filter
+            // Database stores UTC, UI displays Vietnam time (UTC+7)
+            // User selects dates in Vietnam time, need to convert to UTC for query
+            // Example: User selects 19-Jan Vietnam → 18-Jan 17:00 UTC
             if (startDate.HasValue)
             {
-                var startDateUtc = DateTime.SpecifyKind(startDate.Value.Date, DateTimeKind.Utc);
-                query = query.Where(o => o.OrderDate >= startDateUtc);
+                // Start of day in Vietnam time → convert to UTC by subtracting 7 hours
+                var startOfDayVietnam = startDate.Value.Date; // e.g., 19-Jan 00:00
+                var startOfDayUtc = DateTime.SpecifyKind(startOfDayVietnam.AddHours(-7), DateTimeKind.Utc);
+                query = query.Where(o => o.OrderDate >= startOfDayUtc);
             }
             if (endDate.HasValue)
             {
-                // Include the entire end date (until 23:59:59) and convert to UTC
-                var endOfDay = DateTime.SpecifyKind(endDate.Value.Date.AddDays(1).AddTicks(-1), DateTimeKind.Utc);
-                query = query.Where(o => o.OrderDate <= endOfDay);
+                // End of day (23:59:59.999) in Vietnam time → convert to UTC
+                var endOfDayVietnam = endDate.Value.Date.AddDays(1).AddTicks(-1); // e.g., 20-Jan 23:59:59
+                var endOfDayUtc = DateTime.SpecifyKind(endOfDayVietnam.AddHours(-7), DateTimeKind.Utc);
+                query = query.Where(o => o.OrderDate <= endOfDayUtc);
             }
 
             // Apply amount range filter
