@@ -144,6 +144,11 @@
     <PublishReadyToRun>False</PublishReadyToRun>
     <PublishTrimmed>False</PublishTrimmed>
     <JsonSerializerIsReflectionEnabledByDefault>true</JsonSerializerIsReflectionEnabledByDefault>
+    <!-- Fix WinUI 3 self-contained deployment -->
+    <SelfContained>true</SelfContained>
+    <PublishSingleFile>false</PublishSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>false</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>false</EnableCompressionInSingleFile>
   </PropertyGroup>
   
   <!-- Auto-copy Plugins after build -->
@@ -175,6 +180,25 @@
 
     <Warning Text="FuzzySearch.dll not found at: ..\Plugins\FuzzySearch\bin\x64\$(Configuration)\$(TargetFramework)\FuzzySearch.dll - build FuzzySearch project first"
              Condition="!Exists('..\Plugins\FuzzySearch\bin\x64\$(Configuration)\$(TargetFramework)\FuzzySearch.dll')" />
+  </Target>
+
+  <!-- Auto-copy Plugins after publish -->
+  <Target Name="CopyPluginsToPublish" AfterTargets="Publish">
+    <MakeDir Directories="$(PublishDir)Plugins" />
+
+    <!-- Copy MomoPayment Plugin -->
+    <Copy SourceFiles="..\Plugins\MomoPayment\bin\x64\$(Configuration)\$(TargetFramework)\MomoPayment.dll"
+          DestinationFolder="$(PublishDir)Plugins"
+          SkipUnchangedFiles="true"
+          Condition="Exists('..\Plugins\MomoPayment\bin\x64\$(Configuration)\$(TargetFramework)\MomoPayment.dll')" />
+
+    <!-- Copy FuzzySearch Plugin -->
+    <Copy SourceFiles="..\Plugins\FuzzySearch\bin\x64\$(Configuration)\$(TargetFramework)\FuzzySearch.dll"
+          DestinationFolder="$(PublishDir)Plugins"
+          SkipUnchangedFiles="true"
+          Condition="Exists('..\Plugins\FuzzySearch\bin\x64\$(Configuration)\$(TargetFramework)\FuzzySearch.dll')" />
+
+    <Message Text="Plugins copied to publish directory: $(PublishDir)Plugins\" Importance="high" />
   </Target>
 
   <ItemGroup>
