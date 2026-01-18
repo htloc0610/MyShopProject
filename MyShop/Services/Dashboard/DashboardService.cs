@@ -13,7 +13,7 @@ namespace MyShop.Services.Dashboard;
 public class DashboardService
 {
     private readonly HttpClient _httpClient;
-    private const string BaseUrl = "http://localhost:5002";
+    private const string BaseUrl = "http://34.69.122.4:5002";
 
     public DashboardService(HttpClient httpClient)
     {

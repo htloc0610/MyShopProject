@@ -71,6 +71,7 @@ namespace MyShopAPI.Controllers
         public async Task<ActionResult<IEnumerable<TopSellingProductDto>>> GetTopSellingProducts()
         {
             var products = await _context.OrderItems
+                .Where(oi => oi.Order.Status == Models.OrderStatus.Paid)
                 .GroupBy(oi => new { oi.ProductId, oi.Product.Name })
                 .Select(g => new TopSellingProductDto
                 {

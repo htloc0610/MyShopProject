@@ -13,7 +13,7 @@ namespace MyShop.Services.Orders;
 public class OrderService : IOrderService
 {
     private readonly HttpClient _httpClient;
-    private const string BaseUrl = "http://localhost:5002";
+    private const string BaseUrl = "http://34.69.122.4:5002";
     private const string OrdersEndpoint = "/api/orders";
 
     public OrderService(HttpClient httpClient)

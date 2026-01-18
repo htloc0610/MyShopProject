@@ -17,7 +17,7 @@ namespace MyShop.Services.Categories;
 public class CategoryService : ICategoryService
 {
     private readonly HttpClient _httpClient;
-    private const string BaseUrl = "http://localhost:5002";
+    private const string BaseUrl = "http://34.69.122.4:5002";
     private const string CategoriesEndpoint = "/api/categories";
 
     public CategoryService(HttpClient httpClient)

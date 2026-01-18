@@ -32,7 +32,7 @@ namespace MyShop.Services.Auth
             _credentialService = credentialService;
 
             // Configure base address for auth API
-            _httpClient.BaseAddress = new Uri("http://localhost:5002/");
+            _httpClient.BaseAddress = new Uri("http://34.69.122.4:5002/");
             Debug.WriteLine("=== AuthService Initialized ===");
         }
 

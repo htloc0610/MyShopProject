@@ -1,34 +1,57 @@
 using System;
-using System.Net;
-using System.Net.Sockets;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Imaging;
 using Microsoft.UI;
-using Windows.UI; // Add this for Color
+using Windows.UI;
 
 namespace MomoPayment;
 
 public class PaymentControl : UserControl
 {
     private readonly decimal _amount;
-    private readonly int _port;
+    private string? _paymentUrl;
     private Image? _qrImage;
-    private TextBlock? _ipAddressText;
+    private TextBlock? _serverText;
     private TextBlock? _statusText;
+    private ProgressRing? _loadingRing;
+    private Border? _qrBorder;
 
     private readonly Color _momoColor = Color.FromArgb(255, 163, 0, 101); // #A30065
 
     public event EventHandler? SimulationRequested;
     public event EventHandler? DialogCloseRequested;
 
-    public PaymentControl(decimal amount, int port)
+    public PaymentControl(decimal amount)
     {
         _amount = amount;
-        _port = port;
         Content = BuildUI();
-        LoadQrCode(amount);
+        // Start with loading state
+        ShowLoading(true);
+    }
+
+    /// <summary>
+    /// Sets the payment URL and displays the QR code.
+    /// Called after server session is created.
+    /// </summary>
+    public void SetPaymentUrl(string paymentUrl)
+    {
+        _paymentUrl = paymentUrl;
+        
+        DispatcherQueue.TryEnqueue(() =>
+        {
+            ShowLoading(false);
+            LoadQrCode();
+        });
+    }
+
+    private void ShowLoading(bool isLoading)
+    {
+        if (_loadingRing != null) _loadingRing.IsActive = isLoading;
+        if (_loadingRing != null) _loadingRing.Visibility = isLoading ? Visibility.Visible : Visibility.Collapsed;
+        if (_qrImage != null) _qrImage.Visibility = isLoading ? Visibility.Collapsed : Visibility.Visible;
+        if (_statusText != null) _statusText.Text = isLoading ? "Đang kết nối server..." : "Đang chờ thanh toán...";
     }
 
     private UIElement BuildUI()
@@ -110,7 +133,7 @@ public class PaymentControl : UserControl
         bodyStack.Children.Add(amountStack);
 
         // QR Code Container
-        var qrBorder = new Border
+        _qrBorder = new Border
         {
             Width = 190,
             Height = 190,
@@ -122,9 +145,23 @@ public class PaymentControl : UserControl
             HorizontalAlignment = HorizontalAlignment.Center
         };
 
-        _qrImage = new Image { Stretch = Stretch.Uniform };
-        qrBorder.Child = _qrImage;
-        bodyStack.Children.Add(qrBorder);
+        var qrContent = new Grid();
+        
+        _qrImage = new Image { Stretch = Stretch.Uniform, Visibility = Visibility.Collapsed };
+        qrContent.Children.Add(_qrImage);
+        
+        _loadingRing = new ProgressRing 
+        { 
+            IsActive = true, 
+            Width = 50, 
+            Height = 50,
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center
+        };
+        qrContent.Children.Add(_loadingRing);
+        
+        _qrBorder.Child = qrContent;
+        bodyStack.Children.Add(_qrBorder);
 
         // Instruction
         var instructionStack = new StackPanel { Spacing = 8 };
@@ -138,7 +175,7 @@ public class PaymentControl : UserControl
 
         _statusText = new TextBlock
         {
-            Text = "Đang chờ thanh toán...",
+            Text = "Đang kết nối server...",
             FontSize = 12,
             FontStyle = Windows.UI.Text.FontStyle.Italic,
             Foreground = new SolidColorBrush(Colors.Gray),
@@ -147,7 +184,7 @@ public class PaymentControl : UserControl
         instructionStack.Children.Add(_statusText);
         bodyStack.Children.Add(instructionStack);
 
-        // IP / Debug Info (Cleaner)
+        // Server Info
         var debugBorder = new Border
         {
             Padding = new Thickness(12, 8, 12, 8),
@@ -156,8 +193,8 @@ public class PaymentControl : UserControl
         };
         var debugContent = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 5, HorizontalAlignment = HorizontalAlignment.Center };
         debugContent.Children.Add(new TextBlock { Text = "Server:", FontSize = 11, Foreground = new SolidColorBrush(Colors.DimGray) });
-        _ipAddressText = new TextBlock { Text = "...", FontSize = 11, FontWeight = Microsoft.UI.Text.FontWeights.Bold, Foreground = new SolidColorBrush(Colors.DimGray) };
-        debugContent.Children.Add(_ipAddressText);
+        _serverText = new TextBlock { Text = "Cloud", FontSize = 11, FontWeight = Microsoft.UI.Text.FontWeights.Bold, Foreground = new SolidColorBrush(Colors.DimGray) };
+        debugContent.Children.Add(_serverText);
         debugBorder.Child = debugContent;
         bodyStack.Children.Add(debugBorder);
 
@@ -174,12 +211,10 @@ public class PaymentControl : UserControl
             BorderThickness = new Thickness(0),
             Margin = new Thickness(0, 10, 0, 0)
         };
-        // Override hover style to avoid white background
         simBtn.Resources["ButtonBackgroundPointerOver"] = new SolidColorBrush(Color.FromArgb(255, 255, 180, 50));
         simBtn.Resources["ButtonForegroundPointerOver"] = new SolidColorBrush(Colors.White);
         simBtn.Click += (s, e) => {
             SimulationRequested?.Invoke(this, EventArgs.Empty);
-            // Request the dialog to close after a short delay to let status update
             DispatcherQueue.TryEnqueue(async () => {
                 await System.Threading.Tasks.Task.Delay(500);
                 DialogCloseRequested?.Invoke(this, EventArgs.Empty);
@@ -187,10 +222,10 @@ public class PaymentControl : UserControl
         };
         bodyStack.Children.Add(simBtn);
 
-        // Warning Footer
+        // Info Footer
         bodyStack.Children.Add(new TextBlock
         {
-            Text = "ⓘ Đảm bảo điện thoại và máy tính dùng chung Wi-Fi",
+            Text = "ⓘ Quét mã QR bằng điện thoại để thanh toán",
             FontSize = 10,
             Foreground = new SolidColorBrush(Colors.Gray),
             HorizontalAlignment = HorizontalAlignment.Center,
@@ -203,52 +238,32 @@ public class PaymentControl : UserControl
         return mainGrid;
     }
 
-    private void LoadQrCode(decimal amount)
+    private void LoadQrCode()
     {
-        string localIp = GetLocalIpAddress();
-        if (_ipAddressText != null)
+        if (string.IsNullOrEmpty(_paymentUrl))
         {
-            _ipAddressText.Text = $"{localIp}:{_port}";
+            UpdateStatus("Không thể kết nối server!");
+            return;
         }
 
-        // URL that phone will open
-        string paymentUrl = $"http://{localIp}:{_port}/pay?amt={amount}";
-        
-        // Use public API to generate QR Code image for this URL
-        string qrApiUrl = $"https://api.qrserver.com/v1/create-qr-code/?size=200x200&data={Uri.EscapeDataString(paymentUrl)}";
+        // Use public API to generate QR Code image for server URL
+        string qrApiUrl = $"https://api.qrserver.com/v1/create-qr-code/?size=200x200&data={Uri.EscapeDataString(_paymentUrl)}";
         
         if (_qrImage != null)
         {
             _qrImage.Source = new BitmapImage(new Uri(qrApiUrl));
         }
     }
-
-    private string GetLocalIpAddress()
-    {
-        try
-        {
-            var host = Dns.GetHostEntry(Dns.GetHostName());
-            foreach (var ip in host.AddressList)
-            {
-                if (ip.AddressFamily == AddressFamily.InterNetwork)
-                {
-                    return ip.ToString();
-                }
-            }
-            return "localhost";
-        }
-        catch
-        {
-            return "localhost";
-        }
-    }
     
     public void UpdateStatus(string message)
     {
-        if (_statusText != null)
+        DispatcherQueue.TryEnqueue(() =>
         {
-            _statusText.Text = message;
-        }
+            if (_statusText != null)
+            {
+                _statusText.Text = message;
+            }
+        });
     }
 
     public void RequestDialogClose()

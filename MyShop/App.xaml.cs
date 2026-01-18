@@ -95,7 +95,7 @@ public partial class App : Application
         // ====================================================
         // Base HttpClient (shared)
         // ====================================================
-        var baseAddress = new Uri("http://localhost:5002/");
+        var baseAddress = new Uri("http://34.69.122.4:5002/");
 
         // ====================================================
         // Authentication Services (register first as dependencies)
