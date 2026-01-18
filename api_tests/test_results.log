@@ -1,0 +1,262 @@
+﻿**********************
+Windows PowerShell transcript start
+Start time: 20260118181550
+Username: LUONG\ADMIN
+RunAs User: LUONG\ADMIN
+Configuration Name: 
+Machine: LUONG (Microsoft Windows NT 10.0.26200.0)
+Host Application: C:\WINDOWS\System32\WindowsPowerShell\v1.0\powershell.exe -noexit -command try { . "c:\Users\ADMIN\AppData\Local\Programs\Antigravity\resources\app\out\vs\workbench\contrib\terminal\common\scripts\shellIntegration.ps1" } catch {}
+Process ID: 31504
+PSVersion: 5.1.26100.7462
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.26100.7462
+BuildVersion: 10.0.26100.7462
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+
+=============================================
+   MYSHOP API TESTS
+   Server: http://localhost:5002
+   Time: 2026-01-18 18:15:50
+=============================================
+
+=== AUTH TESTS ===
+
+[GET]
+  [PASS] POST /api/auth/login returns token
+  [PASS] Token has valid length
+  [PASS] GET /api/auth/me returns email
+  [PASS] GET /api/auth/me returns shopName
+
+[DOMAIN]
+PS>TerminatingError(Invoke-RestMethod): "The remote server returned an error: (401) Unauthorized."
+  [PASS] Wrong password â†’ 401
+PS>TerminatingError(Invoke-RestMethod): "The remote server returned an error: (401) Unauthorized."
+  [PASS] Fake email â†’ 401
+PS>TerminatingError(Invoke-RestMethod): "The remote server returned an error: (400) Bad Request."
+  [PASS] Empty email â†’ 400
+PS>TerminatingError(Invoke-RestMethod): "The remote server returned an error: (400) Bad Request."
+  [PASS] Empty password â†’ 400
+PS>TerminatingError(Invoke-RestMethod): "The remote server returned an error: (401) Unauthorized."
+  [PASS] No token â†’ 401
+PS>TerminatingError(Invoke-RestMethod): "The remote server returned an error: (401) Unauthorized."
+  [PASS] Invalid token â†’ 401
+
+Passed: 10 | Failed: 0
+
+=== CATEGORIES TESTS ===
+
+[GET]
+  [PASS] GET /api/categories OK
+  [PASS] Has categories
+  [PASS] GET /api/categories/{id} OK
+  [PASS] Category has name
+
+[CRUD]
+  [PASS] CREATE OK (ID: 9)
+  [PASS] CREATE returns correct name
+  [PASS] READ returns correct description
+  [PASS] UPDATE name works
+  [PASS] UPDATE description works
+  [PASS] DELETE OK
+
+[DOMAIN]
+PS>TerminatingError(Invoke-RestMethod): "The remote server returned an error: (404) Not Found."
+  [PASS] Non-existent â†’ 404
+PS>TerminatingError(Invoke-RestMethod): "The remote server returned an error: (404) Not Found."
+  [PASS] Delete non-existent â†’ 404
+
+Passed: 12 | Failed: 0
+
+=== CUSTOMERS TESTS ===
+
+[GET]
+  [PASS] GET /api/customers OK
+  [PASS] Response has items array
+  [PASS] Response has totalCount
+  [PASS] Pagination pageSize=5 works
+  [PASS] Pagination currentPage=1
+  [PASS] GET /api/customers/{id} OK
+  [PASS] Customer has name
+  [PASS] Customer has phoneNumber
+
+[CRUD]
+  [PASS] CREATE OK (ID: 563d1de0-1920-48a4-a507-1804ba9e5416)
+  [PASS] New customer has totalSpent=0
+  [PASS] READ returns correct phone
+  [PASS] READ returns correct name
+  [PASS] UPDATE name works
+  [PASS] UPDATE address works
+  [PASS] DELETE OK
+
+[DOMAIN]
+PS>TerminatingError(Invoke-RestMethod): "The remote server returned an error: (400) Bad Request."
+  [PASS] Empty name â†’ 400
+PS>TerminatingError(Invoke-RestMethod): "The remote server returned an error: (400) Bad Request."
+  [PASS] Empty phone â†’ 400
+PS>TerminatingError(Invoke-RestMethod): "The remote server returned an error: (404) Not Found."
+  [PASS] Non-existent â†’ 404
+PS>TerminatingError(Invoke-RestMethod): "The remote server returned an error: (404) Not Found."
+  [PASS] Delete non-existent â†’ 404
+
+Passed: 19 | Failed: 0
+
+=== DISCOUNTS TESTS ===
+
+[GET]
+  [PASS] GET /api/discounts OK
+  [PASS] Response has items
+  [PASS] Response has totalCount
+  [PASS] Pagination works
+  [PASS] Filter status=active works
+  [PASS] GET /api/discounts/{id} OK
+  [PASS] Discount has code
+  [PASS] Discount has amount
+  [PASS] Validate returns isValid
+
+[CRUD]
+  [PASS] CREATE OK (ID: 30)
+  [PASS] CREATE returns correct code
+  [PASS] New discount has usedCount=0
+  [PASS] READ returns correct amount
+  [PASS] UPDATE amount works
+  [PASS] DELETE OK
+
+[DOMAIN]
+PS>TerminatingError(Invoke-RestMethod): "The remote server returned an error: (400) Bad Request."
+  [PASS] Amount=0 â†’ 400
+PS>TerminatingError(Invoke-RestMethod): "The remote server returned an error: (400) Bad Request."
+  [PASS] Negative amount â†’ 400
+PS>TerminatingError(Invoke-RestMethod): "The remote server returned an error: (400) Bad Request."
+  [PASS] EndDate<StartDate â†’ 400
+PS>TerminatingError(Invoke-RestMethod): "The remote server returned an error: (400) Bad Request."
+  [PASS] Duplicate code â†’ 400
+  [PASS] Expired â†’ isValid=false
+PS>TerminatingError(Invoke-RestMethod): "The remote server returned an error: (404) Not Found."
+  [PASS] Non-existent code â†’ 404
+
+Passed: 21 | Failed: 0
+
+=== PRODUCTS TESTS ===
+
+[GET]
+  [PASS] GET /api/products OK
+  [PASS] Response has items
+  [PASS] Response has totalCount
+  [PASS] Pagination works
+  [PASS] GET /api/products/all OK
+  [PASS] Has products
+  [PASS] GET /api/products/{id} OK
+  [PASS] Product has SKU
+  [PASS] Product has name
+  [PASS] Product has sellingPrice
+  [PASS] Product has stock
+
+[CRUD]
+  [PASS] CREATE OK (ID: 94)
+  [PASS] CREATE returns correct SKU
+  [PASS] READ returns correct name
+  [PASS] READ returns correct price
+  [PASS] READ returns correct stock
+  [PASS] UPDATE name works
+  [PASS] UPDATE price works
+  [PASS] UPDATE stock works
+  [PASS] DELETE OK
+
+[DOMAIN]
+PS>TerminatingError(Invoke-RestMethod): "The remote server returned an error: (400) Bad Request."
+  [PASS] Invalid category â†’ 400
+PS>TerminatingError(Invoke-RestMethod): "The remote server returned an error: (404) Not Found."
+  [PASS] Non-existent â†’ 404
+  [PASS] Stock decreased by 5
+
+Passed: 23 | Failed: 0
+
+=== ORDERS TESTS ===
+
+[GET]
+  [PASS] GET /api/orders OK
+  [PASS] Response has items
+  [PASS] Response has totalCount
+  [PASS] Pagination works
+  [PASS] GET /api/orders/{id} OK
+  [PASS] Order has totalAmount
+  [PASS] Order has finalAmount
+  [PASS] Order has status
+  [PASS] Order has items
+  [PASS] GET /api/orders/available-coupons OK
+
+[CRUD]
+  [PASS] CREATE OK (ID: 125)
+  [PASS] Order has finalAmount > 0
+  [PASS] READ OK
+  [PASS] New order status = Created
+  [PASS] Order has 1 item
+  [FAIL] Not updated
+  [PASS] DELETE OK
+
+[DOMAIN]
+PS>TerminatingError(Invoke-RestMethod): "The remote server returned an error: (400) Bad Request."
+  [PASS] Update cancelled â†’ 400
+PS>TerminatingError(Invoke-RestMethod): "The remote server returned an error: (400) Bad Request."
+  [PASS] Empty items â†’ 400
+PS>TerminatingError(Invoke-RestMethod): "The remote server returned an error: (400) Bad Request."
+  [PASS] Invalid product â†’ 400
+PS>TerminatingError(Invoke-RestMethod): "The remote server returned an error: (400) Bad Request."
+  [PASS] Quantity=0 â†’ 400
+  [PASS] Discount: 10000 VND
+  [PASS] TotalSpent increased on Paid
+  [PASS] TotalSpent restored on Cancel
+
+Passed: 23 | Failed: 1
+
+=== DASHBOARD API TEST ===
+
+=== LOGIN ===
+[PASS] POST /api/auth/login (ms)
+[INFO] Token acquired
+[PASS] GET /api/dashboard/summary (ms)
+
+[PASS] GET /api/dashboard/low-stock (ms)
+[PASS] GET /api/dashboard/top-selling (ms)
+[PASS] GET /api/dashboard/recent-orders (ms)
+[PASS] GET /api/dashboard/revenue-month (ms)
+
+=============================================
+            TEST SUMMARY
+=============================================
+Passed:  6
+Failed:  0
+Skipped: 0
+---------------------------------------------
+[SUCCESS] All tests passed!
+
+=== REPORTS API TEST ===
+
+=== LOGIN ===
+[PASS] POST /api/auth/login (ms)
+[INFO] Token acquired
+[PASS] GET /api/reports/product-sales-summary (ms)
+[PASS] GET /api/reports/product-revenue-profit-summary (ms)
+[PASS] GET /api/reports/sales-quantity-series (ms)
+[PASS] GET /api/reports/revenue-profit-series (ms)
+
+=============================================
+            TEST SUMMARY
+=============================================
+Passed:  5
+Failed:  0
+Skipped: 0
+---------------------------------------------
+[SUCCESS] All tests passed!
+
+=============================================
+   ALL TESTS COMPLETED
+=============================================
+**********************
+Windows PowerShell transcript end
+End time: 20260118181553
+**********************

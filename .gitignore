@@ -90,3 +90,5 @@ patch_*
 .env
 .env.local
 .env.production
+api_test_result.txt
+/api_tests/test_results.log
