@@ -15,7 +15,7 @@ namespace MyShop.Services.Products;
 public class ProductService : IProductService
 {
     private readonly HttpClient _httpClient;
-    private const string BaseUrl = "http://localhost:5002";
+    private const string BaseUrl = "http://34.69.122.4:5002";
     private const string ProductsEndpoint = "/api/products";
 
     public ProductService(HttpClient httpClient)

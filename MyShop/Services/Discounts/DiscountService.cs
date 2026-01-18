@@ -36,7 +36,7 @@ public interface IDiscountService
 public class DiscountService : IDiscountService
 {
     private readonly HttpClient _httpClient;
-    private const string BaseUrl = "http://localhost:5002";
+    private const string BaseUrl = "http://34.69.122.4:5002";
     private const string DiscountsEndpoint = "/api/discounts";
 
     public DiscountService(HttpClient httpClient)
