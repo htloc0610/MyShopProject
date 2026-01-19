@@ -1,0 +1,36 @@
+pipeline {
+    agent any
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                echo 'Checking out source code...'
+                checkout scm
+            }
+        }
+        
+        stage('Build with Docker Compose') {
+            steps {
+                echo 'Building API with docker-compose...'
+                dir('MyShopAPI') {
+                    sh 'docker compose build api'
+                }
+            }
+        }
+    }
+    
+    post {
+        success {
+            echo "CI Pipeline completed successfully!"
+            echo "Docker image built successfully"
+        }
+        
+        failure {
+            echo "CI Pipeline failed!"
+        }
+        
+        always {
+            echo 'Build completed'
+        }
+    }
+}

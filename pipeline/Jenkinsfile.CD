@@ -1,0 +1,55 @@
+pipeline {
+    agent any
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                echo 'Checking out source code...'
+                checkout scm
+            }
+        }
+        
+        stage('Copy Environment File') {
+            steps {
+                echo 'Copying .env file from Jenkins credentials...'
+                dir('MyShopAPI') {
+                    withCredentials([file(credentialsId: 'myshop-env-file', variable: 'ENV_FILE')]) {
+                        sh 'cp $ENV_FILE .env'
+                    }
+                }
+            }
+        }
+        
+        stage('Stop Current Containers') {
+            steps {
+                echo 'Stopping current containers...'
+                dir('MyShopAPI') {
+                    sh 'docker compose down || true'
+                }
+            }
+        }
+        
+        stage('Deploy with Docker Compose') {
+            steps {
+                echo 'Deploying API with docker-compose...'
+                dir('MyShopAPI') {
+                    sh 'docker compose up -d --force-recreate api'
+                }
+            }
+        }
+    }
+    
+    post {
+        success {
+            echo "CD Pipeline completed successfully!"
+        }
+        
+        failure {
+            echo "CD Pipeline failed!"
+        }
+        
+        always {
+            echo 'Deployment completed'
+        }
+    }
+}
