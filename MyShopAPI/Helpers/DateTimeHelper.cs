@@ -26,7 +26,8 @@ public static class DateTimeHelper
     /// </summary>
     public static DateTime ToUtc(DateTime vietnamTime)
     {
-        return vietnamTime.Subtract(VietnamOffset);
+        var utcTime = vietnamTime.Subtract(VietnamOffset);
+        return DateTime.SpecifyKind(utcTime, DateTimeKind.Utc);
     }
     
     /// <summary>

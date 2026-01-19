@@ -28,7 +28,7 @@ namespace MyShopAPI.Controllers
         {
             // Today in Vietnam time, converted to UTC for database query
             var todayVietnam = DateTimeHelper.Today; // e.g., 19-Jan 00:00 Vietnam
-            var todayUtc = todayVietnam.AddHours(-7); // e.g., 18-Jan 17:00 UTC
+            var todayUtc = DateTimeHelper.ToUtc(todayVietnam); // e.g., 18-Jan 17:00 UTC
 
             var totalProducts = await _context.Products.CountAsync();
 
@@ -73,8 +73,14 @@ namespace MyShopAPI.Controllers
         [HttpGet("top-selling")]
         public async Task<ActionResult<IEnumerable<TopSellingProductDto>>> GetTopSellingProducts()
         {
+            // Get paid order IDs first
+            var paidOrderIds = await _context.Orders
+                .Where(o => o.Status == Models.OrderStatus.Paid)
+                .Select(o => o.OrderId)
+                .ToListAsync();
+
             var products = await _context.OrderItems
-                .Where(oi => oi.Order.Status == Models.OrderStatus.Paid)
+                .Where(oi => paidOrderIds.Contains(oi.OrderId))
                 .GroupBy(oi => new { oi.ProductId, oi.Product.Name })
                 .Select(g => new TopSellingProductDto
                 {
