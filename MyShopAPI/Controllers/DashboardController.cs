@@ -28,7 +28,7 @@ namespace MyShopAPI.Controllers
         {
             // Today in Vietnam time, converted to UTC for database query
             var todayVietnam = DateTimeHelper.Today; // e.g., 19-Jan 00:00 Vietnam
-            var todayUtc = todayVietnam.AddHours(-7); // e.g., 18-Jan 17:00 UTC
+            var todayUtc = DateTimeHelper.ToUtc(todayVietnam); // e.g., 18-Jan 17:00 UTC
 
             var totalProducts = await _context.Products.CountAsync();
 
