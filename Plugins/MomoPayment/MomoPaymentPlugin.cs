@@ -1,15 +1,15 @@
 using System;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls; // Add this for TextBlock
+using Microsoft.UI.Xaml.Controls;
 using MyShop.Contracts;
 
 namespace MomoPayment;
 
 public class MomoPaymentPlugin : IPaymentPlugin
 {
-    private LocalWebServer? _server;
+    private ServerPaymentHandler? _serverHandler;
     private PaymentControl? _control;
-    private const int PORT = 8888;
+    private decimal _amount;
 
     public string Name => "Momo E-Wallet";
     public string Description => "Thanh toán qua ví điện tử Momo (Quét QR)";
@@ -19,13 +19,46 @@ public class MomoPaymentPlugin : IPaymentPlugin
 
     public void Initialize(decimal amount)
     {
-        _server = new LocalWebServer(PORT);
-        _server.OnPaymentSuccess += Server_OnPaymentSuccess;
-        _server.OnPaymentFailed += Server_OnPaymentFailed;
-        _server.Start();
-
-        _control = new PaymentControl(amount, PORT);
+        _amount = amount;
+        
+        // Create control immediately with loading state
+        _control = new PaymentControl(amount);
         _control.SimulationRequested += Server_OnPaymentSuccess;
+        
+        // Initialize server handler and start async session creation
+        _serverHandler = new ServerPaymentHandler();
+        _serverHandler.OnPaymentSuccess += Server_OnPaymentSuccess;
+        _serverHandler.OnPaymentFailed += Server_OnPaymentFailed;
+        
+        // Start async initialization (fire and forget, updates control when ready)
+        _ = InitializeServerSessionAsync(amount);
+    }
+
+    private async System.Threading.Tasks.Task InitializeServerSessionAsync(decimal amount)
+    {
+        try
+        {
+            // Create session on server
+            var session = await _serverHandler!.CreateSessionAsync(amount);
+            
+            if (session.HasValue)
+            {
+                // Update control with server payment URL
+                _control?.SetPaymentUrl(session.Value.payUrl);
+                
+                // Start polling for payment status
+                _serverHandler.StartPolling();
+            }
+            else
+            {
+                _control?.UpdateStatus("Không thể kết nối server!");
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Server init error: {ex.Message}");
+            _control?.UpdateStatus("Lỗi kết nối server!");
+        }
     }
 
     public UIElement GetPaymentView()
@@ -42,12 +75,13 @@ public class MomoPaymentPlugin : IPaymentPlugin
 
     public void Cleanup()
     {
-        if (_server != null)
+        if (_serverHandler != null)
         {
-            _server.Stop();
-            _server.OnPaymentSuccess -= Server_OnPaymentSuccess;
-            _server.OnPaymentFailed -= Server_OnPaymentFailed;
-            _server = null;
+            _serverHandler.StopPolling();
+            _serverHandler.OnPaymentSuccess -= Server_OnPaymentSuccess;
+            _serverHandler.OnPaymentFailed -= Server_OnPaymentFailed;
+            _serverHandler.Dispose();
+            _serverHandler = null;
         }
     }
 

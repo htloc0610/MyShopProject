@@ -17,7 +17,7 @@ namespace MyShop.Services.Categories;
 public class CategoryService : ICategoryService
 {
     private readonly HttpClient _httpClient;
-    private const string BaseUrl = "http://localhost:5002";
+    private const string BaseUrl = "http://34.69.122.4:5002";
     private const string CategoriesEndpoint = "/api/categories";
 
     public CategoryService(HttpClient httpClient)
@@ -66,7 +66,7 @@ public class CategoryService : ICategoryService
     {
         try
         {
-            var createDto = new { Name = name, Description = description };
+            var createDto = new CreateCategoryRequest { Name = name, Description = description };
             var response = await _httpClient.PostAsJsonAsync(CategoriesEndpoint, createDto);
             
             if (response.IsSuccessStatusCode)
@@ -92,7 +92,7 @@ public class CategoryService : ICategoryService
     {
         try
         {
-            var updateDto = new { CategoryId = id, Name = name, Description = description };
+            var updateDto = new UpdateCategoryRequest { CategoryId = id, Name = name, Description = description };
             var response = await _httpClient.PutAsJsonAsync($"{CategoriesEndpoint}/{id}", updateDto);
             
             if (response.IsSuccessStatusCode)

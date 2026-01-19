@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MyShopAPI.Data;
 using MyShopAPI.DTOs;
+using MyShopAPI.Helpers;
 
 namespace MyShopAPI.Controllers
 {
@@ -47,6 +48,8 @@ namespace MyShopAPI.Controllers
                 DateTimeKind.Utc);
 
             query = query.Where(x => x.Order.OrderDate < toUtcExclusive);
+            // Only count paid orders
+            query = query.Where(x => x.Order.Status == Models.OrderStatus.Paid);
 
             var items = await query
                 .GroupBy(x => new
@@ -77,7 +80,9 @@ namespace MyShopAPI.Controllers
             DateOnly to
         )
         {
-            var query = _context.OrderItems.AsQueryable();
+            var orderQuery = _context.Orders
+                .Where(x => x.Status == Models.OrderStatus.Paid)
+                .AsQueryable();
 
             if (from.HasValue)
             {
@@ -85,32 +90,59 @@ namespace MyShopAPI.Controllers
                     from.Value.ToDateTime(TimeOnly.MinValue),
                     DateTimeKind.Utc);
 
-                query = query.Where(x => x.Order.OrderDate >= fromUtc);
+                orderQuery = orderQuery.Where(x => x.OrderDate >= fromUtc);
             }
 
             var toUtcExclusive = DateTime.SpecifyKind(
                 to.AddDays(1).ToDateTime(TimeOnly.MinValue),
                 DateTimeKind.Utc);
 
-            query = query.Where(x => x.Order.OrderDate < toUtcExclusive);
+            orderQuery = orderQuery.Where(x => x.OrderDate < toUtcExclusive);
 
-            var items = await query
-                .GroupBy(x => new
+            // Get orders with items for proportional discount calculation
+            var orders = await orderQuery
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.Product)
+                .ToListAsync();
+
+            // Calculate proportional revenue and profit per product
+            var productData = new Dictionary<int, (string Name, decimal Revenue, decimal Profit)>();
+
+            foreach (var order in orders)
+            {
+                // Calculate discount ratio for this order
+                var discountRatio = order.TotalAmount > 0
+                    ? order.FinalAmount / order.TotalAmount
+                    : 1m;
+
+                foreach (var item in order.OrderItems)
                 {
-                    x.ProductId,
-                    x.Product.Name
-                })
-                .Select(g => new ProductRevenueProfitSummaryItemDto
+                    // Apply proportional discount to item revenue
+                    var itemRevenue = item.TotalPrice * discountRatio;
+                    var itemCost = (decimal)item.Product.ImportPrice * item.Quantity;
+                    var itemProfit = itemRevenue - itemCost;
+
+                    if (productData.TryGetValue(item.ProductId, out var existing))
+                    {
+                        productData[item.ProductId] = (existing.Name, existing.Revenue + itemRevenue, existing.Profit + itemProfit);
+                    }
+                    else
+                    {
+                        productData[item.ProductId] = (item.Product.Name, itemRevenue, itemProfit);
+                    }
+                }
+            }
+
+            var items = productData
+                .Select(kvp => new ProductRevenueProfitSummaryItemDto
                 {
-                    ProductId = g.Key.ProductId,
-                    ProductName = g.Key.Name,
-                    Revenue = g.Sum(x => x.TotalPrice),
-                    Profit = g.Sum(x =>
-                        ((decimal)x.UnitPrice - (decimal)x.Product.ImportPrice) * x.Quantity
-                    )
+                    ProductId = kvp.Key,
+                    ProductName = kvp.Value.Name,
+                    Revenue = kvp.Value.Revenue,
+                    Profit = kvp.Value.Profit
                 })
                 .OrderByDescending(x => x.Revenue)
-                .ToListAsync();
+                .ToList();
 
             return Ok(new ProductRevenueProfitSummaryDto
             {
@@ -178,7 +210,7 @@ namespace MyShopAPI.Controllers
             string groupBy = "day"
         )
         {
-            var query = _context.OrderItems.AsQueryable();
+            var orderQuery = _context.Orders.AsQueryable();
 
             if (from.HasValue)
             {
@@ -186,37 +218,34 @@ namespace MyShopAPI.Controllers
                     from.Value.ToDateTime(TimeOnly.MinValue),
                     DateTimeKind.Utc);
 
-                query = query.Where(x => x.Order.OrderDate >= fromUtc);
+                orderQuery = orderQuery.Where(x => x.OrderDate >= fromUtc);
             }
 
             var toUtcExclusive = DateTime.SpecifyKind(
                 to.AddDays(1).ToDateTime(TimeOnly.MinValue),
                 DateTimeKind.Utc);
 
-            query = query.Where(x => x.Order.OrderDate < toUtcExclusive);
-            query = query.Where(x => x.Order.Status == Models.OrderStatus.Paid);
+            orderQuery = orderQuery.Where(x => x.OrderDate < toUtcExclusive);
+            orderQuery = orderQuery.Where(x => x.Status == Models.OrderStatus.Paid);
 
-            var rows = await query
-                .Select(x => new
-                {
-                    x.Order.OrderDate,
-                    x.TotalPrice,
-                    x.UnitPrice,
-                    x.Quantity,
-                    ImportPrice = x.Product.ImportPrice
-                })
+            // Get orders with their items for profit calculation
+            var orders = await orderQuery
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.Product)
                 .ToListAsync();
 
             var groupByValue = ParseGroupBy(groupBy);
 
-            var items = rows
-                .GroupBy(x => GetPeriodStart(x.OrderDate, groupByValue))
+            var items = orders
+                .GroupBy(o => GetPeriodStart(o.OrderDate, groupByValue))
                 .Select(g => new RevenueProfitTimeSeriesItemDto
                 {
                     PeriodStart = g.Key,
                     Label = FormatPeriodLabel(g.Key, groupByValue),
-                    Revenue = g.Sum(x => x.TotalPrice),
-                    Profit = g.Sum(x => ((decimal)x.UnitPrice - (decimal)x.ImportPrice) * x.Quantity)
+                    // Use FinalAmount (after discount) for revenue
+                    Revenue = g.Sum(o => o.FinalAmount),
+                    // Profit = FinalAmount - Total Import Cost
+                    Profit = g.Sum(o => o.FinalAmount - o.OrderItems.Sum(oi => (decimal)oi.Product.ImportPrice * oi.Quantity))
                 })
                 .OrderBy(x => x.PeriodStart)
                 .ToList();
@@ -240,7 +269,9 @@ namespace MyShopAPI.Controllers
 
         private static DateOnly GetPeriodStart(DateTime dateTimeUtc, ReportGroupBy groupBy)
         {
-            var date = DateOnly.FromDateTime(dateTimeUtc);
+            // Convert UTC to Vietnam time (UTC+7) before extracting date
+            var vietnamTime = DateTimeHelper.ToVietnam(dateTimeUtc);
+            var date = DateOnly.FromDateTime(vietnamTime);
 
             return groupBy switch
             {

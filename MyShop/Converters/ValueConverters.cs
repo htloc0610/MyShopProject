@@ -242,7 +242,7 @@ namespace MyShop.Converters
     /// </summary>
     public class RelativeToAbsoluteUrlConverter : IValueConverter
     {
-        private const string BaseUrl = "http://localhost:5002";
+        private const string BaseUrl = "http://34.69.122.4:5002";
 
         public object Convert(object value, Type targetType, object parameter, string language)
         {

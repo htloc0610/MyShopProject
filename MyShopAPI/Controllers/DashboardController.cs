@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MyShopAPI.Data;
 using MyShopAPI.DTOs;
+using MyShopAPI.Helpers;
 using System.Diagnostics;
 
 namespace MyShopAPI.Controllers
@@ -25,15 +26,17 @@ namespace MyShopAPI.Controllers
         [HttpGet("summary")]
         public async Task<ActionResult<DashboardSummaryDto>> GetSummary()
         {
-            var today = DateTime.UtcNow.Date;
+            // Today in Vietnam time, converted to UTC for database query
+            var todayVietnam = DateTimeHelper.Today; // e.g., 19-Jan 00:00 Vietnam
+            var todayUtc = DateTimeHelper.ToUtc(todayVietnam); // e.g., 18-Jan 17:00 UTC
 
             var totalProducts = await _context.Products.CountAsync();
 
             var todayOrders = await _context.Orders
-                .CountAsync(o => o.OrderDate >= today && o.Status == Models.OrderStatus.Paid);
+                .CountAsync(o => o.OrderDate >= todayUtc && o.Status == Models.OrderStatus.Paid);
 
             var todayRevenue = await _context.Orders
-                .Where(o => o.OrderDate >= today && o.Status == Models.OrderStatus.Paid)
+                .Where(o => o.OrderDate >= todayUtc && o.Status == Models.OrderStatus.Paid)
                 .SumAsync(o => (decimal?)o.FinalAmount) ?? 0;
             return Ok(new DashboardSummaryDto
             {
@@ -70,8 +73,14 @@ namespace MyShopAPI.Controllers
         [HttpGet("top-selling")]
         public async Task<ActionResult<IEnumerable<TopSellingProductDto>>> GetTopSellingProducts()
         {
+            // Get paid order IDs first
+            var paidOrderIds = await _context.Orders
+                .Where(o => o.Status == Models.OrderStatus.Paid)
+                .Select(o => o.OrderId)
+                .ToListAsync();
+
             var products = await _context.OrderItems
-                .Where(oi => oi.Order.Status == Models.OrderStatus.Paid)
+                .Where(oi => paidOrderIds.Contains(oi.OrderId))
                 .GroupBy(oi => new { oi.ProductId, oi.Product.Name })
                 .Select(g => new TopSellingProductDto
                 {
@@ -114,27 +123,27 @@ namespace MyShopAPI.Controllers
         {
             try
             {
-                var now = DateTime.UtcNow;
+                var now = DateTimeHelper.Now;
 
-                var start = new DateTime(
-                    now.Year,
-                    now.Month,
-                    1,
-                    0, 0, 0,
-                    DateTimeKind.Utc);
+                // Start of current month in Vietnam time, converted to UTC for query
+                var startVietnam = new DateTime(now.Year, now.Month, 1, 0, 0, 0);
+                var startUtc = DateTimeHelper.ToUtc(startVietnam);
+                var endUtc = DateTimeHelper.ToUtc(startVietnam.AddMonths(1));
 
-                var end = start.AddMonths(1);
+                var orders = await _context.Orders
+                    .Where(o => o.OrderDate >= startUtc && o.OrderDate < endUtc && o.Status == Models.OrderStatus.Paid)
+                    .ToListAsync();
 
-                var revenue = await _context.Orders
-                    .Where(o => o.OrderDate >= start && o.OrderDate < end && o.Status == Models.OrderStatus.Paid)
-                    .GroupBy(o => o.OrderDate.Day)
+                // Group by day in Vietnam timezone
+                var revenue = orders
+                    .GroupBy(o => DateTimeHelper.ToVietnam(o.OrderDate).Day)
                     .Select(g => new RevenueByDayDto
                     {
                         Day = g.Key,
                         Revenue = g.Sum(o => (decimal)o.FinalAmount)
                     })
                     .OrderBy(x => x.Day)
-                    .ToListAsync();
+                    .ToList();
 
                 return Ok(revenue);
             }
