@@ -73,8 +73,14 @@ namespace MyShopAPI.Controllers
         [HttpGet("top-selling")]
         public async Task<ActionResult<IEnumerable<TopSellingProductDto>>> GetTopSellingProducts()
         {
+            // Get paid order IDs first
+            var paidOrderIds = await _context.Orders
+                .Where(o => o.Status == Models.OrderStatus.Paid)
+                .Select(o => o.OrderId)
+                .ToListAsync();
+
             var products = await _context.OrderItems
-                .Where(oi => oi.Order.Status == Models.OrderStatus.Paid)
+                .Where(oi => paidOrderIds.Contains(oi.OrderId))
                 .GroupBy(oi => new { oi.ProductId, oi.Product.Name })
                 .Select(g => new TopSellingProductDto
                 {
