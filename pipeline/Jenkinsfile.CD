@@ -1,0 +1,102 @@
+pipeline {
+    agent any
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                echo 'Checking out source code...'
+                checkout scm
+            }
+        }
+        
+        stage('Copy Environment File') {
+            steps {
+                echo 'Copying .env file from Jenkins credentials...'
+                dir('MyShopAPI') {
+                    withCredentials([file(credentialsId: 'myshop-env-file', variable: 'ENV_FILE')]) {
+                        sh 'cp $ENV_FILE .env'
+                    }
+                }
+            }
+        }
+        
+        stage('Approval') {
+            steps {
+                script {
+                    def userChoice = input(
+                        message: 'Bạn có muốn deploy không?',
+                        parameters: [
+                            choice(
+                                name: 'ACTION',
+                                choices: ['Proceed', 'Abort'],
+                                description: 'Chọn hành động'
+                            )
+                        ]
+                    )
+                    
+                    env.DEPLOY_APPROVED = (userChoice == 'Proceed') ? 'true' : 'false'
+                    
+                    if (userChoice == 'Abort') {
+                        echo 'Deployment aborted by user. Skipping deployment stages...'
+                    }
+                }
+            }
+        }
+        
+        stage('Build Docker Image') {
+            when {
+                expression { env.DEPLOY_APPROVED == 'true' }
+            }
+            steps {
+                echo 'Building API with docker-compose...'
+                dir('MyShopAPI') {
+                    sh 'docker compose build api'
+                }
+            }
+        }
+        
+        stage('Stop Current Containers') {
+            when {
+                expression { env.DEPLOY_APPROVED == 'true' }
+            }
+            steps {
+                echo 'Stopping current containers...'
+                dir('MyShopAPI') {
+                    sh 'docker compose down || true'
+                }
+            }
+        }
+        
+        stage('Deploy with Docker Compose') {
+            when {
+                expression { env.DEPLOY_APPROVED == 'true' }
+            }
+            steps {
+                echo 'Deploying API with docker-compose...'
+                dir('MyShopAPI') {
+                    sh 'docker compose up -d --force-recreate api'
+                }
+            }
+        }
+    }
+    
+    post {
+        success {
+            script {
+                if (env.DEPLOY_APPROVED == 'true') {
+                    echo "CD Pipeline completed successfully!"
+                } else {
+                    echo "ℹDeployment was skipped by user"
+                }
+            }
+        }
+        
+        failure {
+            echo "CD Pipeline failed!"
+        }
+        
+        always {
+            echo 'Pipeline completed'
+        }
+    }
+}
